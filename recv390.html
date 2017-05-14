@@ -1,0 +1,234 @@
+<HTML>
+<HEAD>
+<TITLE>RECV390</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+<TABLE BORDER="0" ALIGN="DEFAULT" WIDTH="100%">
+<TR>
+<TD WIDTH="25">
+<P>&nbsp;</P>
+</TD>
+<TD WIDTH="500">
+<H1 ALIGN="center">RECV390<BR>
+</H1>
+<P> RECV390 is a copyrighted work of <A HREF="http://ensose.com">Enhanced Software Services, Inc.</A> See &quot;License&quot; below for further details.<BR>
+<BR>
+RECV390 is a program that provides Linux and Windows users with the ability to extract OS/390 TSO/E TRANSMIT PDSs onto their PC.</P>
+<TABLE BORDER="1" ALIGN="DEFAULT" WIDTH="100%">
+<TR>
+<TD WIDTH="25%"><A HREF="#start">Getting Started</A></TD>
+<TD WIDTH="25%"><A HREF="#install">Installation</A></TD>
+<TD WIDTH="25%"><A HREF="#create">Creating a TRANSMIT dataset</A></TD>
+<TD WIDTH="25%"><A HREF="#transfer">Transfer TRANSMIT<BR>
+dataset to your PC</A></TD>
+</TR>
+<TR>
+<TD><A HREF="#running">Running RECV390</A></TD>
+<TD><A HREF="#options">Options</A></TD>
+<TD><A HREF="#support">Support</A></TD>
+<TD><A HREF="#license">License</A></TD>
+</TR>
+</TABLE>
+
+<BR>
+RECV390 is not the only choice you have for extracting XMIT files. The latest offering for Windows systems is from Data Aid Systems Limited, and is called <A HREF="http://homepages.enterprise.net/neal">Xmit Manager</A>. Dave Alcock, of PlanetMVS fame, also maintains a list of other unXmit tools at his <A HREF="http://www.planetmvs.com/UnXMIT/index.html">unXmit information exchange page.
+</A><BR>
+<BR>
+<HR>
+
+<A NAME="start"></A>
+<P>Getting Started</P>
+<P>In order to use RECV390, you will need an IBM mainframe, plug compatible processor, or emulator such as Hercules running MVS38j or OS/390, some method to transfer files from OS/390 to your PC, a method to unzip the distribution materials, and the RECV390 distribution materials.<BR>
+<BR>
+Note that RECV390 may well be able to process TRANSMIT datasets from older MVS systems, but I will have to rely on others for that assessment. RECV390 has only been tested with selected TRANSMIT datasets from the <A HREF="http://www.cbttape.org">CBT</A> tape, and a few other TRANSMIT datasets.</P>
+<P>Further note that I have only tested RECV390 on Linux (2.2 and 2.4 kernels) and Win98, although I would expect it to run on Win95, and WinNT. I have no idea whether it will run on Win3.something or Win200, although I wouldn't be surprised if it did. When I get time, I will attempt to discover whether RECV390 runs in an OS/2 DOS box.</P>
+<A NAME="install"></A>
+<HR>
+<P>Installation<BR>
+<BR>
+BY DOWNLOADING RECV390, YOU AGREE TO ABIDE BY ITS LICENSE (BELOW).<BR>
+<BR>
+You will need acess to PKUNZIP, WinZIP, or a similar product. Download <A HREF="ftp://ensose.com/public/recv390.zip">this file</A>, then unzip it.<BR>
+<BR>
+Windows:  place RECV390.EXE in a subdirectory specified in your PATH. <BR>
+<BR>
+Linux: execute the 'make' command, then the 'make install' command. By default, the executable is placed in the /usr/bin directory; you may change the makefile if you want it someplace else.<BR>
+</P>
+<A NAME="create"></A>
+<HR>
+<P>Creating a TRANSMIT dataset</P>
+<P>The OS/390 user would first use the OS/390 TSO/E TRANSMIT command (or MVS38j XMIT370 program) to create a TRANSMIT dataset, such as either the following batch job:</P>
+
+// ... JOB ...<BR>
+//XMIT     EXEC PGM=IKJEFT01<BR>
+//SYSPRINT  DD SYSOUT=*<BR>
+//SYSTSPRT  DD SYSOUT=*<BR>
+//SYSTSIN   DD *<BR>
+XMIT (NODE.USERID) DA(inputdsn) -<BR>
+ OUTDSN(outputdsn) -<BR>
+ NOLOG NONOTIFY SYSOUT(Z)<BR>
+//<BR>
+<BR>
+Or the following TSO/E command from either the TSO/E READY prompt, ISPF Option 6, or using the TSO command at the ISPF command prompt:<BR>
+<BR>
+XMIT (NODE.USERID) DA(inputdsn) OUTDSN(outputdsn)<BR>
+<BR>
+<TABLE BORDER="0" ALIGN="DEFAULT" WIDTH="100%">
+<TR>
+<TD>Where</TD>
+<TD>Means</TD>
+</TR>
+<TR>
+<TD>inputdsn</TD>
+<TD>MVS dataset name of input dataset</TD>
+</TR>
+<TR>
+<TD>outputdsn</TD>
+<TD>MVS dataset name of output dataset</TD>
+</TR>
+</TABLE>
+<P>Refer to the TSO/E TRANSMIT command documentation for further information, or try the online help. Information concerning the XMIT370 program is provided with the download.</P>
+<A NAME="transfer"></A>
+<HR>
+<P>Transfer the TRANSMIT dataset to your PC<BR>
+<BR>
+The next step is to BINARY transfer the TRANSMIT dataset to your PC. You'll have to figure out how to do that yourself. If you forget to do a BINARY transfer, and instead do a TEXT transfer, the TRANSMIT dataset will not be usable by RECV390. </P>
+<A NAME="running"></A>
+<HR>
+<P>Running RECV390<BR>
+<BR>
+Once the TRANSMIT dataset has been file transfered to your PC, you can use RECV390 to extract the PDS members into the current directory. Let's assume you placed your TRANSMIT dataset in d:\data\my.xmi.<BR>
+Open a DOS box, and type:<BR>
+<BR>
+d:<BR>
+cd \data<BR>
+recv390 my<BR>
+<BR>
+This will result in several messages, and the creation of one file for each PDS member in my.xmi. The created PDS members will have a default extension of TXT. You may now proceed to manipulate the extracted PDS members as you see fit.<BR>
+</P>
+<HR>
+<P>Options</P>
+RECV390 understands several options. Run &quot;recv390 +help&quot; to see a description of them.<BR>
+Here's the syntax diagram help from a recent version of RECV390:
+<PRE>
+Syntax: [options...] [[path]fn[.exti] [exto]]
+
+ path      path name of input file (default=current directory)
+ fn[.exti] input file name (default fn=OS390 ext=XMI)
+ [exto]    output file extension (default=TXT)
+           output fn = PDS member name
+
+                                            Help (default: not displayed
+Default options    on/yes(+)   off/no(-)          unless error occurs):
+------------------------------------------- ------------------------------
++tran    translate from EBCDIC to ASCII     -about    copyright &amp; version
+-seq     remove sequence field              -help     general help
++trim    remove trailing blanks             -syntax   syntax help
+-rdw     no OS/390 RDW                      -helpbug  debug help
++dir     display PDS directory              -helptran translation help
++write   write output file(s)               -helprdw  RDW help
++halt    issue &lt;press enter&gt; prompt         -helpseq  sequence field help
++xmisum  display TRANSMIT dataset summary
++dsattr  display dataset attributes
+-dirhex  don't display directory entries'
+         userdata in hex
+-map     don't show translation table
+</PRE><A NAME="support"></A>
+<HR>
+Support<BR>
+<BR>
+Support is provided on an as-time-and-interest-permits basis via <A HREF="mailto:recv390@ensose.com">email</A>. Please feel free to let me know if you have questions or comments about RECV390. Whether you wish to provide donations in support of the coding effort is up to you. RECV390 is not crippleware, and neither does it (intentionally) stop running at some point in the future. <BR>
+<BR>
+<A NAME="history"></A>
+<HR>
+<BR>
+History<BR>
+<BR>
+<TABLE BORDER="0" ALIGN="DEFAULT" WIDTH="100%">
+<TR>
+<TD WIDTH="25%">V1R1M4</TD>
+<TD WIDTH="15%">April 7, 2001</TD>
+<TD>Source modified to compile under Linux; source now distributed along with Windows executable.</TD>
+</TR>
+<TR>
+<TD WIDTH="25%">V1R1M3</TD>
+<TD WIDTH="15%">May 17, 2000</TD>
+<TD>Amended license to allow CBT and all who redistribute CBT in its entirely to redistribute RECV390. No code changes.</TD>
+</TR>
+</TABLE>
+<BR>
+The prior license for RECV390 can be found <A HREF="recv390V1R1M2.html">here</A>.<BR>
+<BR>
+<TABLE BORDER="0" ALIGN="DEFAULT" WIDTH="100%">
+<TR>
+<TD WIDTH="25%">V1R1M2</TD>
+<TD>04/23/00</TD>
+<TD>Changed trailer determination code. Added additional +getblock diagnostics to show block header &amp; trailer. Thanks to Ed Strauss for supplying 8+ meg XMI file that exposes this error (plus the very interesting debugger that was in the XMI).</TD>
+</TR>
+<TR>
+<TD>V1R1M1</TD>
+<TD>04/17/00</TD>
+<TD>Fixed characters written count for PDS member. CRLF is two characters, not one.</TD>
+</TR>
+<TR>
+<TD WIDTH="20%">Release 1.0</TD>
+<TD WIDTH="15%">04/16/00</TD>
+<TD>First release; changed \r to \n from final Alpha version (0.14).</TD>
+</TR>
+</TABLE>
+<A NAME="license"></A>
+<HR>
+License (V1R1M3)<BR>
+<BR>
+THIS IS A LEGAL AGREEMENT BETWEEN YOU (THE END USER) AND ENHANCED SOFTWARE SERVICES, INC. BEFORE DOWNLOADING THE SOFTWARE, YOU SHOULD CAREFULLY READ THE FOLLOWING TERMS AND CONDITIONS. DOWNLOADING THE SOFTWARE INDICATES YOUR ACCEPTANCE OF THE TERMS AND CONDITIONS. IF YOU DO NOT AGREE TO THE TERMS OF THIS AGREEMENT, DO NOT DOWNLOAD THE SOFTWARE.
+<P>LICENSE AGREEMENT FOR RECV390 </P>
+<P>GRANT OF LICENSE. Enhanced Software Services, Inc. (herein after referred
+to as ENSOSE) grants to you the non-transferrable right to use one
+copy of RECV390 (which comprises executable code and documentation)
+on only one machine at any one time.  You may not copy, modify,
+or merge copies of RECV390 except as this agreement provides.  You may
+not reverse compile, reverse engineer, or reverse assemble any
+Programs in RECV390 provided in executable form.  Except as provided
+in this agreement, you may not rent, lease, sell, sublicense, assign
+or otherwise transfer RECV390.</P>
+<P>COPYRIGHT. RECV390 is owned by ENSOSE or its suppliers and is protected
+by United States copyright laws.  In addition to the rights granted,
+you may also make one copy of RECV390 solely for backup or archival
+purposes.</P>
+<P>TERM AND TERMINATION. Your license for RECV390 terminates January 1,
+2050,  or 12 months after availability of a new version of RECV390 at
+http://ensose.com/recv390, or upon the release of RECV390 source code into the public domain, whichever occurs first. If you currently hold a license for RECV390 as authorized by a prior version of this license agreement, your old license remains in effect or you may switch to the current license (V1R1M3) as you prefer. </P>
+<P>A grant of redistribution rights for RECV390 is authorized for the http://cbttape.org site and all entities which redistribute the &quot;CBT tape&quot; contents in its entirety. Redistribution of the &quot;overflow CBT tape&quot; is not required to be eligible for this grant.<BR>
+<BR>
+Samuel Golob, a  maintainer of the http://cbttape.org website, is authorized to release the source code for RECV390 into the public domain upon the demise of James M. Morrison, author of RECV390 and President of Enhanced Software Services, Inc.<BR>
+<BR>
+Upon termination,
+you agree to destroy all copies of RECV390.  You may terminate your
+license at any time prior to the above date by destroying all of your
+copies of RECV390.  ENSOSE may terminate your license to RECV390 if
+you fail to comply with all the terms and conditions of the Agreement.</P>
+<P>DISCLAIMER OF WARRANTY. RECV390 is provided &quot;AS-IS&quot;.  ENSOSE makes
+no warranty express or implied with respect to RECV390 including
+the implied warranties of merchantability and fitness for a
+particular purpose.  The entire risk arising out of use or
+performance of the program and documentation remains with you.</P>
+<P>In no event will ENSOSE or its suppliers be liable for any lost
+profits, lost savings, incidental damages or other economic
+consequential damages, even if ENSOSE or its authorized supplier
+has been advised of the possibility of such damages.  In addition,
+ENSOSE will not be liable for any damages claimed by you based on
+any third party claim.</P>
+<P>Some jurisdictions do not allow the exclusion of implied warranties
+or the exclusion or limitation of consequential or incidential
+damages, so the above may not apply to you.</P>
+<P>If you use RECV390 in the United States, this license is governed by
+the substantive laws of the State of Illinois.  Otherwise, this license is governed by the laws of the country in which you use RECV390.</P>
+<HR>
+<P>&copy; 2000, 2001, Enhanced Software Services, Inc.</P>
+
+
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>
