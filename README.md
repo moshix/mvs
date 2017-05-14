@@ -1,4 +1,4 @@
-# mvs
+# MVS Utilities
 this repository includes some very useful utilities for people working with MVS, z/OS on real mainframes or emulated ones. 
 
 1. recv390 is a receive command for Linux or Windows. It extracts XMIT files. recv390 is by James Morrison. I made some fixes and 
