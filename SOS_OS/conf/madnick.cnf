@@ -1,0 +1,27 @@
+#**********************************************************************
+#***                                                                ***
+#*** File:    madnick.cnf                                           ***
+#***                                                                ***
+#*** Purpose: Hercules configuration file for Madnick Sample OS     ***
+#***          with 3215 console at 009 listening at port 3215       ***
+#***                                                                ***
+#*** Updated: 2015/11/13                                            ***
+#***                                                                ***
+#**********************************************************************
+CPUSERIAL 004711
+CPUMODEL 3145
+MAINSIZE 16
+XPNDSIZE 0
+CNSLPORT 3215
+NUMCPU 1
+MAXCPU 1
+ARCHMODE S/370
+0009 3215 noprompt
+0012 3505 * eof
+000C 3505 rdr/sample_operating_system_version_2.00.ipldeck eof
+0112 3505 * eof
+010C 3505 * eof
+0010 1403 prt/stream-1_output.txt
+000E 1403 prt/stream-2_output.txt
+0110 1403 prt/stream-3_output.txt
+010E 1403 prt/stream-4_output.txt

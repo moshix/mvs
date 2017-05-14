@@ -1,0 +1,301 @@
+1                                         High Level Assembler Option Summary                   (PTF UK37157)   Page    1
+-                                                                                            HLASM R6.0  2016/08/29 09.36
+0  No Overriding ASMAOPT Parameters
+   Overriding Parameters-  OBJECT,ESD,RXREF,RLD,XREF(SHORT,UNREFS),DXREF,LIST,TERM,ASA
+   No Process Statements
+ 
+ 
+   Options for this Assembly
+0  NOADATA
+     ALIGN
+ 3   ASA
+     BATCH
+     CODEPAGE(047C)
+   NOCOMPAT
+   NODBCS
+   NODECK
+ 3   DXREF
+ 3   ESD
+   NOEXIT
+     FLAG(0,ALIGN,CONT,EXLITW,NOIMPLEN,NOPAGE0,PUSH,RECORD,NOSUBSTR,USING0)
+   NOFOLD
+   NOGOFF
+   NOINFO
+     LANGUAGE(EN)
+   NOLIBMAC
+     LINECOUNT(60)
+ 3   LIST(121)
+     MACHINE(,NOLIST)
+     MXREF(SOURCE)
+ 3   OBJECT
+     OPTABLE(UNI,NOLIST)
+   NOPCONTROL
+   NOPESTOP
+   NOPROFILE
+   NORA2
+   NORENT
+ 3   RLD
+ 3   RXREF
+     SECTALGN(8)
+     SIZE(MAX)
+   NOSUPRWARN
+     SYSPARM()
+ 3   TERM(WIDE)
+   NOTEST
+     THREAD
+   NOTRANSLATE
+     TYPECHECK(MAGNITUDE,REGISTER)
+     USING(NOLIMIT,MAP,WARN(15))
+   NOWORKFILE
+ 3   XREF(SHORT,UNREFS)
+ 
+   Standard   DD Names- SYSLIN   SYSLIB   SYSIN    SYSPRINT SYSPUNCH SYSUT1   SYSTERM  SYSADATA ASMAOPT
+   Overriding DD Names- SYS00013 SYS00005 SYS00011 SYS00012                   SYS00010
+1                                              External Symbol Dictionary                                       Page    2
+-Symbol   Type   Id     Address  Length   Owner Id Flags Alias-of                            HLASM R6.0  2016/08/29 09.36
+0SOSUSERC  SD 00000001 00000000 0000035C             00
+1         Sample Operating System Version 2.00: Demo Program                                                    Page    3
+   Active Usings: None
+0  Loc  Object Code    Addr1 Addr2  Stmt   Source Statement                                  HLASM R6.0  2016/08/29 09.36
+0                                      2 *********************************************************************** 00020000
+                                       3 *                                                                     * 00030000
+                                       4 *  *****************************************************************  * 00040000
+                                       5 *  *                                                               *  * 00050000
+                                       6 *  *                       Sample Operating System                 *  * 00060000
+                                       7 *  *                             Version 2.00                      *  * 00070000
+                                       8 *  *                        Developed at MIT 1973                  *  * 00080000
+                                       9 *  *                                                               *  * 00090000
+                                      10 *  *****************************************************************  * 00100000
+                                      11 *                                                                     * 00110000
+                                      12 *  Title: Demo user program for use with the Sample Operating System  * 00120000
+                                      13 *                                                                     * 00130000
+                                      14 *  Function:                                                          * 00140000
+                                      15 *                                                                     * 00150000
+                                      16 *   - print logo                                                      * 00160000
+                                      17 *   - read card containing message to print                           * 00170000
+                                      18 *   - format entry point to six hex digits and place                  * 00180000
+                                      19 *     it in columnes 54-59 of the message read                        * 00190000
+                                      20 *   - print message                                                   * 00200000
+                                      21 *   - format start message and parameter prompt for console at 009    * 00201002
+                                      22 *   - setup console CCWs                                              * 00202002
+                                      23 *   - display start message and parameter prompt on console           * 00203002
+                                      24 *   - wait for parameter input                                        * 00204002
+                                      25 *   - print parameters entered                                        * 00205002
+                                      26 *   - format end message and display it on console                    * 00206002
+                                      27 *   - exit                                                            * 00210000
+                                      28 *                                                                     * 00220000
+                                      29 *********************************************************************** 00230000
+                                      30          PUNCH '$JOB,2K,READER=IN,PRINTER=OUT,CONSOLE=EXCP' job card    00240002
+ 000000                00000 0035C    31 SOSUSERC CSECT ,              begin of program                          00248002
+ 000000 05F0                          32          BALR  R15,0          establish addressability ..               00256002
+                  R:F  00002          33          USING *,R15            .. and tell assembler                   00264002
+ 000002 4120 F1BA            001BC    34          LA    R2,PRNTLOGO    send logo ..                              00272002
+ 000006 0AE2                          35          SVC   C'S'             .. to printer                           00290000
+ 000008 D203 F2F6 F2EA 002F8 002EC    36          MVC   WAITMSG+8(4),WAITLNG initialize reply length             00300002
+ 00000E 4120 F2EE            002F0    37          LA    R2,WAITMSG     wait for reply indicating ..              00303002
+ 000012 0AD9                          38          SVC   C'R'             .. printing is completed                00310000
+ 000014 4120 F302            00304    39          LA    R2,READCARD    read card ..                              00320002
+ 000018 0AE2                          40          SVC   C'S'             .. containing next message              00330000
+ 00001A D203 F2F6 F2EA 002F8 002EC    41          MVC   WAITMSG+8(4),WAITLNG initialize reply length             00340002
+ 000020 4120 F2EE            002F0    42          LA    R2,WAITMSG     wait for reply indicating ..              00343002
+ 000024 0AD9                          43          SVC   C'R'             .. card has been read                   00350000
+ 000026 182F                          44          LR    R2,R15         base address ..                           00360002
+ 000028 5B20 F33E            00340    45          S     R2,ENTRY         .. minus two ..                         00367002
+ 00002C 5020 F33E            00340    46          ST    R2,ENTRY           .. is entry address                   00374002
+ 000030 F363 F343 F33F 00345 00341    47          UNPK  ENTRYU(7),ENTRY+1(4) unpack address                      00390000
+ 000036 DC05 F343 F25A 00345 0025C    48          TR    ENTRYU(6),HEXTAB translate to hex                        00400000
+ 00003C D205 F29B F343 0029D 00345    49          MVC   LINE+53(6),ENTRYU move address into message              00410000
+ 000042 4120 F252            00254    50          LA    R2,PRINTMSG    send message ..                           00420002
+ 000046 0AE2                          51          SVC   C'S'             .. to printer                           00430000
+ 000048 D203 F2F6 F2EA 002F8 002EC    52          MVC   WAITMSG+8(4),WAITLNG initialize reply length             00440002
+ 00004E 4120 F2EE            002F0    53          LA    R2,WAITMSG     wait for reply indicating ..              00443002
+ 000052 0AD9                          54          SVC   C'R'             .. printing is completed                00450000
+ 000054 D200 F17B F27F 0017D 00281    55          MVC   STREAMNO(1),LINE+25 move job info ..                     00450202
+ 00005A D205 F199 F29B 0019B 0029D    56          MVC   CNSENTRY(6),LINE+53   .. into console prompt             00450402
+1         Sample Operating System Version 2.00: Demo Program                                                    Page    4
+   Active Usings: SOSUSERC+X'2',R15
+0  Loc  Object Code    Addr1 Addr2  Stmt   Source Statement                                  HLASM R6.0  2016/08/29 09.36
+0000060 9240 F266      00268          57          MVI   LINE,C' '      blank ..                                  00450602
+ 000064 D282 F267 F266 00269 00268    58          MVC   LINE+1(131),LINE .. print line                           00450802
+ 00006A 4120 F165            00167    59          LA    R2,CNSPRMPT    console prompt address                    00451002
+ 00006E BF28 F109            0010B    60          ICM   R2,B'1000',WRITE insert write command                    00451202
+ 000072 5020 F10E            00110    61          ST    R2,CCW1        store CCW                                 00451402
+ 000076 4120 004E            0004E    62          LA    R2,LCNPRMPT    length of console prompt                  00451602
+ 00007A 5020 F112            00114    63          ST    R2,CCW1+4      store length in CCW, zero all flags       00451802
+ 00007E 9640 F112      00114          64          OI    CCW1+4,X'40'   indicate command chaining                 00452002
+ 000082 4120 F13D            0013F    65          LA    R2,CNSINPUT    address of console input area             00452202
+ 000086 BF28 F108            0010A    66          ICM   R2,B'1000',READ insert read command                      00452402
+ 00008A 5020 F116            00118    67          ST    R2,CCW2        store CCW                                 00452602
+ 00008E 4120 0028            00028    68          LA    R2,LCNSINPT    length of console input area              00452802
+ 000092 5020 F11A            0011C    69          ST    R2,CCW2+4      store length in CCW, zero all flags       00453002
+ 000096 9620 F11A      0011C          70          OI    CCW2+4,X'20'   suppress length indication                00453202
+ 00009A 4120 F316            00318    71          LA    2,CONSOLIO     send prompt ..                            00453402
+ 00009E 0AE2                          72          SVC   C'S'             .. to console                           00453602
+ 0000A0 D203 F2F6 F2EA 002F8 002EC    73          MVC   WAITMSG+8(4),WAITLNG initialize reply length             00453802
+ 0000A6 4120 F2EE            002F0    74          LA    2,WAITMSG      wait for reply indicating ..              00454002
+ 0000AA 0AD9                          75          SVC   C'R'             .. console I/O is completed             00454202
+ 0000AC 4120 F32E            00330    76          LA    2,CONSOLOK     release ..                                00454402
+ 0000B0 0AE2                          77          SVC   C'S'             .. console                              00454602
+ 0000B2 4120 0046            00046    78          LA    R2,LPE+LCNSINPT-1 total length of print message ..       00454802
+ 0000B6 4B20 F300            00302    79          SH    R2,WAITMSG+18    .. minus residual count minus one       00455002
+ 0000BA 4420 F102            00104    80          EX    R2,GETINPUT    move to print line                        00455202
+ 0000BE 4120 F252            00254    81          LA    R2,PRINTMSG    send message ..                           00455402
+ 0000C2 0AE2                          82          SVC   C'S'             .. to printer                           00455602
+ 0000C4 D203 F2F6 F2EA 002F8 002EC    83          MVC   WAITMSG+8(4),WAITLNG initialize reply length             00455802
+ 0000CA 4120 F2EE            002F0    84          LA    R2,WAITMSG     wait for reply indicating ..              00456002
+ 0000CE 0AD9                          85          SVC   C'R'             .. printing is completed                00456202
+ 0000D0 D206 F169 F1B3 0016B 001B5    86          MVC   CNSPRMPT+4(7),ENDED make it a termination message        00456402
+ 0000D6 4120 F165            00167    87          LA    R2,CNSPRMPT    console termination message address       00456602
+ 0000DA BF28 F10A            0010C    88          ICM   R2,B'1000',WRITEACR insert write command                 00456802
+ 0000DE 5020 F10E            00110    89          ST    R2,CCW1        store CCW                                 00457002
+ 0000E2 4120 0017            00017    90          LA    R2,23          length of console prompt                  00457202
+ 0000E6 5020 F112            00114    91          ST    R2,CCW1+4      store length in CCW, zero all flags       00457402
+ 0000EA 4120 F316            00318    92          LA    2,CONSOLIO     send prompt ..                            00457602
+ 0000EE 0AE2                          93          SVC   C'S'             .. to console                           00457802
+ 0000F0 D203 F2F6 F2EA 002F8 002EC    94          MVC   WAITMSG+8(4),WAITLNG initialize reply length             00458002
+ 0000F6 4120 F2EE            002F0    95          LA    2,WAITMSG      wait for reply indicating ..              00458202
+ 0000FA 0AD9                          96          SVC   C'R'             .. console I/O is completed             00458402
+ 0000FC 4120 F32E            00330    97          LA    2,CONSOLOK     release ..                                00458602
+ 000100 0AE2                          98          SVC   C'S'             .. console                              00458802
+ 000102 0AC8                          99          SVC   C'H'           halt job                                  00460000
+ 000104 D200 F266 F11E 00268 00120   100 GETINPUT MVC   LINE(1),PE     move output message to print line (EX'ed) 00460502
+ 00010A 0A                           101 READ     DC    X'0A'          console read                              00461002
+ 00010B 01                           102 WRITE    DC    X'01'          console write                             00461502
+ 00010C 09                           103 WRITEACR DC    X'09'          console write with auto CR                00462002
+ 000110                              104 CCW1     DS    D              console write CCW                         00462502
+ 000118                              105 CCW2     DS    D              console read CCW                          00463002
+ 000120 D78199819485A385             106 PE       DC    C'Parameters entered on console: ' echo parameters       00463502
+                       0001F         107 LPE      EQU   *-PE           length of echo message                    00464002
+ 00013F 4040404040404040             108 CNSINPUT DC    40C' '         input from console                        00464502
+                       00028         109 LCNSINPT EQU   *-CNSINPUT     length of console input area              00465002
+ 000167 D1968240A2A38199             110 CNSPRMPT DC    C'Job started on stream-' prompt to ..                   00465502
+ 00017D 40                           111 STREAMNO DC    C' '                               .. be     ..          00466002
+1         Sample Operating System Version 2.00: Demo Program                                                    Page    5
+   Active Usings: SOSUSERC+X'2',R15
+0  Loc  Object Code    Addr1 Addr2  Stmt   Source Statement                                  HLASM R6.0  2016/08/29 09.36
+000017E 6B40A4A285994097             112          DC    C', user program entry point = '  .. issued ..           00466502
+ 00019B 404040404040                 113 CNSENTRY DC    C'      '                        .. on     ..            00467002
+ 0001A1 6B408595A3859940             114          DC    C', enter parameters: '         .. console               00467502
+                       0004E         115 LCNPRMPT EQU   *-CNSPRMPT     length of console prompt                  00468002
+ 0001B5 85958485844040               116 ENDED    DC    CL7'ended'     convert started to ended message          00468502
+ 0001BC                              117          DS    0F             align parameter lists                     00470000
+ 0001BC D7D9C9D5E3C5D940             118 PRNTLOGO DC    CL8'PRINTER'   print a line: process name ..             00480002
+ 0001C4 00000008                     119          DC    F'8'             .. length of command ..                 00486002
+ 0001C8 D7D9C9D5000001D0             120          DC    C'PRIN',A(LOGO)    .. command                            00492002
+ 0001D0 60606040E2819497             121 LOGO     DC    CL132'--- Sample Operating System Version 2.00 ---' logo 00498002
+ 000254 D7D9C9D5E3C5D940             122 PRINTMSG DC    CL8'PRINTER'   print a line: process name ..             00504002
+ 00025C 00000008                     123          DC    F'8'             .. length of command ..                 00510002
+ 000260 D7D9C9D500000268             124          DC    C'PRIN',A(LINE)    .. command                            00516002
+ 000268 4040404040404040             125 LINE     DC    132C' '        line to be printed or card read           00522002
+ 0002EC 00000008                     126 WAITLNG  DC    F'8'           maximum length of reply to be received    00528002
+ 0002F0                              127 WAITMSG  DS    CL8            wait for msg: originator returned here    00534002
+ 0002F8                              128          DS    F                .. length of return area ..             00540002
+ 0002FC                              129          DS    CL8                .. message received                   00546002
+ 000304 D9C5C1C4C5D94040             130 READCARD DC    CL8'READER'    read a card: process name ..              00552002
+ 00030C 00000008                     131          DC    F'8'             .. length of command ..                 00558002
+ 000310 D9C5C1C400000268             132          DC    C'READ',A(LINE)    .. command                            00564002
+ 000318 C3D6D5E2D6D3C540             133 CONSOLIO DC    CL8'CONSOLE'   perform console I/O: process name ..      00570002
+ 000320 0000000C                     134          DC    F'12'            .. length of command ..                 00576002
+ 000324 C5E7C3D700000009             135          DC    C'EXCP',X'00000009',A(CCW1) .. command                   00582002
+ 000330 C3D6D5E2D6D3C540             136 CONSOLOK DC    CL8'CONSOLE'   release console: process name ..          00588002
+ 000338 00000002                     137          DC    F'2'           .. length of command ..                   00594002
+ 00033C D6D2                         138          DC    C'OK'            .. command                              00600002
+ 00033E 0000
+ 000340 00000002                     139 ENTRY    DC    F'2'           entry address will end up here            00620000
+ 000344 00                           140          DC    X'00'          food for UNPK                             00630000
+ 000345 00000000000000               141 ENTRYU   DC    7X'00'         unpacked entry point plus excess byte     00640000
+ 00034C                0034C 0025C   142          ORG   *-240          first 240 bytes of HEXTAB are not needed  00650000
+ 00025C                              143 HEXTAB   DS    0X             translation table for unpacked to hex     00660000
+ 00025C                0025C 0034C   144          ORG   ,              restore current location                  00670000
+ 00034C F0F1F2F3F4F5F6F7             145          DC    C'0123456789ABCDEF' hex characters                       00680000
+                       00002         146 R2       EQU   2              register 2                                00690002
+                       0000F         147 R15      EQU   15             register 15                               00690502
+                                     148          END   ,              end of program                            00691002
+1                                                 Relocation Dictionary                                         Page    6
+-   Pos.Id   Rel.Id   Address  Type  Action                                                  HLASM R6.0  2016/08/29 09.36
+0  00000001 00000001 000001CC   A 4     +
+   00000001 00000001 00000264   A 4     +
+   00000001 00000001 00000314   A 4     +
+   00000001 00000001 0000032C   A 4     +
+1                               Ordinary Symbol and Literal Cross Reference                                     Page    7
+-Symbol   Length   Value     Id    R Type Asm  Program   Defn References                     HLASM R6.0  2016/08/29 09.36
+0CCW1          8 00000110 00000001     D  D               104   61M   63M   64M   89M   91M  135
+ CCW2          8 00000118 00000001     D  D               105   67M   69M   70M
+ CNSENTRY      6 0000019B 00000001     C  C               113   56M
+ CNSINPUT      1 0000013F 00000001     C  C               108   65   109
+ CNSPRMPT     22 00000167 00000001     C  C               110   59    86M   87   115
+ CONSOLIO      8 00000318 00000001     C  C               133   71    92
+ CONSOLOK      8 00000330 00000001     C  C               136   76    97
+ ENDED         7 000001B5 00000001     C  C               116   86
+ ENTRY         4 00000340 00000001     F  F               139   45    46M   47
+ ENTRYU        1 00000345 00000001     X  X               141   47M   48M   49
+ GETINPUT      6 00000104 00000001     I                  100   80X
+ HEXTAB        1 0000025C 00000001     X  X               143   48
+ LCNPRMPT      1 0000004E 00000001 A   U                  115   62
+ LCNSINPT      1 00000028 00000001 A   U                  109   68    78
+ LINE          1 00000268 00000001     C  C               125   49M   55    56    57M   58M   58   100M  124   132
+ LOGO        132 000001D0 00000001     C  C               121  120
+ LPE           1 0000001F 00000001 A   U                  107   78
+ PE           31 00000120 00000001     C  C               106  100   107
+ PRINTMSG      8 00000254 00000001     C  C               122   50    81
+ PRNTLOGO      8 000001BC 00000001     C  C               118   34
+ READ          1 0000010A 00000001     X  X               101   66
+ READCARD      8 00000304 00000001     C  C               130   39
+ R15           1 0000000F 00000001 A   U                  147   32M   33U   44
+ R2            1 00000002 00000001 A   U                  146   34M   37M   39M   42M   44M   45M   46    50M   53M   59M
+                                                                60M   61    62M   63    65M   66M   67    68M   69    78M
+                                                                79M   80    81M   84M   87M   88M   89    90M   91
+ STREAMNO      1 0000017D 00000001     C  C               111   55M
+ WAITLNG       4 000002EC 00000001     F  F               126   36    41    52    73    83    94
+ WAITMSG       8 000002F0 00000001     C  C               127   36M   37    41M   42    52M   53    73M   74    79    83M
+                                                                84    94M   95
+ WRITE         1 0000010B 00000001     X  X               102   60
+ WRITEACR      1 0000010C 00000001     X  X               103   88
+1                                  Unreferenced Symbols Defined in CSECTs                                       Page    8
+-  Defn  Symbol                                                                              HLASM R6.0  2016/08/29 09.36
+0    31  SOSUSERC
+1                                                      Using Map                                                Page    9
+-                                                                                            HLASM R6.0  2016/08/29 09.36
+   Stmt  -----Location----- Action ----------------Using----------------- Reg Max     Last Label and Using Text
+           Count      Id           Type          Value    Range     Id        Disp    Stmt
+0    33  00000002  00000001 USING  ORDINARY    00000002 00001000 00000001  15 00343    100 *,R15
+1                                   General Purpose Register Cross Reference                                    Page   10
+- Register  References (M=modified, B=branch, U=USING, D=DROP, N=index)                      HLASM R6.0  2016/08/29 09.36
+0    0(0)    (no references identified)
+     1(1)    (no references identified)
+     2(2)      34M   37M   39M   42M   44M   45M   46    50M   53M   59M   60M   61    62M   63    65M   66M   67    68M
+               69    71M   74M   76M   78M   79M   80    81M   84M   87M   88M   89    90M   91    92M   95M   97M
+     3(3)    (no references identified)
+     4(4)    (no references identified)
+     5(5)    (no references identified)
+     6(6)    (no references identified)
+     7(7)    (no references identified)
+     8(8)    (no references identified)
+     9(9)    (no references identified)
+    10(A)    (no references identified)
+    11(B)    (no references identified)
+    12(C)    (no references identified)
+    13(D)    (no references identified)
+    14(E)    (no references identified)
+    15(F)      32M   33U   44
+1                                  Diagnostic Cross Reference and Assembler Summary                             Page   11
+-                                                                                            HLASM R6.0  2016/08/29 09.36
+0     No Statements Flagged in this Assembly
+ HIGH LEVEL ASSEMBLER, 5696-234, RELEASE 6.0, PTF UK37157
+0SYSTEM: z/OS 01.10.00              JOBNAME: IBMUSER3    STEPNAME: *OMVSEX    PROCSTEP: (NOPROC)
+0Data Sets Allocated for this Assembly
+  Con DDname   Data Set Name                                Volume  Member
+   P1 SYSIN    /mbhfs/sosuser.asm
+   L1 SYSLIB   CEE.SCEEMAC                                  ZAPRD2
+   L2          SYS1.MACLIB                                  ZARES1
+   L3          SYS1.MODGEN                                  ZARES1
+      SYSLIN   /mbhfs/sosuser.o
+      SYSPRINT /dev/fd1
+      SYSTERM  /dev/fd2
+ 
+ 1028584K allocated to Buffer Pool       Storage required     200K
+     148 Primary Input Records Read            0 Library Records Read                  0 Work File Reads
+       0 ASMAOPT Records Read                301 Primary Print Records Written         0 Work File Writes
+      20 Object Records Written                0 ADATA Records Written
+0Assembly Start Time: 09.36.55 Stop Time: 09.36.55 Processor Time: 00.00.00.0242
+ Return Code 000
