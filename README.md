@@ -22,4 +22,10 @@ this repository includes some very useful utilities for people working with MVS,
 
 3. sort.jcl is a sort job which stresses a Tk4 MVS 3.8 by creating millions of random records and then using IBM sort to sort them. 
 
+4. the amazing standalone operating system for S/360 from Prof Madnick's seminal book on operating system. I also include the assembly output. 
 
+5. my .vimrc file for VIM. It color highlights correctly JCl and assembler for S/370. 
+
+6. my PL/I implementation of the N x N queens problem
+
+7. Sorichetti's vpwpc output seprator for Hercules printers
