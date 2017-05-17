@@ -1,0 +1,11 @@
+//HERC01T JOB (01),'COPY TO TAPE',CLASS=A,MSGCLASS=H                    00000102
+//COPY   EXEC PGM=IEBCOPY,REGION=562K                                   00000200
+//SYSPRINT DD SYSOUT=*                                                  00000300
+//TAPE     DD UNIT=TAPE,DISP=NEW,DSN=SYS1.MACLIB,                       00000400
+//            VOL=SER=HECLBL,LABEL=(,SL)                                00000500
+//PDS      DD DSN=SYS1.MACLIB,,DISP=SHR                                 00000604
+//SYSUT3   DD UNIT=SYSDA,SPACE=(80,(60,45)),DISP=(NEW,DELETE)           00000700
+//SYSIN    DD *                                                         00000800
+  COPY INDD=TAPE,OUTDD=PDS                                              00000900
+/*                                                                      00001000
+//                                                                      00001100
