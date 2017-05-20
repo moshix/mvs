@@ -1,0 +1,71 @@
+//XYZ0023  JOB ' ',NOTIFY=&SYSUID                                       00010000
+//S1       EXEC PGM=ADRDSSU,REGION=0M                                   00020000
+//SYSPRINT DD SYSOUT=*                                                  00030000
+//DASD1    DD UNIT=SYSALLDA,VOL=SER=OS39R9,DISP=SHR                     00040000
+//TAPE1    DD DSN=DUMP.OS39R9.TAPE01,DISP=(,CATLG),                     00050000
+//            LABEL=(,SL),VOL=SER=TAPE01,UNIT=590                       00060000
+//SYSIN    DD *                                                         00070000
+  DUMP INDD(DASD1) OUTDD(TAPE1) COMPRESS ADMIN OPTIMIZE(4)              00080000
+//S2       EXEC PGM=ADRDSSU,REGION=0M                                   00090000
+//SYSPRINT DD SYSOUT=*                                                  00100000
+//DASD1    DD UNIT=SYSALLDA,VOL=SER=OS3R9A,DISP=SHR                     00110000
+//TAPE1    DD DSN=DUMP.OS3R9A.TAPE02,DISP=(,CATLG),                     00120000
+//            LABEL=(,SL),VOL=SER=TAPE02,UNIT=590                       00130000
+//SYSIN    DD *                                                         00140000
+  DUMP INDD(DASD1) OUTDD(TAPE1) COMPRESS ADMIN OPTIMIZE(4)              00150000
+//S3       EXEC PGM=ADRDSSU,REGION=0M                                   00160000
+//SYSPRINT DD SYSOUT=*                                                  00170000
+//DASD1    DD UNIT=SYSALLDA,VOL=SER=OS39D9,DISP=SHR                     00180000
+//TAPE1    DD DSN=DUMP.OS39D9.TAPE03,DISP=(,CATLG),                     00190000
+//            LABEL=(,SL),VOL=SER=(TAPE03,TAPE04),UNIT=590              00200000
+//SYSIN    DD *                                                         00210000
+  DUMP INDD(DASD1) OUTDD(TAPE1) COMPRESS ADMIN OPTIMIZE(4)              00220000
+//S4       EXEC PGM=ADRDSSU,REGION=0M                                   00230000
+//SYSPRINT DD SYSOUT=*                                                  00240000
+//DASD1    DD UNIT=SYSALLDA,VOL=SER=OS3D9A,DISP=SHR                     00250000
+//TAPE1    DD DSN=DUMP.OS3D9A.TAPE05,DISP=(,CATLG),                     00260000
+//            LABEL=(,SL),VOL=SER=TAPE05,UNIT=590                       00270000
+//SYSIN    DD *                                                         00280000
+  DUMP INDD(DASD1) OUTDD(TAPE1) COMPRESS ADMIN OPTIMIZE(4)              00290000
+//S5       EXEC PGM=ADRDSSU,REGION=0M                                   00300000
+//SYSPRINT DD SYSOUT=*                                                  00310000
+//DASD1    DD UNIT=SYSALLDA,VOL=SER=OS39M1,DISP=SHR                     00320000
+//TAPE1    DD DSN=DUMP.OS39M1.TAPE06,DISP=(,CATLG),                     00330000
+//            LABEL=(,SL),VOL=SER=TAPE06,UNIT=590                       00340000
+//SYSIN    DD *                                                         00350000
+  DUMP INDD(DASD1) OUTDD(TAPE1) COMPRESS ADMIN OPTIMIZE(4)              00360000
+//S6       EXEC PGM=ADRDSSU,REGION=0M                                   00370000
+//SYSPRINT DD SYSOUT=*                                                  00380000
+//DASD1    DD UNIT=SYSALLDA,VOL=SER=OS39H9,DISP=SHR                     00390000
+//TAPE1    DD DSN=DUMP.OS39H9.TAPE07,DISP=(,CATLG),                     00400000
+//            LABEL=(,SL),VOL=SER=TAPE07,UNIT=590                       00410000
+//SYSIN    DD *                                                         00420000
+  DUMP INDD(DASD1) OUTDD(TAPE1) COMPRESS ADMIN OPTIMIZE(4)              00430000
+//S7       EXEC PGM=ADRDSSU,REGION=0M                                   00440000
+//SYSPRINT DD SYSOUT=*                                                  00450000
+//DASD1    DD UNIT=SYSALLDA,VOL=SER=OS39P9,DISP=SHR                     00460000
+//TAPE1    DD DSN=DUMP.OS39P9.TAPE08,DISP=(,CATLG),                     00470000
+//            LABEL=(,SL),VOL=SER=TAPE08,UNIT=590                       00480000
+//SYSIN    DD *                                                         00490000
+  DUMP INDD(DASD1) OUTDD(TAPE1) COMPRESS ADMIN OPTIMIZE(4)              00500000
+//S8       EXEC PGM=ADRDSSU,REGION=0M                                   00510000
+//SYSPRINT DD SYSOUT=*                                                  00520000
+//DASD1    DD UNIT=SYSALLDA,VOL=SER=OS3P9A,DISP=SHR                     00530000
+//TAPE1    DD DSN=DUMP.OS3P9A.TAPE09,DISP=(,CATLG),                     00540000
+//            LABEL=(,SL),VOL=SER=TAPE09,UNIT=590                       00550000
+//SYSIN    DD *                                                         00560000
+  DUMP INDD(DASD1) OUTDD(TAPE1) COMPRESS ADMIN OPTIMIZE(4)              00570000
+//S9       EXEC PGM=ADRDSSU,REGION=0M                                   00580000
+//SYSPRINT DD SYSOUT=*                                                  00590000
+//DASD1    DD UNIT=SYSALLDA,VOL=SER=OS3P9B,DISP=SHR                     00600000
+//TAPE1    DD DSN=DUMP.OS3P9B.TAPE10,DISP=(,CATLG),                     00610000
+//            LABEL=(,SL),VOL=SER=TAPE10,UNIT=590                       00620000
+//SYSIN    DD *                                                         00630000
+  DUMP INDD(DASD1) OUTDD(TAPE1) COMPRESS ADMIN OPTIMIZE(4)              00640000
+//S10      EXEC PGM=ADRDSSU,REGION=0M                                   00650000
+//SYSPRINT DD SYSOUT=*                                                  00660000
+//DASD1    DD UNIT=SYSALLDA,VOL=SER=OS3D9B,DISP=SHR                     00670000
+//TAPE1    DD DSN=DUMP.OS3D9B.TAPE11,DISP=(,CATLG),                     00680000
+//            LABEL=(,SL),VOL=SER=TAPE11,UNIT=590                       00690000
+//SYSIN    DD *                                                         00700000
+  DUMP INDD(DASD1) OUTDD(TAPE1) COMPRESS ADMIN OPTIMIZE(4)              00710000

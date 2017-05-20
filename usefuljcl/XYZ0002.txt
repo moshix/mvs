@@ -1,0 +1,5 @@
+//XYZ0002  JOB ' ',NOTIFY=&SYSUID                                       00010000
+//S1      EXEC PGM=IDCAMS                                               00070000
+//SYSPRINT  DD SYSOUT=*                                                 00080000
+//SYSIN     DD *                                                        00090000
+  DEFINE CL(NAME(SYS1.VVDS.VXYZ001) CYL(1 1) VOL(XYZ001) NIXD)          00100000

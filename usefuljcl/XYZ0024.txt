@@ -1,0 +1,16 @@
+//XYZ0024  JOB ' ',NOTIFY=&SYSUID                                       00010000
+//S1       EXEC PGM=ADRDSSU,REGION=0M                                   00020000
+//SYSPRINT DD SYSOUT=*                                                  00030000
+//SYSIN    DD *                                                         00070000
+  COPY DATASET (INCLUDE ( -                                             00080000
+   ANDYP.**,              -                                             00090000
+   ROBINW.**,             -                                             00091000
+   STEVEW.**,             -                                             00100000
+   STEVEP.**,             -                                             00110000
+   VISW.**             )) -                                             00120000
+  LOGINDY (               -                                             00130000
+            (OS39M1),     -                                             00140000
+            (OS39R9)    ) -                                             00150000
+  OUTDY   (               -                                             00160000
+            (XYZWRK)    ) -                                             00180000
+  SPHERE WAIT(0,0), TOL(ENQF) RECATALOG(*) DELETE                       00190000

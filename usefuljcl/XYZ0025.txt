@@ -1,0 +1,10 @@
+//XYZ0025  JOB ' ',NOTIFY=&SYSUID                                       00010000
+//TAPECOPY EXEC PGM=ADRDSSU,REGION=0M                                   00025000
+//SYSPRINT DD DSN=XYZ.BACKUP.OUTPUT(XYZ0025),DISP=SHR                   00026000
+//TAPEOUT  DD DSN=DUMP.XYZ.ALL,DISP=(NEW,CATLG),                        00026100
+//            UNIT=590,VOL=SER=TAPE30                                   00026200
+//SYSIN    DD *                                                         00027000
+  DUMP DS(INC(XYZ.**,           -                                       00028000
+              HERMAN,**))       -                                       00028100
+  ODD(TAPEOUT) TOL(ENQF) SHR    -                                       00028600
+  LOGINDY((XYZ001),(XYZWRK))                                            00029000

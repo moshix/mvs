@@ -1,0 +1,9 @@
+//XYZ0022  JOB ' ',NOTIFY=&SYSUID                                       00010000
+//S0 EXEC PGM=ADRDSSU,REGION=0M                                         00070000
+//SYSPRINT DD SYSOUT=*                                                  00080000
+//DASD1    DD UNIT=SYSALLDA,VOL=SER=OS39R9,DISP=SHR                     00090000
+//TAPE1    DD DSN=DUMP.OS39R9.TAPE01,DISP=(,CATLG),                     00100000
+//            LABEL=(,SL),VOL=SER=TAPE01,UNIT=590                       00110000
+//SYSIN    DD *                                                         00140000
+  DUMP INDD(DASD1) OUTDD(TAPE1) COMPRESS ADMIN OPTIMIZE(4)              00146000
+//*                                                                     00150000

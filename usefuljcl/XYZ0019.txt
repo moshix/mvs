@@ -1,0 +1,70 @@
+//XYZ0009  JOB ' ',NOTIFY=&SYSUID                                       00010000
+//S300    EXEC PGM=ADRDSSU,REGION=6000K                                 38F00100
+//SYSPRINT DD  SYSOUT=*                                                 38F00120
+//DASDIN   DD  UNIT=3390,VOL=SER=OS39R9,DISP=SHR                        38F00140
+//DASDOUT  DD  UNIT=3390,VOL=SER=XYZ380,DISP=SHR                        38F00130
+//SYSIN    DD  *                                                        38F00150
+  COPY INDD(DASDIN) OUTDD(DASDOUT) ADMIN COPYV                          00001900
+//XYZ1009  JOB ' ',NOTIFY=&SYSUID                                       00010000
+//S301    EXEC PGM=ADRDSSU,REGION=6000K                                 38F00100
+//SYSPRINT DD  SYSOUT=*                                                 38F00120
+//DASDIN   DD  UNIT=3390,VOL=SER=OS3R9A,DISP=SHR                        38F00140
+//DASDOUT  DD  UNIT=3390,VOL=SER=XYZ381,DISP=SHR                        38F00130
+//SYSIN    DD  *                                                        38F00150
+  COPY INDD(DASDIN) OUTDD(DASDOUT) ADMIN COPYV                          00001900
+//XYZ2009  JOB ' ',NOTIFY=&SYSUID                                       00010000
+//S302    EXEC PGM=ADRDSSU,REGION=6000K                                 38F00100
+//SYSPRINT DD  SYSOUT=*                                                 38F00120
+//DASDIN   DD  UNIT=3390,VOL=SER=OS39D9,DISP=SHR                        38F00140
+//DASDOUT  DD  UNIT=3390,VOL=SER=XYZ382,DISP=SHR                        38F00130
+//SYSIN    DD  *                                                        38F00150
+  COPY INDD(DASDIN) OUTDD(DASDOUT) ADMIN COPYV                          00001900
+//XYZ3009  JOB ' ',NOTIFY=&SYSUID                                       00010000
+//S303    EXEC PGM=ADRDSSU,REGION=6000K                                 38F00100
+//SYSPRINT DD  SYSOUT=*                                                 38F00120
+//DASDIN   DD  UNIT=3390,VOL=SER=OS3D9A,DISP=SHR                        38F00140
+//DASDOUT  DD  UNIT=3390,VOL=SER=XYZ383,DISP=SHR                        38F00130
+//SYSIN    DD  *                                                        38F00150
+  COPY INDD(DASDIN) OUTDD(DASDOUT) ADMIN COPYV                          00001900
+//XYZ4009  JOB ' ',NOTIFY=&SYSUID                                       00010000
+//S304    EXEC PGM=ADRDSSU,REGION=6000K                                 38F00100
+//SYSPRINT DD  SYSOUT=*                                                 38F00120
+//DASDIN   DD  UNIT=3390,VOL=SER=OS39M1,DISP=SHR                        38F00140
+//DASDOUT  DD  UNIT=3390,VOL=SER=XYZ384,DISP=SHR                        38F00130
+//SYSIN    DD  *                                                        38F00150
+  COPY INDD(DASDIN) OUTDD(DASDOUT) ADMIN COPYV                          00001900
+//XYZ5009  JOB ' ',NOTIFY=&SYSUID                                       00010000
+//S305    EXEC PGM=ADRDSSU,REGION=6000K                                 38F00100
+//SYSPRINT DD  SYSOUT=*                                                 38F00120
+//DASDIN   DD  UNIT=3390,VOL=SER=OS39H9,DISP=SHR                        38F00140
+//DASDOUT  DD  UNIT=3390,VOL=SER=XYZ385,DISP=SHR                        38F00130
+//SYSIN    DD  *                                                        38F00150
+  COPY INDD(DASDIN) OUTDD(DASDOUT) ADMIN COPYV                          00001900
+//XYZ6009  JOB ' ',NOTIFY=&SYSUID                                       00010000
+//S306    EXEC PGM=ADRDSSU,REGION=6000K                                 38F00100
+//SYSPRINT DD  SYSOUT=*                                                 38F00120
+//DASDIN   DD  UNIT=3390,VOL=SER=OS39P9,DISP=SHR                        38F00140
+//DASDOUT  DD  UNIT=3390,VOL=SER=XYZ386,DISP=SHR                        38F00130
+//SYSIN    DD  *                                                        38F00150
+  COPY INDD(DASDIN) OUTDD(DASDOUT) ADMIN COPYV                          00001900
+//XYZ7009  JOB ' ',NOTIFY=&SYSUID                                       00010000
+//S307    EXEC PGM=ADRDSSU,REGION=6000K                                 38F00100
+//SYSPRINT DD  SYSOUT=*                                                 38F00120
+//DASDIN   DD  UNIT=3390,VOL=SER=OS3P9A,DISP=SHR                        38F00140
+//DASDOUT  DD  UNIT=3390,VOL=SER=XYZ387,DISP=SHR                        38F00130
+//SYSIN    DD  *                                                        38F00150
+  COPY INDD(DASDIN) OUTDD(DASDOUT) ADMIN COPYV                          00001900
+//XYZ8009  JOB ' ',NOTIFY=&SYSUID                                       00010000
+//S308    EXEC PGM=ADRDSSU,REGION=6000K                                 38F00100
+//SYSPRINT DD  SYSOUT=*                                                 38F00120
+//DASDIN   DD  UNIT=3390,VOL=SER=OS3P9B,DISP=SHR                        38F00140
+//DASDOUT  DD  UNIT=3390,VOL=SER=XYZ388,DISP=SHR                        38F00130
+//SYSIN    DD  *                                                        38F00150
+  COPY INDD(DASDIN) OUTDD(DASDOUT) ADMIN COPYV                          00001900
+//XYZ9009  JOB ' ',NOTIFY=&SYSUID                                       00010000
+//S309    EXEC PGM=ADRDSSU,REGION=6000K                                 38F00100
+//SYSPRINT DD  SYSOUT=*                                                 38F00120
+//DASDIN   DD  UNIT=3390,VOL=SER=OS3D9B,DISP=SHR                        38F00140
+//DASDOUT  DD  UNIT=3390,VOL=SER=XYZ389,DISP=SHR                        38F00130
+//SYSIN    DD  *                                                        38F00150
+  COPY INDD(DASDIN) OUTDD(DASDOUT) ADMIN COPYV                          00001900

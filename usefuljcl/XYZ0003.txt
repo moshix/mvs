@@ -1,0 +1,9 @@
+//XYZ0003  JOB ' ',NOTIFY=&SYSUID                                       00020000
+//S1      EXEC PGM=IDCAMS                                               00030000
+//SYSPRINT  DD SYSOUT=*                                                 00040000
+//SYSIN     DD *                                                        00050000
+  DEFINE    USERCATALOG        -                                        00060000
+  (  NAME(USERCAT.XYZ)         -                                        00070000
+  VOLUME(XYZ001)               -                                        00080000
+  CYLINDERS(5 2)               -                                        00090000
+  MODEL(USERCAT.VOS39P9))                                               00100000

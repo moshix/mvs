@@ -1,0 +1,18 @@
+//XYZ0007  JOB ' ',NOTIFY=&SYSUID                                       00020000
+//S0       EXEC PGM=ICKDSF,REGION=4096K                                 00080000
+//SYSPRINT DD SYSOUT=*                                                  00090000
+//SYSIN    DD *                                                         00100000
+  INIT UNIT(312) NOVALIDATE NVFY VOLID(XYZPAG) PURGE VTOC(0,1,30)       00110000
+//XYZ1007  JOB ' ',NOTIFY=&SYSUID,TYPRUN=HOLD                           00120000
+//S1      EXEC PGM=IDCAMS                                               00130000
+//SYSPRINT  DD SYSOUT=*                                                 00140000
+//SYSIN     DD *                                                        00150000
+  DEFINE CL(NAME(SYS1.VVDS.VXYZPAG) CYL(2 1) VOL(XYZPAG) NIXD)          00160000
+//XYZ2007  JOB ' ',NOTIFY=&SYSUID,TYPRUN=HOLD                           00170000
+//S2      EXEC PGM=IDCAMS                                               00180000
+//SYSPRINT  DD SYSOUT=*                                                 00190000
+//SYSIN     DD *                                                        00200000
+  DEFINE PAGESPACE (NAME(SYS1.LOCAL1.PAGE) -                            00220000
+  VOLUME(XYZPAG) CYLINDERS(1500))                                       00240000
+  DEFINE PAGESPACE (NAME(SYS1.LOCAL2.PAGE) -                            00250000
+  VOLUME(XYZPAG) CYLINDERS(500))                                        00260000

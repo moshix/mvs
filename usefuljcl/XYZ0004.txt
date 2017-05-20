@@ -1,0 +1,6 @@
+//XYZ0004  JOB ' ',NOTIFY=&SYSUID                                       00020000
+//S1      EXEC PGM=IDCAMS                                               00030000
+//SYSPRINT  DD SYSOUT=*                                                 00040000
+//SYSIN     DD *                                                        00050000
+  DEFINE  ALIAS (NAME(XYZ) RELATE(USERCAT.XYZ))                         00080000
+  DEFINE  ALIAS (NAME(DUMP) RELATE(USERCAT.XYZ))                        00090000

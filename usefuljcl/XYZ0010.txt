@@ -1,0 +1,10 @@
+//XYZ0010  JOB ' ',NOTIFY=&SYSUID                                       00010000
+//****************************************************************
+//* THIS IS AN EXAMPLE OF A JOB THAT WILL:
+//*   RE-LABEL A DISK VOLUME - DOES NOT PURGE DISK DATA
+//*
+//****************************************************************
+//ICKDSF   EXEC PGM=ICKDSF,REGION=4096K
+//SYSPRINT DD SYSOUT=*
+//SYSIN    DD *
+    REFORMAT UNITADDRESS(38B) VERIFY(XYZ001) VOLID(XYZ999)

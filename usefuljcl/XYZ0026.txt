@@ -1,0 +1,7 @@
+//XYZ0026  JOB ' ',NOTIFY=&SYSUID                                       00010000
+//ST1      EXEC PGM=ADRDSSU,REGION=0M                                   00040000
+//SYSPRINT DD DSN=XYZ.BACKUP.OUTPUT(XYZ0026),DISP=SHR                   00050000
+//TAPE     DD DSN=DUMP.XYZ.ALL,DISP=SHR                                 00060000
+//SYSIN    DD *                                                         00080000
+ RESTORE DS(INC(XYZ.SPUFI.OUTPUT)) -                                    00100000
+         OUTDY(XYZWRK) IDD(TAPE) CATALOG                                00110000

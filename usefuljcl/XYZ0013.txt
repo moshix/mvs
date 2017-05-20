@@ -1,0 +1,6 @@
+//XYZ0009  JOB (),NOTIFY=&SYSUID                                        00010000
+// EXEC PGM=IEFBR14                                                     00020000
+//ALLOC DD DSN=HFS.XYZ.BIGHFS,DISP=(,KEEP),                             00030000
+// VOL=SER=(XYZHF0,XYZFH1,XYZHF2,XYZHF3,XYZHF4),                        00040000
+// UNIT=(3390,5),DSNTYPE=HFS,                                           00050000
+// SPACE=(CYL,(3330,3330,1))                                            00060000

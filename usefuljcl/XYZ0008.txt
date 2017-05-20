@@ -1,0 +1,5 @@
+//XYZ0008  JOB ' ',NOTIFY=&SYSUID                                       00010001
+//ICKDSF   EXEC PGM=ICKDSF,REGION=4096K                                 00025000
+//SYSPRINT DD SYSOUT=*                                                  00026000
+//SYSIN    DD *                                                         00027000
+  INIT UNIT(30C) NOVALIDATE NVFY VOLID(OS39MX) PURGE VTOC(0,1,30)       00028000

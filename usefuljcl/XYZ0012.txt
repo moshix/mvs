@@ -1,0 +1,7 @@
+//XYZ0012  JOB ' ',NOTIFY=&SYSUID                                       00010000
+//TEST     EXEC PGM=IEBGENER                                            00020000
+//SYSPRINT DD SYSOUT=*                                                  00030000
+//SYSUT1   DD DSN=TCPIP.PROFILE.TCPIP,DISP=SHR                          00040000
+//SYSUT2   DD DSN=XYZ.TCPIP.PROFILE.TCPIP,DISP=(,CATLG),                00050000
+//            LABEL=(,SL),VOL=SER=TAPE01,UNIT=590                       00060000
+//SYSIN     DD DUMMY                                                    00070000

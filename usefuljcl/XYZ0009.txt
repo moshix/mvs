@@ -1,0 +1,11 @@
+//XYZ0020  JOB ' ',NOTIFY=&SYSUID                                       00010000
+//****************************************************************      00021000
+//*                                                                     00022000
+//*   ALLOCATE JES2 SPOOL DATASET                                       00023000
+//*                                                                     00024000
+//****************************************************************      00025000
+//IEFBR14  EXEC PGM=IEFBR14                                             00030000
+//SYSPRINT DD SYSOUT=*                                                  00040000
+//DD1      DD DSN=SYS1.HASPACE,VOL=SER=OS39MX,UNIT=3390,DISP=(,KEEP),   00041000
+//            DCB=RECFM=U,SPACE=(CYL,1500)                              00042000
+//SYSIN    DD DUMMY                                                     00050000

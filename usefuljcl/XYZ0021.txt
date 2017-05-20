@@ -1,0 +1,26 @@
+*************************************************************           00001100
+*                                                           *           00002000
+* EXAMPLE OF HOW TO HANDLE REMOTE NFS MOUNTS FROM OS/390    *           00002100
+*                                                           *           00002400
+*************************************************************           00003000
+*************************************************************           00004000
+* PLACE THE FOLLOWING JCL IN MVSNFS.CNTL(NFSRMT)            *           00010000
+*************************************************************           00011000
+//NFSRMT   JOB ()                                                       00020000
+//NFSRMT   EXEC PGM=IKJEFT01                                            00030000
+//SYSPRINT DD SYSOUT=*                                                  00040000
+//SYSTSPRT DD SYSOUT=*                                                  00050000
+//SYSTERM  DD DUMMY                                                     00060000
+//SYSTSIN  DD *                                                         00070000
+MOUNT FILESYSTEM('/export/home/rmt') MOUNTPOINT('/u/rmt') +             00080000
+ TYPE(NFS) PARM('ip_addr:/export/home/rmt,xlat(y)') MODE(RDWR)          00090000
+LOGOFF                                                                  00100000
+*************************************************************           00110000
+* PLACE THE FOLLOWING JCL IN USER.PROCLIB(NFSSTC)           *           00120000
+*************************************************************           00130000
+//NFSSTC   PROC MBR='NFSRMT'                                            00160000
+//RDR      EXEC PGM=IEBGENER                                            00170000
+//SYSPRINT DD SYSOUT=*                                                  00180000
+//SYSIN    DD DUMMY                                                     00190000
+//SYSUT1   DD DSN=MVSNFS.CNTL(&MBR),DISP=SHR                            00200000
+//SYSUT2   DD SYSOUT=(,INTRDR)                                          00210000

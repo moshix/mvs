@@ -1,0 +1,42 @@
+SYS1.README on OS39Rx
+http://198.81.193.6/adcd.html
+
+Resource Link
+http://notes.s390.ibm.com/servers/resourcelink/hom03010.nsf?OpenDataBase
+
+Documentation
+http://www.s390.ibm.com/os390/bkserv
+
+Porting to OS/390 information
+http://www.s390.ibm.com/products/adtools/porting
+
+OS/390 Unix System Services Porrting Information
+http://www.s390.ibm.com/products/oe/bpxa1por.html
+
+Key publications for porting activities
+http://www.s390.ibm.com/products/adtools/pubs/
+
+FAQ
+http://www.developer.ibm.com/tech/faq/
+
+BBS
+http://www.developer.ibm.com/sdp/bbaccess.html
+
+Hotline
+1-800-627-8363 us/canada
+1-770-835-9902 worldwide
+
+Software Defect
+1-800-237-5511 us
+1-770-955-6016 outside us
+
+Software Maintenance
+http://techsupport.services.ibm.com/390/psd-adv.html
+http://techsupport.services.ibm.com/390register/regform.html?
+
+Red Alerts
+http://techsupport.services.ibm.com/390/redalerts.html
+
+Hardware Defect
+1-800-IBM-SERV
+

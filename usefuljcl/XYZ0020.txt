@@ -1,0 +1,13 @@
+//XYZ0021  JOB ' ',NOTIFY=&SYSUID                                       00001000
+//ICKDSF   EXEC PGM=ICKDSF,REGION=4096K                                 00002000
+//SYSPRINT DD SYSOUT=*                                                  00003000
+//SYSIN    DD *                                                         00004000
+  INIT UNIT(38B) NOVALIDATE NVFY VOLID(RESTOR) PURGE                    00005000
+//XYZ1021  JOB ' ',NOTIFY=&SYSUID,TYPRUN=HOLD                           00010000
+//S2 EXEC PGM=ADRDSSU,REGION=5000K,TIME=1440                            00145000
+//SYSPRINT DD SYSOUT=*                                                  00146000
+//DASD1    DD  UNIT=3390,VOL=SER=RESTOR,DISP=SHR                        00147000
+//TAPE1    DD  DSN=DUMP.OS39P9.TAPE09,DISP=SHR                          00149100
+//SYSIN    DD *                                                         00149200
+  RESTORE INDD(TAPE1) OUTDD(DASD1) PURGE ADMIN                          00149700
+/*                                                                      00149800
