@@ -6,14 +6,15 @@ this repository includes some very useful utilities for people working with MVS,
 
 
 2. SYCPLK.ccdk is a 3390-3 volume (SYSCPK) which incluedes about 10 or 12 compilers for the mainframe, including:
- PLI F compiler
- Cobol compiler from the 60s
- RPG compiler
- PL/360 compiler
- Pascal compiler
- the amazing aSSIST assembler
- Simula compiler
- and many other goodies. 
+
+- PLI F compiler
+- Cobol compiler from the 60s
+- RPG compiler
+- PL/360 compiler
+- Pascal compiler
+- the amazing aSSIST assembler
+- Simula compiler
+- and many other goodies. 
 
  Simply mount the volume on your system, add it to the VTLST00 member as private, and then extend your JES2 to use the included
  SYS2.PROCLIB on SYSCPK. This proclib has procedures for all the included compilers. The run-time libraries, like SYSC.PLILIB are of course included in the volume. 
@@ -29,3 +30,10 @@ this repository includes some very useful utilities for people working with MVS,
 6. my PL/I implementation of the N x N queens problem
 
 7. Sorichetti's vpwpc output seprator for Hercules printers
+
+8 The usefuljcl/ directory contains very useful JCL jobs which you will use on adaily basis as a MVS or z/OS SYSPROG
+
+
+Enjoy!
+
+moshix
