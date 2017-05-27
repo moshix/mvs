@@ -14,16 +14,14 @@ import (
 	"fmt"
 )
 
-/* global variables section */
-
 func main() {
 
 	var lrecl int = 0 // initialize lrecl
 	var dasd = ""     //  initialize DASD type
 
-	dasdPtr := flag.String("dasd", "3390", "DASD model")
-	lreclPtr := flag.Int("lrecl", 80, "logical record length")
-	helpPtr := flag.Bool("help", false, "help flag")
+	dasdPtr := flag.String("dasd", "", "DASD model")          // default to no DASD
+	lreclPtr := flag.Int("lrecl", 0, "logical record length") //default to zero lrecl
+	helpPtr := flag.Bool("help", false, "help flag")          // default  to no help
 	flag.Parse()
 
 	lrecl = *lreclPtr // assign argument to main variable lrecl
