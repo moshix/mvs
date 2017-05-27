@@ -32,7 +32,7 @@ this repository includes some very useful utilities for people working with MVS,
 7. Sorichetti's vpwpc output seprator for Hercules printers
 
 8 The usefuljcl/ directory contains very useful JCL jobs which you will use on adaily basis as a MVS or z/OS SYSPROG
-
+9. a calculator for ideal blocksize given a DASD type and a logical record length, written by me in Go language. It's called blocksize.go and I also inlude a Linux 64bit binary
 
 Enjoy!
 
