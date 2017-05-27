@@ -21,7 +21,7 @@ func main() {
 	var lrecl int = 0 // initialize lrecl
 	var dasd = ""     //  initialize DASD type
 
-	dasdPtr := flag.String("dasd", "33903", "DASD model")
+	dasdPtr := flag.String("dasd", "3390", "DASD model")
 	lreclPtr := flag.Int("lrecl", 80, "logical record length")
 	helpPtr := flag.Bool("help", false, "help flag")
 	flag.Parse()
@@ -30,19 +30,19 @@ func main() {
 	dasd = *dasdPtr   // assign dasd type to main variable dasd
 
 	if dasd == "" {
-		fmt.Println("\nNo DASD type entered. ")
-		fmt.Println("pls enter DASD type or restart with -h for list of DASD types")
+		fmt.Println("\nBLK205R No DASD type entered. ")
+		fmt.Println("BLK206R pls enter DASD type or restart with -h for list of DASD types")
 		fmt.Scan(&dasd)
 	}
 	if lrecl == 0 {
 
-		fmt.Printf("\nlrecl command line argument is not included.\n")
-		fmt.Println("Please enter lrecl length: ")
+		fmt.Printf("\nBLK201R lrecl command line argument is not included.\n")
+		fmt.Println("BLK202R Please enter lrecl length: ")
 		fmt.Scan(&lrecl)
 	}
 	if *helpPtr {
-		fmt.Println("Usage example:   ")
-		fmt.Println("blockfactor -h -dasd=3380K -lrecl=80")
+		fmt.Println("BLK080I Usage example:   ")
+		fmt.Println("BLK080I blockfactor -h -dasd=3380K -lrecl=80")
 		fmt.Println(" ")
 		fmt.Println("-h         show this help         ")
 		fmt.Println("-dasd      IBM DASD type (see table below)")
