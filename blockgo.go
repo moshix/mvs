@@ -71,9 +71,9 @@ func main() {
 	/* formula:  BLOCKIZE = INT(half of TRKSZIE/LRECL) * LRECL
 	   // calculate optimum block size                            */
 
-	fulltracks := table[dasd]    //obtain pair value of key dasd
-	halftracks := fulltracks / 2 // half track size
+	/* fulltracks := table[dasd]  */ //obtain pair value of key dasd
+	halftracks := table[dasd] / 2    // half track size
 	blocksize := int((halftracks / lrecl) * lrecl)
-	fmt.Println("BLK100I Ideal blocksize for dasd ", dasd, " and lrecl: ", lrecl, " is: ", blocksize)
+	fmt.Println("BLK100I Ideal blocksize for DASD type", dasd, ", LRECL: ", lrecl, " is: ", blocksize)
 	return
 }
