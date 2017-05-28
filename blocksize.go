@@ -1,9 +1,10 @@
 package main
 
 /*
-   blockfactor
+   blocksize
    block size calculator for most IBM DASDs
-   invoke wiht blockfactor DASD LRECL parameters
+   invoke with: 
+   blocksize DASD LRECL parameters
 
 
    (c) 2017 by moshix
@@ -62,16 +63,16 @@ func main() {
 	table["9345"] = 46456
 	/*  this is just an exampmle on how to print out table
 	    p.s. prints out in random order.... not sure why
-	for model, size := range table {
+    	for model, size := range table {
 	         fmt.Println("Model",model, "size",size)
 	    } */
 
-	/* formula:  BLOCKIZE = INT(half of TRKSZIE/LRECL) * LRECL
-	   // calculate optimum block size                            */
+	/* formula:  BLOCKIZE = INT(half of TRKSZIE/LRECL) * LRECL */
 
-	/* fulltracks := table[dasd]  */ //obtain pair value of key dasd
 	halftracks := table[dasd] / 2    // half track size
 	blocksize := int((halftracks / lrecl) * lrecl)
+
 	fmt.Println("BLK100I Ideal blocksize for DASD type", dasd, ", LRECL: ", lrecl, " is: ", blocksize)
+
 	return
 }
