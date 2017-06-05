@@ -1,0 +1,955 @@
+ 
+USER.DOC PC/370 User Documentation
+
+Copyright 1987 Donald S. Higgins
+
+Don Higgins
+6365 - 32 Avenue North
+St. Petersburg, Florida 33710
+
+E-mail CompuServe 73047,1113
+
+PC/370 users:
+
+This is the user documentation for the PC/370 cross assembler,
+linkage editor, and emulator for 370 assembly language users.
+The PC/370 package provides the capability to assemble, link,
+and execute IBM 370 assembler programs on any 80x86 MSDOS 2.0+ micro
+computer such as the IBM PC, XT, AT, PS/2, Compaq, etc.
+
+Chapter table of contents:
+
+ 1. M370.COM macro preprocessor
+
+ 2. A370.EXE cross 370 assembler
+
+ 3. L370.EXE cross 370 linkage editor
+
+ 4. E370R42.EXE run time 370 emulator
+
+ 5. Technical hardware and software specifications
+
+ 6. ASSIST extended instructions for student use
+
+ 7. DEBUG interactive debugging facility
+
+ 8. Floating point instructions and scientific subroutines
+
+ 9. XA extended architecture instructions
+
+10. System subroutine library
+
+11. COBOL call interface
+
+12. Reference publications
+
+*********
+
+Chapter 1.  M370.COM macro preprocessor
+
+*********
+
+The M370 macro preprocessor has the following command format:
+
+A>M370 file
+
+where file is the name of a source macro program file which has the
+suffix (.MLC).  The source file must be in ASCII text format with
+each line terminated by a line feed character.  The only output from
+this program is a source basic assembler file with expanded macro
+statements.  The suffix of the output file is (.ALC).
+
+Any number of macros can be used by M370 input files and must be
+defined in individual source macro files with the file name equal to
+the macro name and a suffix of (.MAC).  These macros must be placed on
+the default drive for access by M370.  For more speed, these files may
+be moved to RAM disk.
+
+*********
+
+Chapter 2.  A370.EXE cross 370 assembler
+
+*********
+
+The A370 assembler has the following command format:
+
+A>A370 file/options
+
+where file is the name of a source program file which has the
+suffix (.ALC).  The source file must be in ASCII text
+format with each line terminated by a line feed character.
+Any number of editors including SEE can be used to create ALC files.
+An optional drive and path may be specified such as B:\dir\file.
+The options which can be specified are as follows:
+
+  A - alignment option. Default is on.
+  C - object code option. Default is on.
+  L - produce listing file (.PRN). Default is none.
+  T - trace assembler execution. Default is off.
+  X - produce symbol and literal cross reference. Default is none.
+
+If an option is on by default, specifying it will turn it off.
+For example:
+
+A>A370 B:DEMOPNUM/LX
+
+will read the source file B:DEMOPNUM.ALC and produce the object
+code file B:DEMOPNUM.OBJ and the listing file B:DEMOPNUM.PRN.
+
+The A370 assembler conforms to the OS/VS IBM 370 Assembly
+Language as defined in the IBM manual GC33-4010 with the
+following limitations:
+
+  1.  No continuation lines.
+  2.  Maximum control sections and dummy sections is 255.
+  3.  Macros and system variable symbols are not supported (see M370).
+  4.  OPSYN statement not supported.
+  5.  EQU third operand (type attribute) not supported.
+  6.  Scale, exponent, and bit length data modifiers not supported.
+
+Extended features include the following:
+
+  1.  Data constant types F and H may use arithmetic expressions.
+
+  2.  Extended ASSIST instruction set including XREAD, XPRNT,
+      XDECI, XDECO, AND XDUMP as defined in the book Assembler
+      Language with ASSIST by Ross A. Overbeek.  Also 2 more
+      instructions XFILI and XFILO are added to allow changing
+      default ASSIST input and output files at execution time.
+
+  3.  ASCII character strings may be defining by using double
+      quotes instead of single quotes in DC and self defining
+      character constants.
+
+*********
+
+Chapter 3.  L370.EXE cross 370 linage editor
+
+*********
+
+The L370 linkage editor has the following command format:
+
+A>L370 file/options
+
+where file is the name of an A370 object code file (.OBJ) and
+may specify a specific drive.  The options supported by the
+linkage editor are as follows:
+
+  B - create VS COBOL callable subroutine file (type .BIN).
+  D - set debug mode for emulator. Default is off.  When option D
+      is on, interactive debug is entered at beginning of each
+      COM or BIN file execution.
+  G - load and execute with no file output. Default is off.
+  I - turn off all interrupts from keyboard.
+  L - list CSECT addresses and lengths. Default is off.
+  M - create 370 code module without COM prefix code.
+  O - dump input object code records in hex. Default is off.
+  P - force floating point option off even if 80x87 installed.
+  X - cross reference of external symbols. Default is off.
+  U - allow unresolved external references
+
+For example:
+
+A>L370 B:DEMOPNUM/LX
+
+will read the object code file B:DEMOPNUM.OBJ and produce the binary
+command file B:DEMOPNUM.COM, and the listing and cross-reference file
+B:DEMOPNUM.LST.  Note that since DEMOPNUM calls the external
+subroutine PET, the subroutine library L370.LIB must be available.
+The binary command file B:DEMOPNUM.COM may be directly executed by the
+MSDOS command:
+
+A>B:DEMOPNUM
+
+When the above command is executed, the program will load at X'0200'
+and the fetch routine linked with the program will load the
+emulator E370.EXE in high memory and transfer control to it.
+
+The linkage editor uses two concatenated subroutine library
+files.  The first file is named file.LIB and may contain
+any number of A370 subroutine object modules which are called by the
+modules in file.obj.  This file is optional and only called modules
+are included.  The second file is named L370.LIB and may contain any
+number of A370 subroutine object modules which are commonly used by
+multiple programs.  An L370.OBJ file is included with the PC/370
+package and contains sample time and date routines.  The MS-DOS COPY
+command with option /B may be used to concatenate A370 object modules
+in either library file.  Note module references must be resolved in
+one sequential pass of library so backward module references may cause
+unresolved entry.
+
+The linkage editor listing file (.LST) shows relative entry point
+and segment lengths and optional cross reference by segment.  The
+last line of the listing contains ENT/LNG which is the 370 relative
+entry point of the module and the length of the entire module.
+
+*********
+
+Chapter 4.  E370R42.EXE run time 370 native machine code emulator
+
+*********
+
+The emulator is transparent to the user when using A370 and L370 to
+create MSDOS command files.  The emulator is dynamically executed by
+the 80x86 COM file prefix generated by L370.  The 370 machine code
+starts at X'210' from the beginning of the COM file.  The origin of
+the 370 virtual address space for a COM program starts at X'10' from
+the beginning of the COM file.  The execution of the 370 machine code
+will start at the specified relative start address plus hex 200 with
+that absolute address in register 15.  Register 1 will point to
+standard MVS parameter list address at location X'80' with EBCDIC text
+passed from MS-DOS command line.  Register 13 will point to standard
+save area in ASCB and register 14 points to return to detach
+instruction in ASCB to exit to MS-DOS.  If a program check occurs, the
+interactive debug facility will be invoked and will initially display
+the general registers and the program status word at the time of the
+interruption.  See DOC\SYSTEM.DOC SPIE supervisor call for facility to
+handle program checks.  Also see MAC\MVS.MLC for example of how to run
+programs in problem state with your own supervisor shell.
+
+A new facility with PC/370 release 4 is the ability to make the
+emulator resident by simply executing it directly.  The resident
+emulator reserves about 50k for code and uses an 80x86 hardware
+interrupt to transfer control when needed at execution time.  To
+remove the current resident emulator, simply execute it directly
+again.  Release 4.0 and 4.1 used interrupt hex DC.  Release 4.2 uses
+hex 60 within the Micro Focus Extended Memory (XM) real interrupt
+handler range of hex 60-6F.  See DOC\PTF.DOC for pathc to change
+interrupt in case it conflicts with another user installed software
+package.
+
+With release 4.1 a new system queue area (SQA) memory option has been
+added to define a memory which can be shared by all COBOL subroutines
+and which is allocated in the resident emulator address space.  The
+size of the SQA is specified by a single hex parm when making the
+emulator resident.  The size is in hex paragraphs and the default is
+10 or 256 bytes.  For example, the following command would make the
+emulator resident with an 8k byte SQA:
+
+  C>E370R42 200
+
+With the SQA facility, COBOL assembler subroutines can issue standard
+file I/O with dynamic buffers allocate from SQA. See BAT\RUNCBL.BAT
+for demo.
+
+With release 4.2, PC/370 supports Micro Focus COBOL/2 assembler
+subroutine calles in normal MS-DOS mode or in extended memory XM mode.
+In both cases the emulator must be resident before starting the COBOL
+program via workbench or run time executive with or without XM.  In
+XM mode, the emulator still runs in real mode after requesting XM to
+mode the called subroutine code (BIN file) and the argument data
+segments to base memory area for access in V=R real mode.  This
+creates the XM restriction that there must be sufficient base memory
+for called BIN file and data segment at the time of the call.  Also,
+the emulator must not attempt to access memory beyond end of BIN or
+data segments in real memory.  The emulator can use SQA in XM mode.
+See BAT\RUNCBL.BAT for demo of XM mode subroutines (requires XM.EXE
+and RUN.EXE from Micro Focus).
+
+There are five distinctly different ways to execute the E370 emulator:
+
+  1.  Direct execution to make it resident if not currently resident.
+
+  2.  Direct execution again to remove current resident copy.  If
+      another software package is using interrupt, an error message
+      will display.  See DOC\PTF.DOC to change interrupt number.
+
+  3.  Execution of a 370 COM module without E370 resident causes
+      dynamic loading of E370 in high 64k of MS-DOS memory to support
+      execution of 370 code in the COM module.
+
+  4.  Execution of a 370 COM module with E370 module resident causes
+      execution of resident copy via cross memory interrupt facility.
+
+  5.  Execution of a 370 BIN module from within Micro Focus COBOL run
+      time environment causes execution of resident copy via cross
+      memory interrupt facility.  In XM mode, a protected interface
+      routine in the emulator is called directly by the BIN module
+      which in turn issues interrupt to execute emulator in real mode.
+
+
+*********
+
+Chapter 5. Technical specifications
+
+*********
+
+   1.  A370.EXE requires 256k memory to execute and can handle source
+       programs with over 1000 labels.
+
+   2.  L370.EXE requires 256k memory and can handle load modules up to
+       50k bytes long.
+
+   3.  E370R42.EXE requires 50k plus SQA which includes the emulator,
+       and the extended SVC support functions, and interactive debug.
+       A production only copy of the emulator named E370P42.EXE is
+       included which only requires 40k but does not include
+       interactive debug facility or the ASSIST extended instructions.
+       This version saves resident base memory, but should only be
+       used for fully tested programs or programs with their own
+       program check handlers for error recovery.
+
+   4.  E370R42 supports all the non-supervisor state IBM 370
+       instructions as defined in the IBM/370 XA Principals
+       of Operation manual SA22-7085 except the conditional
+       swapping feature instructions.  Short, long, and extended
+       floating point instructions are supported provided 80x87
+       is installed.
+
+   5.  The minimum configuration for PC/370 is as follows:
+       a.  80x86 processor.  XM only supported on 80286/80386.
+       b.  256k RAM memory which allows execution of 370 program in
+           128k virtual address space.  Maximum virtual address space
+           is about 512k on 640k machine.
+       c.  1 floppy disk drive.
+       d.  80x87 only required for floating point instructions.
+
+   6.  A benchmark program consisting of calculating the first
+       100 prime numbers was run in interpretive BASIC using
+       16 bit integer arithmetic.  It took 67 seconds on a
+       4.77 MHZ 8086 system.  The same program was rewritten in
+       370 assembler using 32 bit fixed point arithmetic.  It
+       took 25 seconds to execute on the same system.  This
+       benchmark program is included as a demo called DEMOPNUM.ALC.
+
+       The demo may be run with the following commands:
+
+         A>A370 DEMO\DEMOPNUM/LX  (create DEMOPNUM.OBJ)
+         A>L370 DEMO\DEMOPNUM/LX  (create DEMOPNUM.COM)
+         A>DEMO\DEMOPNUM
+
+   7.  The following error messages are supported:
+
+       A370/L370
+
+        E01 - DUPLICATE LABEL
+        E02 - INVALID LABEL
+        E03 - SYMBOL TABLE FULL
+        E04 - INVALID OPERATION CODE
+        E05 - UNDEFINED OPERATION CODE
+        E06 - UNDEFINED LABEL
+        E07 - INVALID OPERAND
+        E08 - MEMORY FULL
+        E09 - EXPRESSION INVALID
+        E10 - SELF DEFINING TERM INVALID
+        E11 - ARITHMETIC OVERFLOW IN EXPRESSION
+        E12 - TOO MANY EXTERNAL SYMBOLS
+        E13 - NO BASE REGISTER AVAILABLE
+        E14 - LENGTH ERROR
+        E15 - OPERAND ERROR
+        E16 - DATA CONSTANT DUPLICATION FACTOR ERROR
+        E17 - DATA CONSTANT TYPE ERROR
+        E18 - DATA CONSTANT LENGTH ERROR
+        E19 - DATA CONSTANT DATA ERROR
+        E20 - START SEQUENCE ERROR
+        E21 - LTORG SEQUENCE ERROR
+        E22 - LOCATION COUNTER ERROR BETWEEN PASS 1 AND 2
+
+   8.  IOS LOGICAL ACCESS METHOD USED BY A370, L370, AND E370
+
+      IOS001 - NO DISK SPACE
+      IOS001 - FILE NOT FOUND
+      IOS001 - NO BUFFER SPACE
+      IOS001 - OPEN FAILED
+      IOS002 - CLOSE FAILED
+      IOS003 - READING UNWRITTEN DATA
+      IOS003 - INVALID REQUEST
+      IOS004 - ERROR IN EXTENDING FILE
+      IOS004 - END OF DISK DATA AREA
+      IOS004 - NO MORE DIRECTORY SPACE
+      IOS004 - INVALID REQUEST
+      IOS005 - INVALID RECORD TYPE
+      IOS005 - INVALID RECORD LENGTH
+      IOS006 - INVALID RECORD TYPE
+      IOS006 - INVALID RECORD LENGTH
+      IOS007 - DELETE FAILED
+
+*********
+
+Chapter 6. ASSIST extended instructions for student use
+
+*********
+
+  A.  Overview
+
+      The book, "Assembler Language With ASSIST", by Ross A. Overbeek
+      and W. E. Singletary published by Science Research Associates,
+      Inc.  in 1976 describes a set of 370 extended instructions to
+      greatly simplify input and output for students learning to write
+      370 assembler programs.  A new book with also covers ASSIST is,
+      "IBM 370 Assembly Language with ASSIST, Structured Concepts, and
+      Advanced Topics", Charles J. Kacmar, Prentice Hall, September
+      1987, ISBN 0-13-455742-5.
+
+      PC/370 implements these instructions to allow students to
+      code, assemble, and execute ASSIST 370 programs on any 80x86 MS-
+      DOS based micro-computer rather than having to use an IBM 370
+      mainframe.  This was the original objective for which PC/370 was
+      developed back in 1981.  The first students to use PC/370 with
+      ASSIST were volunteers at the University of South Florida,
+      College of Engineering.  The students used a CP/M based Z80
+      micro-computer with the original version of PC/370 instead of
+      the IBM 3033 mainframe ASSIST system accessed via RJE using
+      keypunched card decks.
+
+  B.  ASSIST extended instructions
+
+      1.  XFILI =C'filename'
+
+          This extended instruction redirects input source for XREAD.
+          If open, the current input source file is closed.  The new
+          filename can be any standard MS-DOS path/filename ending
+          with suffix .xxx or a zero byte.  If the filename is CON:
+          then the input source is the console with a ? prompt.  To
+          set the ASSIST end of file condition code for XREAD from the
+          console, use the escape (ESC) key.  See DEMOAST3.ALC for
+          demo of redirection.
+
+      2.  XFILO =C'filename'
+
+          This extended instruction redirects the output from XPRNT.
+          If open, the current output file is closed.  The new file
+          name can be any standard MS-DOS path/filename ending with
+          suffix .xxx or a zero byte.  If the filename is CON: then
+          the output from XPRNT is directed to the console.  The first
+          byte which is printer control code is also printed on
+          console.
+
+      3.  XREAD area [,length]
+
+          Read record into area with default length of 80 padded with
+          blanks.  If the input is coming from console, the first
+          carriage return defines end of record, and single ESC
+          character defines end of file.  Note ASCII characters from
+          console or file are automatically translated to EBCDIC in
+          record area.  Condition code set as follows:
+
+            0 - read successful
+            1 - end of file
+
+          Default input source is file named ASSIST.DAT.  If the file
+          is not found, the input and output source is switched to
+          console.
+
+      4.  XPRNT area [,length]
+
+          Print record from area with default length of 132.  Trailing
+          blanks are stripped off.  The first character is used as
+          standard ASCII print control character:
+
+           ' ' - space means skip one line
+           '/' - slash means skip two lines
+           '1' - one means skip a page
+           '+' - means skip no lines
+           '-' - dash means skip three lines
+
+          Output to console includes print control character.  Default
+          output is to file named ASSIST.PRN which is also used by
+          interactive debug X logging command and XDUMP.
+
+      5.  XDECI reg,area
+
+          Read ASCII integer number from area and store into register.
+          Leading plus or minus signs may be present.  Condition code
+          is set as follows:
+
+           0 - number is zero
+           1 - number less than zero
+           2 - number is greater than zero
+           3 - no number found in area
+
+          Register 1 is set to address of first character after number
+          read.
+
+      6.  XDECO reg,area
+
+          Convert binary integer number in register to 12 character
+          display field with numeric value including sign.
+
+      7.  XDUMP [area start, area end]
+
+          Dump general purpose registers (default with no args) or
+          dump area of memory to output file.
+
+*********
+
+Chapter 7.  Interactive Debug Facility
+
+*********
+
+     A.  Overview
+
+     The PC/370 interactive debug facility is designed to provide a
+     tool to help debug program errors in either 80x86 code or 370
+     code.  The facility provides the basic tools namely tracing
+     program flow via breakpoints defined by calls, and displaying
+     register and memory contents upon request.  In addition, the
+     facility provides a data and address stop option which is very
+     useful for locating errors.
+
+     B.  Program Interface
+
+     The PC/370 interactive debug facility is implemented via a single
+     module named MMDBUG which is linked into A370, L370 and E370
+     programs and is called with a single 3 byte ASCII argument
+     located immediately after the near call instruction.   In the
+     E370 emulator environment, the interactive debugger can be called
+     directly from 370 programs through SVC 9 which must be followed
+     by 3 byte EBCDIC argument and a 1 byte filler to keep
+     instructions on half word boundary.
+
+     There are several special calling arguments as follows:
+
+     1.   'OFF' - turn off (kill) trace facility for speed
+                  (a trace is killed by replacing call with jump over
+                  the trace ID to the next instruction)
+     2.   'ON ' - turn trace facility back on (stop killing traces)
+     3.   'BUG' - force interactive debug mode
+     4.   'IOF' - interrupts off (unsolicited keys queued for input)
+     5.   'ION' - interrupts on  (any key stroke invokes user
+                  interface)
+     6.   'IFL' - instruction fetch loop (special trace used in E370
+                  to identify next trace id as 370 operation trace to
+                  be stored in trace table)
+
+     The first call to MMDBUG in A370, L370, and E370 is with 'OFF'
+     unless the trace option was requested via COM file parm or if the
+     debug option D was specified on link edit of COM or BIN file.
+
+     C.  User Interface
+
+     When MMDBUG is called without the 'OFF' argument, or when a key
+     is hit without the 'IOF' argument being issued previously, the
+     user interface mode is invoked and the following commands may
+     be entered in upper or lower case from the console:
+
+          A - ADDRESS STOP (PROMPTS FOR ADDRESS, LENGTH, TYPE)
+          C - CONTINUE TO NEXT TRACE ENTRY
+          D - DUMP MEMORY (PROMPTS FOR ADDRESS)
+          F - FIND TRACE ENTRY (PROMPTS FOR TRACE ID)
+          H - HELP LIST MMDBUG COMMANDS (THIS LIST)
+          I - INSTRUCTION COUNTER WORD
+          J - RESET NEXT 370 OR 8086 INSTRUCTION ADDRESS
+          K - KILL MODE SET/RESET (kills or restores traces)
+          L - SET/RESET TRACE LIMIT FOR Q/T MODE
+          M - MODIFY MEMORY (PROMPTS FOR ADDRESS AND DATA)
+          N - LIST LAST 20 TRACE ENTRIES (NOTE K,Z  AFFECT THIS LIST)
+          P - SET/RESET PRINT COPY OF ALL MMDBUG I/O
+          Q - SET QUIET MODE (USED WITH F, L, AND 'BUG' OPTIONS)
+          R - DISPLAY REGISTERS (SEE Z OPTION)
+          S - SAVE/UNSAVE CURRENT TRACE ID FROM KILL MODE
+          T - SET TRACE MODE (USED WITH OPTIONS F AND L)
+          W - LIST FREE MEMORY QUEUE
+          X - SET/RESET ASSIST LOGGING OF INTERACTIVE DEBUG OUTPUT
+          Y - MODIFY 8086/370 REGISTER (PROMPTS FOR REGISTER/DATA)
+          Z - SET/RESET 8086/370 MODE
+                IN 8086 MODE, R DUMPS 8086 REGISTERS AND D PRINTS
+                PRINTABLE ASCII CHARACTERS IN DUMP.
+                IN PC/370 MODE, R DUMPS 370 REGISTERS AND PSW
+                AND D DUMPS PRINTABLE EBCDIC CHARACTERS IN DUMP.
+         <cr> - dump same address again as defined in D command
+         <sp> - dump forward until any key hit
+         <bs> - dump backwards until any key hit
+         <esc>- exit to MSDOS after attempting to close files
+
+     Memory addresses may be entered in xxxx:xxxx or xxxxxx hex format
+     without leading zeros required.  In 370 mode, the xxxxxx format
+     always refers to the relative address within the current address
+     space.  In 80x86 mode, the xxxxxx format refers to the offset
+     using the current segment.  The segment:offset is initialized to
+     the emulator data segment area containing the 370 registers.
+
+     D.  User Guide
+
+     The PC/370 interactive debug facility can assist you in locating
+     errors within your 370 assembler programs.  But first there are
+     some more basic things to check:
+
+     1. Are you sure that you are executing the latest version of
+        the source program.  To be absolutely sure, code the date
+        and time in a print statement at the beginning of the program
+        and then reassemble (A370) and relink (L370) and execute the
+        program again.
+
+     2. Does the program run to normal termination?  If so then you
+        can run the program again specifying a T as the only parameter
+        on the execute command to initiate the interactive debug
+        facility.  Another way to invoke the interactive debug option
+        is to specify option D in the linkage editor.   This method
+        should be used if the program requires a parameter other than
+        T.
+
+    3.  If the program terminated abnormally, the interactive debug
+        facility is automatically initiated along with a display of
+        the PSW and the failing instruction.  To calculate the
+        relative address of the failing instruction in the program,
+        subtract the program load address of X'0200' (Note you will
+        have to look at the link edit listing to get the starting
+        address if the failing instruction is in a subroutine.
+
+    4.  To trace execution of the program, enter K once or twice to
+        restore all traces and then enter T.  To stop the trace at any
+        point hit any key.
+
+    5.  To continue execution of the program normally, enter Q.
+        For fast execution, use K command to set kill trace mode
+        first.
+
+    6.  To dump the current contents of the registers, enter R.
+
+    7.  To dump any 32 byte area in memory, enter A followed by
+        the starting address in hex xxxx.
+
+    8.  To continue to dump memory from the current location forward,
+        hit the space key.  To dump backwards, hit the backspace key.
+        To stop the dump, hit any key.
+
+    9.  To stop the program at a specific address, enter A followed
+        by the address in hex xxxx followed by the option code A.
+        Then use Q or T to continue execution until the address is
+        found.
+
+   10.  To stop the program when a specific data field in memory is
+        changed, enter A followed by the address in xxxx followed by
+        the option code E for equal data or N for not-equal data.
+        Next entry the length of the data compare in hex when
+        prompted.  If option E is selected, enter the hex value of the
+        data you want to search for when prompted.  Next press Q or T
+        to continue  execution until the data compare specified
+        triggers debug user interface again.  To stop at a specific
+        instruction count in a 370 program, use the I command to
+        display the instruction counter word and then use data equal
+        address stop on the word.  To obtain detail instruction trace
+        up to point of failure, either use Q or T from beginning of
+        the program or set address stop at previous multiple of 256
+        on instruction count field and then restore traces with K
+        command and then use Q or T proceed to point of failure.  At
+        point of failure, use N command to list last 20 instruction
+        trace points.
+
+   11.  To turn off any address stop option, enter A.
+
+   12.  To list the last 20 instruction trace table entries, enter N.
+        If running in 370 mode (option Z toggles mode), only the 370
+        instruction traces will be stored and listed via option N.
+        In 80x86 mode, all traces will be stored and listed.
+        Note that this list may be incomplete if the program
+        was running with K option active to kill traces for speed.
+        Option K kills each trace entry to debug the first time debug
+        is entered for that trace point.  Option K makes the program
+        run much faster at the expense of losing repeated trace
+        points until K reset is issued.  However, you can use Find to
+        locate selected trace id's and use Save to protect id from
+        kill mode.  This option allows much faster execution while
+        still being able to trace selected id's.  A very useful id to
+        save is IFL which will then trace each 370 instruction during
+        kill mode while killing all of the lower level ID's for
+        reasonable speed yet full visibility of 370 instructions.
+        Faster still is to save only one 370 instruction id such as
+        TRT.  This is very useful in conjunction with address stop,
+        since the address stop overhead is only incurred for the
+        selected saved id's.  Note that the trace table only contains
+        addresses of instructions, and as a result if instruction
+        modification or overlays are used, the data listed for a
+        previous instruction may be different from what it was at the
+        time it was executed.  In this case it may be helpful to rerun
+        program with address stop to see what was in memory at the
+        time an instruction was executed.
+
+   13.  To set a fixed limit on the number of trace entries before
+        entering debug command mode again, enter L and count in hex
+        xxxx.  Next enter Q or T to continue until count reached zero.
+        If zero count is entered, the limit is not checked.
+
+   14.  To modify memory, enter M followed by address in hex xxxx.
+        Next enter hex data bytes followed by return key.
+
+   15.  To display the 8086 registers, type Z to switch to 8086 mode.
+        Now type R.  In 8086 mode, storage dumps translate data to
+        ASCII instead of EBCDIC for character display.  In 8086 mode,
+        N lists all trace entries instead of just IFL 370 instruction
+        traces.  In 8086 mode, Y changes 8086 registers instead of 370
+        registers.  To return to 370 mode, type Z again.
+
+   16.  The W command displays free memory in the 8086 data segment
+        for 8086 mode and the free memory in the current address
+        space in 370 mode.  Note these are two totally separate free
+        areas.  The 8086 free area is limited to <= 64k addressable by
+        the DS register and uses 4 byte free queue elements
+        (next,length).  The 370 free area extends from the end of 370
+        code in COM module to the end of free memory and uses 8 byte
+        370 format free queue elements (next,length) on 8 byte
+        boundaries.  For BIN file execution, the free area is the SQA
+        area allocated in the emulator address space.  The first free
+        queue element in a 370 address space is pointed to by ASCASF
+        field in address space control block located at X'104' in low
+        memory (may be zero if no free memory currently available).
+        The ASCB for BIN modules can be located by subtracting
+        (X'200'-X'104') from the entry point address in register 15 at
+        entry (trace ID 370).
+
+   17.  The J jump command may be used to modify either the emulator
+        or the 370 current instruction address depending on the
+        current Z mode.  In 370 mode, the address entered is a virtual
+        address.  In 80x86 mode, the address entered is a code segment
+        offset (This is a very dangerous function and not
+        recommended).
+
+*********
+
+Chapter 8.  Floating Point Support
+
+*********
+
+  A.  Register formats
+
+    1.  General purpose registers
+
+        The general purpose 370 registers are located at the beginning
+        of the data segment of the E370 emulator (DS:0).  They are
+        stored in 80x86/80x87 long integer format with least
+        significant byte first starting with register 0.  For example,
+        the high byte of register 0 is at DS:3 and the low byte of
+        register 1 is at DS:4.  This area can be used with address
+        stop to detect a specific register value or change in register
+        value (although remembering reverse format is always a
+        challenge).  This format is used to allow native loads and
+        stores without reversing bytes which speeds up register to
+        register operations and allows addition of registers directly
+        from memory without conversion.
+
+    2.  Floating point registers
+
+        If the 80x87 co-processor is installed, the R command displays
+        the four 8 byte floating point register values numbered 0, 2,
+        4, and 6.  This is one way (other than 123 /WS screen) to tell
+        if 80x87 is installed.   The floating point registers are
+        stored in 80x87 temporary real format which is 10 bytes long.
+        The first 8 bytes contain the normalized 64 bit unsigned
+        mantissa with the high bit always on stored in reverse order
+        (like a double long integer with the least significant byte at
+        low address.  The last 2 bytes contain the base two exponent
+        and the sign stored as an integer.  The 15 bit exponent is
+        stored in excess 3FFFH format.  True zero is represented by
+        plus or minus sign and all other bits zero.  This format
+        exceeds 370 double precision 8 byte format for both mantissa
+        and exponent range.  This format is used to significantly
+        speed up floating point register to register operations since
+        numbers can be directly transferred to/from 80x87 in this
+        format.  A conversion routine must be used to convert floating
+        point numbers when moved to/from memory to the floating point
+        registers.  The conversion routine is quite efficient but does
+        involve shifting entire number up to 3 bits left or right to
+        convert from normalized base 2 to base 16.  The floating point
+        register memory area can be dumped to see the real format and
+        can be used with address stop to detect specific value or
+        change in value.
+
+  B.  Floating Point Scientific Subroutine Package
+
+    Using floating point 370 instructions plus extended 80x87 function
+    SVC's described in SYSTEM.DOC, a set of efficient scientific
+    subroutines have been coded in SSP.ALC and are stored in the
+    L370.LIB subroutine library.  The argument and result is in F0 or
+    R0 unless noted otherwise.  The SSP functions are similar to the
+    FORTRAN IV intrinsic functions.
+
+    FUNCTION   DESCRIPTION   RANGE LIMITATIONS           NOTES
+
+    ATAN       ARCTAN
+    ALOG       LOG BASE E    0 < F0
+    ALOG10     LOG BASE 10   0 < F0
+    COS        COSINE
+    EXP        E ** X
+    REAL       CVT TO REAL   -2**32 <= R0 < 2**32        ARG. IN R0
+    INT        CVT TO INT    -2**32 <= F0 < 2**32        RESULT IN R0
+    MOD        MOD(F0,F2)                                REMAINDER R0
+    PI         PI            3.14159.............
+    SIN        SINE
+    SQRT       SQUARE ROOT   0 <= F0
+    TAN        TANGENT
+
+  C.  Floating point co-processor assisted standard 370 instructions.
+
+      1.  If the floating point option is on and an 80x87 co-processor
+          is installed, then it is used to assist the CVB and CVD
+          instructions for speed.  In the case of large numbers, the
+          speed improvement can be up to 4 times.  For numbers close
+          to zero, there is no improvement in speed.  Depending on
+          user demand, this type assist may be added for other packed
+          decimal instructions in the future.
+
+*********
+
+Chapter 9.  XA Extended Architecture Support
+
+*********
+
+  1.  A370 supports the XA instructions as defined in the
+      IBM System/370 XA Principles of Operation manual version
+      SA22-7085.
+
+  2.  E370 supports the 6 XA non-privileged instructions
+      BAS, BASR, MVCIN, BASSM, IPM, and BSM.  When the emulator is in
+      31 bit mode, the PSW format displayed by MMDBUG is extended mode
+      with the high address bit on.  The emulator defaults to 24 bit
+      mode and the 370 basic PSW format.
+
+  3.  The standard instructions LA, BAL, BALR, EDMK, and TRT
+      now support both the 24 bit and 31 bit addressing modes
+      as set by BASSM or BSM using the PSW address mode bit.
+      Note that in 31 bit addressing mode the LA instruction
+      adds all 31 bits of the index and base register plus
+      displacement and clears only the high bit of the result.  This
+      means the high byte of the index and base must be cleared when
+      using 24 bit addresses in 31 bit mode.
+
+**********
+
+Chapter 10.  System subroutine library
+
+**********
+
+The following subroutines are included in the default system
+subroutine relocatable library L370.LIB in the root directory:
+
+ #  SUBROUTINE ENTRY   FUNCTION                    ARGUMENTS
+
+ 1  DAT                print date and time         none
+
+ 2  TIMER              return current time         none
+                       of day in R0 in 100th
+                       of a second units
+
+ 3  PET                print elapsed time since    none
+                       last call plus date and
+                       time and 370 instruction
+                       count interval statistics
+
+ 4  DTIME              print time in upper left    none
+                       corner of screen in format
+                       HH:MM:SS
+
+ 5  SYNERROR           print PC/370 input/output   R0 = error code
+                       error message based on      R1 = function code
+                       return codes passed in
+                       registers R0-R1 at entry
+                       to SYNAD DCB exit routine
+
+ 6  SSP                scientific subroutines
+                       (see chapter 8 for entry
+                       points to this module)
+
+ 7  API                support application using
+                       application program interface
+                       (API) with IBM PC 3270
+                       emulation via interrupt 7A
+
+The 370 source code for all of the above modules is in the LIB
+directory, and the BAT\BLDLIB.BAT command file will rebuild library
+from the source.  Remember when adding subroutines to a relocatable
+library that there cannot be any backward references to prior modules
+in the library since L370.EXE uses serial one pass search for external
+references in the library.
+
+**********
+
+Chapter 11.  COBOL call interface support
+
+**********
+
+To call a PC/370 assembler subroutine from a Micro Focus COBOL program
+requires that the PC/370 emulator E370R42.EXE be made resident by
+executing it directly (see BAT\RUNCBL.BAT for demo).  Each subroutine
+to be called must be assembled and linked using option B to create a
+BIN type file which will be dynamically loaded on the first call.
+
+The interface performs the following functions prior to transferring
+control to the assembler subroutine:
+
+  1.  The address space control block at X'104' in the BIN file is
+      initialized to a virtual equals real (V=R) region in order to
+      address the arguments passed.   The ASCASF free memory pointer
+      is initialized to point to the current first free queue element
+      in the common system queue area (SQA) memory allocated along
+      with the resident emulator.   The SQA is used to dynamically
+      allocate buffers for subroutine file I/O and any other dynamic
+      memory requests via GETMAIN/FREEMAIN svc's.  Note that SQA is
+      shared by all subroutines and each subroutine must release any
+      memory it uses prior to exit or SQA will eventually be depleted
+      (just like MVS).
+
+  2.  The segment and offset argument addresses on the stack are
+      converted into a standard 370 calling list of 32 bit absolute
+      addresses located at X'80' in the BIN file (normally the command
+      line area).  Up to 32 arguments can be passed.
+
+  3.  The 370 registers are set as follows:
+
+        R1 = absolute address of argument list at X'80' in BIN file
+
+        R14 = absolute return address to exit subroutine at X'102' in
+        BIN file via detach SVC.
+
+        R15 = absolute address of entry point (normally X'210' in BIN
+        file.   At exit from called BIN module, the low 16 bits of
+        register 15 are used to set special Micro Focus COBOL return
+        code value called RETURN-CODE.  If emulator is not resident
+        when a BIN module is called, a return code of 16 is passed.
+
+  4.  If option D was specified in the L370 link of the BIN module
+      being called, the emulator interactive debug facility will be
+      invoked at entry with all traces restored.  If option D was
+      not specified, execution will proceed without interruption and
+      no traces will be restored to provide fast execution of one or
+      more BIN modules.
+
+  5.  Note that BIN modules are dynamically loaded by COBOL run time
+      system at unknown addresses.  Since BIN subroutines run in
+      V=R address mode in order to address COBOL data areas, all 370
+      subroutine code must be self relocating.  See CBL\TESTCIO.ALC
+      for example of how to relocate any address constants required
+      such as subroutine entry points and DCB addresses.  The A370
+      assembler lists all relocation addresses in PRN listing created
+      with the /L option.
+
+**********
+
+Chapter 12.  Technical References:
+
+**********
+
+   1.  For information on 370 machine instructions see
+       IBM System 370 XA Principles of Operation manual SA22-7085.
+   2.  For information on 370 assembler language see:
+       a.  IBM OS/VS Assembler Language manual GC33-4010.
+       b.  Assembler Language Programming by G. W. Struble.
+   3.  For information on how the assembler, linkage editor, and
+       operating system software works see:
+       a.  Systems Programming by John J. Donovan.
+       b.  Operating Systems by S. E. Madnick and J. J. Donovan.
+   4.  For information on the 80x86 processors see:
+       a.  The 8086 Book by George Alexy.
+       b.  Intel iAPX 286 Programmer's Reference Manual 210498-003.
+       c.  Intel 80386 Programmer's Reference Manual 230985-001.
+   5.  For information on the MSDOS operating system and utilities
+       see:
+       a.  Disk Operating System Version 3.2 Reference 68X2405.
+       b.  Disk Operating System Technical Reference 6139658.
+       c.  Advanced MS-DOS by Microsoft Press ISBN 0-914845-77-2
+   6.  For information on usage of ASSIST extensions see:
+       a.  Assembler Language with Assist by Ross A. Overbeek and W.
+           E. Singletary.  Published by Science Research Associates,
+           Inc., Chicago, Copyright 1976, ISBN 0-574-21085-7.
+       b.  IBM 370 Assembly Language with ASSIST, Structured Concepts,
+           and Advanced Topics by Charles J. Kacmar.  Published by
+           Prentice Hall, September 1987, ISBN 0-13-455742-5.
+   7.  For summary article on how PC/370 was developed see ACM
+       Sigsmall Newsletter Volume 8 Number 3, August 1982.
+   8.  For article on conversion of PC/370 from CP/M to MS-DOS see
+       ACM SIGSMALL/PC Newsletter Volume 11 Number 3, August 1985.
+   9.  For information on 80x87 see Intel iAPX 286 Programmer's
+       Reference Manual #210498-003.  Also book by designer titled,
+       "The 8087 Primer" by John F. Palmer and Stephen P. Morse,
+       published by John Wiley & Sons, inc. Copyright 1984, ISBN 0-
+       471-87569-4.

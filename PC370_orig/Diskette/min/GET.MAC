@@ -1,0 +1,18 @@
+GET	 MACRO DCB?,0
+	 AIF   /&LABEL$$=/ .GO
+&LABEL$$ EQU   *
+.GO	 AIF   &1=(.REG
+	 LA    2,&1
+	 AGO   .AREA
+.REG	 AIF   &1=(2).AREA
+	 LR    2,&1
+.AREA	 AIF   &2=(.REG2
+	 LA    1,&2
+	 AGO   .SVC
+.REG2	 AIF   &2=(1).SVC
+	 LR    1,&2
+.SVC	 SVC   5
+	 AIF   '&2'#'0'.END
+	 L     1,28(0,2)
+.END	 ANOP
+

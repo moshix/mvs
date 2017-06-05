@@ -1,0 +1,165 @@
+         PRINT NOGEN                                                   
+****************************************************************
+*        FILENAME:  TRANSCR1.MLC                               *
+*        AUTHOR  :  Bill Qualls                                *
+*        SYSTEM  :  Compaq 286LTE, PC/370 R4.2                 *
+*        REMARKS :  Reformat grade file so it can be sorted    *
+*                   properly so as to produce transcripts.     *
+****************************************************************
+         START 0                                                       
+         REGS
+BEGIN    BEGIN
+         WTO   'TRANSCR1 ... Begin execution'
+         BAL   R10,SETUP
+MAIN     EQU   *
+         CLI   EOFGRADE,C'Y'
+         BE    EOJ
+         BAL   R10,PROCESS
+         B     MAIN
+EOJ      EQU   *
+         BAL   R10,WRAPUP
+         WTO   'TRANSCR1 ... Normal end of program'
+RETURN   EQU   *
+         RETURN
+****************************************************************
+*        SETUP - Those things which happen one time only,      *
+*                before any records are processed.             *
+****************************************************************
+SETUP    EQU   *
+         ST    R10,SVSETUP
+         OI    GRADEIN+10,X'08'   PC/370 ONLY - Convert all
+*                                 input from ASCII to EBCDIC
+         OI    GRADEOUT+10,X'08'  PC/370 ONLY - Convert all
+*                                 output from EBCDIC to ASCII
+         OPEN  GRADEIN
+         OPEN  GRADEOUT
+         BAL   R10,READGRAD       Priming read - GRADEIN
+         L     R10,SVSETUP
+         BR    R10
+****************************************************************
+*        PROCESS - Those things which happen once per record.  *
+****************************************************************
+PROCESS  EQU   * 
+         ST    R10,SVPROC
+         BAL   R10,FORMAT
+         BAL   R10,WRITE
+         BAL   R10,READGRAD
+PROCESSX EQU   *          
+         L     R10,SVPROC
+         BR    R10
+****************************************************************
+*        FORMAT - Format a single record, with sort key.       *
+****************************************************************
+*        Copy the entire record, with sort key appended.       *
+*        Sort key consists of student ID, year portion of      *
+*        semester, '1' for (W)inter or '2' for (F)all, and     *
+*        the course ID. This appended sort key is used to      *
+*        overcome limitations of DOS' SORT command, which      *
+*        allows a single sort field only. The recoding of      *
+*        the semester was done so Fall classes will come       *
+*        after winter classes. For example, semester 'W92'     *
+*        becomes '921', while semester 'F92' becomes '922'.    *
+****************************************************************
+FORMAT   EQU   *
+         ST    R10,SVFORMAT
+         MVC   SORTDATA,GREC     
+         MVC   SORTSID,GSID  
+         MVC   SORTSEM(2),GSEM+1 
+         CLI   GSEM,C'F'     
+         BNE   FORMAT2       
+         MVI   SORTSEM+2,C'2'  
+         B     FORMAT3
+FORMAT2  EQU   *
+         MVI   SORTSEM+2,C'1'
+FORMAT3  EQU   *
+         MVC   SORTCID,GCID
+         MVC   SORTCRLF,WCRLF
+FORMATX  EQU   *
+         L     R10,SVFORMAT
+         BR    R10
+****************************************************************
+*        READGRAD - Read a Grade record.                       *
+****************************************************************
+READGRAD EQU   *
+         ST    R10,SVREADG
+         GET   GRADEIN,GREC
+         B     READGX
+ATENDGRA EQU   *
+         MVI   EOFGRADE,C'Y'
+READGX   EQU   *
+         L     R10,SVREADG
+         BR    R10
+****************************************************************
+*        WRITE - Write a single output record.                 *
+****************************************************************
+WRITE    EQU   *
+         ST    R10,SVWRITE
+         PUT   GRADEOUT,SORTREC
+         AP    #OUT,=P'1'
+         L     R10,SVWRITE
+         BR    R10
+****************************************************************
+*        WRAPUP - Those things which happen one time only,     *
+*                 after all records have been processed.       *
+****************************************************************
+WRAPUP   EQU   *
+         ST    R10,SVWRAP
+         CLOSE GRADEIN
+         CLOSE GRADEOUT
+         ED    MSG#OUT,#OUT
+         WTO   MSG
+         L     R10,SVWRAP
+         BR    R10
+****************************************************************
+*        Literals, if any, will go here                        *
+****************************************************************
+         LTORG
+****************************************************************
+*        File definitions                                      *
+*        Note: $$$ is common DOS extension for temporary file  *
+****************************************************************
+GRADEIN  DCB   LRECL=15,RECFM=F,MACRF=G,EODAD=ATENDGRA,
+               DDNAME='GRADE.DAT'  
+GRADEOUT DCB   LRECL=26,RECFM=F,MACRF=P,
+               DDNAME='GRADE.$$$'  
+****************************************************************
+*        RETURN ADDRESSES                                      *
+****************************************************************
+SVSETUP  DC    F'0'               SETUP
+SVPROC   DC    F'0'               PROCESS
+SVREADG  DC    F'0'               READCOUR
+SVWRITE  DC    F'0'               WRITE
+SVWRAP   DC    F'0'               WRAPUP
+SVFORMAT DC    F'0'               FORMAT
+****************************************************************
+*        Miscellaneous field definitions                       *
+****************************************************************
+WCRLF    DC    X'0D25'            PC/370 ONLY - EBCDIC CR/LF
+EOFGRADE DC    CL1'N'             End of grades file? (Y/N)
+#OUT     DC    PL2'0'
+MSG      DS    0CL43
+         DC    CL12'TRANSCR1 ...'
+MSG#OUT  DC    XL4'40202120'
+         DC    CL27' grade records reformatted.'
+****************************************************************
+*        Input record definition - Grade                       *
+****************************************************************
+GREC     DS    0CL15      1-15    Grade record
+GSID     DS    CL3        1- 3    Student ID nbr
+GSEM     DS    CL3        4- 6    Semester    
+GCID     DS    CL5        7-11    Course ID nbr  
+GSECT    DS    CL1       12-12    Section number
+GGRADE   DS    CL1       13-13    Grade earned 
+GGCRLF   DS    CL2       14-15    PC/370 only - CR/LF
+****************************************************************
+*        Output record definition - Grade w/ sort key          *
+****************************************************************
+SORTREC  DS    0CL26      1-26    Sort record
+SORTDATA DS    CL13       1-13    Grade record (without CRLF)
+SORTKEY  DS    0CL11     14-24    Sort key, including:
+SORTSID  DS    CL3       14-16    Student ID nbr
+SORTSEM  DS    CL3       17-19    Semester (recoded)
+SORTCID  DS    CL5       20-24    Course ID nbr  
+SORTCRLF DS    CL2       25-26    PC/370 only - CR/LF
+         END   BEGIN                                                   
+

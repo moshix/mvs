@@ -1,0 +1,316 @@
+         PRINT NOGEN                                                   
+****************************************************************
+*        FILENAME:  TEACH11A.MLC                               *
+*        AUTHOR  :  Bill Qualls                                *
+*        SYSTEM  :  Compaq 286LTE, PC/370 R4.2                 *
+*        REMARKS :  Produce list of F92 teaching assignments.  *
+*                   This program illustrates matching logic.   *
+****************************************************************
+         START 0                                                       
+         REGS
+BEGIN    BEGIN
+         WTO   'TEACH11A ... Begin execution'
+         BAL   R10,SETUP
+MAIN     EQU   *
+         CLI   EOFTEACH,C'Y'
+         BE    EOJ
+         CLI   EOFOFFER,C'Y'
+         BE    EOJ
+         BAL   R10,PROCESS
+         B     MAIN
+EOJ      EQU   *
+         BAL   R10,WRAPUP
+         WTO   'TEACH11A ... Normal end of program'
+         RETURN
+****************************************************************
+*        SETUP - Those things which happen one time only,      *
+*                before any records are processed.             *
+****************************************************************
+SETUP    EQU   *
+         ST    R10,SVSETUP
+         OI    TEACHERS+10,X'08'  PC/370 ONLY - Convert all
+*                                 input from ASCII to EBCDIC
+         OI    OFFER+10,X'08'     PC/370 ONLY - Convert all
+*                                 input from ASCII to EBCDIC
+         OI    REPORT+10,X'08'    PC/370 ONLY - Convert all
+*                                 output from EBCDIC to ASCII
+         OPEN  TEACHERS         
+         OPEN  OFFER                                           
+         OPEN  REPORT
+         BAL   R10,READTCH
+         BAL   R10,READOFF
+         L     R10,SVSETUP
+         BR    R10
+****************************************************************
+*        HDGS - Print headings.                                *
+****************************************************************
+HDGS     EQU   *
+         ST    R10,SVHDGS
+         AP    PGS,=P'1'          Add 1 to page count
+         MVC   HDPGS,=X'40202120' Edit pattern for page count
+         ED    HDPGS,PGS          Move page count to heading
+         PUT   REPORT,FORMFEED    PC/370 ONLY
+         PUT   REPORT,HD1
+         PUT   REPORT,HD2
+         PUT   REPORT,HD3
+         PUT   REPORT,HD4
+         ZAP   LNS,=P'0'          Reset line count to zero
+         L     R10,SVHDGS
+         BR    R10
+****************************************************************
+*        PROCESS - Those things which happen once per record.  *
+****************************************************************
+PROCESS  EQU   * 
+         ST    R10,SVPROC
+         CLC   TTID,OTID          Attempt match on teacher ID
+         BH    PROC2              Offerings low
+         BL    PROC3              Teacher low
+         BAL   R10,MATCH          Otherwise a match was found
+         B     PROCESSX           
+PROC2    EQU   *                  No teacher for this offering
+         BAL   R10,OFFERLOW       
+         B     PROCESSX
+PROC3    EQU   *                  No offerings for this teacher
+         BAL   R10,TEACHLOW
+PROCESSX EQU   *
+         L     R10,SVPROC
+         BR    R10
+****************************************************************
+*        TEACHLOW - No courses for this teacher.               *
+*                   This is NOT an error condition.            *
+*                   Just skip this teacher and go to next.     *
+****************************************************************
+TEACHLOW EQU   * 
+         ST    R10,SVTCHLOW
+         BAL   R10,READTCH        Read next teacher record
+         L     R10,SVTCHLOW
+         BR    R10
+****************************************************************
+*        MATCH - Course offering with teacher.                 *
+****************************************************************
+MATCH    EQU   * 
+         ST    R10,SVMATCH
+         MVC   HOLDTID,TTID       Current teacher
+         MVC   HOLDNAME,TTNAME    
+         BAL   R10,DOTHIS1        Do this one (teacher)
+         BAL   R10,READTCH        Read next teacher record
+         L     R10,SVMATCH
+         BR    R10
+****************************************************************
+*        OFFERLOW - Course offering without matching teacher   *
+****************************************************************
+OFFERLOW EQU   * 
+         ST    R10,SVOFFLOW
+         MVC   HOLDTID,OTID       Current teacher
+         MVC   HOLDNAME,=CL15'Unknown'
+         BAL   R10,DOTHIS1        Do this one (teacher)
+         L     R10,SVOFFLOW
+         BR    R10
+****************************************************************
+*        DOTHIS1 - Do this one (teacher)                       *
+****************************************************************
+DOTHIS1  EQU   * 
+         ST    R10,SVTHIS1
+         MVC   RREC,BLANKS  
+         MVC   RTID,HOLDTID       First line for each teacher   
+         MVC   RTNAME,HOLDNAME     will show ID and name
+DOTHIS2  EQU   *                  This loop for each offering
+         BAL   R10,CHKLNS          for this teacher...
+         CP    LNS,=P'0'
+         BNE   DOTHIS3
+         MVC   RTID,HOLDTID       Also shown on first line
+         MVC   RTNAME,HOLDNAME     of each page
+DOTHIS3  EQU   *
+         MVC   RCID,OCID        
+         MVC   RSECT,OSECT 
+         MVC   RROOM,OROOM
+         BAL   R10,WRITE
+         MVC   RREC,BLANKS  
+         BAL   R10,READOFF        Read next offerings record
+         CLI   EOFOFFER,C'Y'      If EOF then done
+         BE    DOTHIS4
+         CLC   HOLDTID,OTID       Still the same teacher?
+         BE    DOTHIS2             Yes, continue this one
+DOTHIS4  EQU   *
+         MVC   RREC,BLANKS        Blank line between teachers
+         BAL   R10,WRITE
+         L     R10,SVTHIS1
+         BR    R10
+****************************************************************
+*        READTCH - Read a teacher record.                      *
+****************************************************************
+READTCH  EQU   *
+         ST    R10,SVREADT
+         GET   TEACHERS,TREC      Read a single teacher record
+         B     READTX
+ATENDTCH EQU   *
+         MVI   EOFTEACH,C'Y'
+READTX   EQU   *
+         L     R10,SVREADT
+         BR    R10
+****************************************************************
+*        READOFF - Read a course offerings record.             *
+****************************************************************
+READOFF  EQU   *
+         ST    R10,SVREADO
+         GET   OFFER,OREC         Read a single offerings record
+         CLC   OSEM,=CL3'F92'     Process F92 records only
+         BNE   READOFF
+         B     READOX
+ATENDOFF EQU   *
+         MVI   EOFOFFER,C'Y'
+READOX   EQU   *
+         L     R10,SVREADO
+         BR    R10
+****************************************************************
+*        CHKLNS - Check lines printed. Full page?              *
+****************************************************************
+CHKLNS   EQU   *
+         ST    R10,SVCHKLNS
+         CP    LNS,MAXLNS
+         BL    CHKLNSX
+         BAL   R10,HDGS
+CHKLNSX  EQU   *
+         L     R10,SVCHKLNS
+         BR    R10
+****************************************************************
+*        WRITE - Write a single detail line.                   *
+****************************************************************
+WRITE    EQU   *
+         ST    R10,SVWRITE
+         PUT   REPORT,RREC        Write report line
+         AP    LNS,=P'1'
+         L     R10,SVWRITE
+         BR    R10
+****************************************************************
+*        WRAPUP - Those things which happen one time only,     *
+*                 after all records have been processed.       *
+****************************************************************
+WRAPUP   EQU   *
+         ST    R10,SVWRAP
+*                                 At this point we know that
+*                                 at least one of the input
+*                                 files is at EOF. Process
+*                                 other file as "unmatched"
+*                                 until at EOF also.
+WRAPUP2  EQU   *
+         CLI   EOFOFFER,C'Y'
+         BE    WRAPUP3
+         BAL   R10,OFFERLOW
+         B     WRAPUP2
+WRAPUP3  EQU   *
+         CLI   EOFTEACH,C'Y'
+         BE    WRAPUP4
+         BAL   R10,TEACHLOW
+         B     WRAPUP3
+WRAPUP4  EQU   *
+         CLOSE TEACHERS
+         CLOSE OFFER
+         CLOSE REPORT
+         WTO   'TEACH11A ... Teacher list on REPORT.TXT'
+         L     R10,SVWRAP
+         BR    R10
+****************************************************************
+*        Literals, if any, will go here                        *
+****************************************************************
+         LTORG
+****************************************************************
+*        File definitions                                      *
+****************************************************************
+TEACHERS DCB   LRECL=29,RECFM=F,MACRF=G,EODAD=ATENDTCH,
+               DDNAME='TEACHER.SRT'  
+OFFER    DCB   LRECL=18,RECFM=F,MACRF=G,EODAD=ATENDOFF,
+               DDNAME='OFFER.SRT'  
+REPORT   DCB   LRECL=62,RECFM=F,MACRF=P,
+               DDNAME='REPORT.TXT'      
+****************************************************************
+*        RETURN ADDRESSES                                      *
+****************************************************************
+SVSETUP  DC    F'0'               SETUP
+SVHDGS   DC    F'0'               HDGS
+SVPROC   DC    F'0'               PROCESS
+SVREADT  DC    F'0'               READTCH
+SVREADO  DC    F'0'               READOFF
+SVWRITE  DC    F'0'               WRITE
+SVWRAP   DC    F'0'               WRAPUP
+SVCHKLNS DC    F'0'               CHKLNS
+SVMATCH  DC    F'0'               MATCH
+SVOFFLOW DC    F'0'               OFFERLOW
+SVTCHLOW DC    F'0'               TEACHLOW
+SVTHIS1  DC    F'0'               DOTHIS1
+****************************************************************
+*        Miscellaneous field definitions                       *
+****************************************************************
+WCRLF    DC    X'0D25'            PC/370 ONLY - EBCDIC CR/LF
+EOFTEACH DC    CL1'N'             End of teacher file? (Y/N)
+EOFOFFER DC    CL1'N'             End of offerings file? (Y/N)
+PGS      DC    PL2'0'             Nbr of pages printed.
+LNS      DC    PL2'6'             Lines printed on this page.
+MAXLNS   DC    PL2'6'             Max nbr lines per page.
+*                                 My line counts exclude hdgs.
+BLANKS   DS    0CL62
+         DC    CL60' ',XL2'0D25'
+HOLDTID  DC    CL3' '             Hold (current) teacher ID
+HOLDNAME DC    CL15' '            Hold (current) teacher name
+****************************************************************
+*        Input record definition - Teacher                     *
+****************************************************************
+TREC     DS    0CL29      1-29    Teacher record
+TTID     DS    CL3        1- 3    Teacher ID nbr
+TTNAME   DS    CL15       4-18    Teacher name
+TTDEG    DS    CL4       19-22    Highest degree
+TTTEN    DS    CL1       23-23    Tenured?
+TTPHONE  DS    CL4       24-27    Phone nbr
+TTCRLF   DS    CL2       28-29    PC/370 only - CR/LF
+****************************************************************
+*        Input record definition - Offerings                   *
+****************************************************************
+OREC     DS    0CL18      1-18    Offerings record
+OSEM     DS    CL3        1- 3    Semester      
+OCID     DS    CL5        4- 8    Course ID   
+OSECT    DS    CL1        9- 9    Section number
+OTID     DS    CL3       10-12    Teacher ID 
+OROOM    DS    CL4       13-16    Room number
+OOCRLF   DS    CL2       17-18    PC/370 only - CR/LF
+****************************************************************
+*        Report (line) definition                              *
+****************************************************************
+RREC     DS    0CL62      1-62    Report record
+RTID     DS    CL3        1- 3    Teacher ID nbr
+         DC    CL2' '     4- 5
+RTNAME   DS    CL15       6-20    Teacher name
+         DC    CL3' '    21-23
+RCID     DS    CL5       24-28    Course ID
+         DC    CL6' '    29-34
+RSECT    DS    CL1       35-35    Section number
+         DC    CL5' '    36-40
+RROOM    DS    CL4       41-44    Room number
+         DC    CL16' '   45-60
+RCRLF    DS    CL2       61-62    PC/370 only - CR/LF
+****************************************************************
+*        Headings definitions                                  *
+****************************************************************
+FORMFEED DS    0CL62              PC/370 only
+*        DC    X'0C'              EBCDIC formfeed
+*        DC    CL59' '
+         DC    60C'_'             For testing...
+         DC    X'0D25'            EBCDIC CR/LF
+HD1      DS    0CL62
+         DC    CL40'          F92 Teaching Assignments      '
+         DC    CL4'Page'
+HDPGS    DC    CL4'BZZ9'
+         DC    CL12' '
+         DC    XL2'0D25'
+HD2      DS    0CL62
+         DC    CL60' '
+         DC    XL2'0D25'
+HD3      DS    0CL62
+         DC    CL40'TID       Name         Course  Section  '
+         DC    CL20'Room'
+         DC    XL2'0D25'
+HD4      DS    0CL62
+         DC    CL40'---  ---------------   ------  -------  '
+         DC    CL20'----'
+         DC    XL2'0D25'
+         END   BEGIN                                                   
+

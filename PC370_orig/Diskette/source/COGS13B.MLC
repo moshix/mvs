@@ -1,0 +1,221 @@
+         PRINT NOGEN                                                   
+****************************************************************
+*        FILENAME:  COGS13B.ML                                 *
+*        AUTHOR  :  Bill Qualls                                *
+*        SYSTEM  :  Compaq 286LTE, PC/370 R4.2                 *
+*        REMARKS :  Produce report for COGSWORTH INDUSTRIES    *
+*                   California's contribution to sales.        *
+****************************************************************
+         START 0                                                       
+         REGS
+BEGIN    BEGIN
+         WTO   'COGS13B ... Begin execution'
+         BAL   R10,SETUP
+MAIN     EQU   *
+         CLI   EOFSW,C'Y'
+         BE    EOJ
+         BAL   R10,PROCESS
+         B     MAIN
+EOJ      EQU   *
+         BAL   R10,WRAPUP
+         WTO   'COGS13B ... Normal end of program'
+         RETURN
+****************************************************************
+*        SETUP - Those things which happen one time only,      *
+*                before any records are processed.             *
+****************************************************************
+SETUP    EQU   *
+         ST    R10,SVSETUP
+         OI    INVENTRY+10,X'08'  PC/370 ONLY - Convert all
+*                                 input from ASCII to EBCDIC
+         OI    REPORT+10,X'08'    PC/370 ONLY - Convert all
+*                                 output from EBCDIC to ASCII
+         OPEN  INVENTRY
+         OPEN  REPORT
+         BAL   R10,HDGS
+         BAL   R10,READ
+         L     R10,SVSETUP
+         BR    R10
+****************************************************************
+*        HDGS - Print headings.                                *
+****************************************************************
+HDGS     EQU   *
+         ST    R10,SVHDGS
+         PUT   REPORT,HD1
+         PUT   REPORT,HD2
+         PUT   REPORT,HD3
+         PUT   REPORT,HD4
+         PUT   REPORT,HD5
+         PUT   REPORT,HD6
+         L     R10,SVHDGS
+         BR    R10
+****************************************************************
+*        PROCESS - Those things which happen once per record.  *
+****************************************************************
+PROCESS  EQU   * 
+         ST    R10,SVPROC
+         BAL   R10,FORMAT
+         BAL   R10,WRITE
+         BAL   R10,READ
+         L     R10,SVPROC
+         BR    R10
+****************************************************************
+*        FORMAT - Format a single detail line.                 *
+****************************************************************
+FORMAT   EQU   *
+         ST    R10,SVFORM
+         MVC   OREC,BLANKS
+         MVC   ODESC,IDESC
+         PACK  WCALIF,ICALIF      Each product's sales must
+         PACK  WILL,IILL           be packed so they can be 
+         PACK  WUTAH,IUTAH          added to total for this
+         PACK  WWISC,IWISC           product...
+         ZAP   WTOTAL,=P'0'       Initialize the total to zero
+         AP    WTOTAL,WCALIF       and start adding...
+         AP    WTOTAL,WILL
+         AP    WTOTAL,WUTAH
+         AP    WTOTAL,WWISC
+         AP    TTOTAL,WTOTAL      Grand total nationwide
+         AP    TCALIF,WCALIF      Grand total for Calif
+         MVC   OTOTAL,=X'40202120'
+         ED    OTOTAL,WTOTAL
+         MVC   OCALIF,=X'40202120'
+         ED    OCALIF,WCALIF
+         ZAP   DIVIDEND,WCALIF
+         ZAP   DIVISOR,WTOTAL
+         SRP   DIVIDEND,3,0
+         DP    DIVIDEND,DIVISOR
+         SRP   QUOTIENT,64-1,5
+         ZAP   PK2,QUOTIENT
+         MVC   OPCT,=X'40202120'
+         ED    OPCT,PK2
+         MVI   OPCT+L'OPCT,PERCENT
+         MVC   OCRLF,WCRLF        PC/370 only.
+         L     R10,SVFORM
+         BR    R10
+****************************************************************
+*        READ - Read a record.                                 *
+****************************************************************
+READ     EQU   *
+         ST    R10,SVREAD
+         GET   INVENTRY,IREC      Read a single product record
+         B     READX
+ATEND    EQU   *
+         MVI   EOFSW,C'Y'
+READX    EQU   *
+         L     R10,SVREAD
+         BR    R10
+****************************************************************
+*        WRITE - Write a single detail line.                   *
+****************************************************************
+WRITE    EQU   *
+         ST    R10,SVWRITE
+         PUT   REPORT,OREC        Write report line
+         L     R10,SVWRITE
+         BR    R10
+****************************************************************
+*        WRAPUP - Those things which happen one time only,     *
+*                 after all records have been processed.       *
+****************************************************************
+WRAPUP   EQU   *
+         ST    R10,SVWRAP
+         PUT   REPORT,HD6
+         MVC   OREC,BLANKS
+         MVC   ODESC(6),=C'TOTALS'
+         MVC   OTOTAL,=X'40202120'
+         ED    OTOTAL,TTOTAL
+         MVC   OCALIF,=X'40202120'
+         ED    OCALIF,TCALIF
+         ZAP   DIVIDEND,TCALIF
+         ZAP   DIVISOR,TTOTAL
+         SRP   DIVIDEND,3,0
+         DP    DIVIDEND,DIVISOR
+         SRP   QUOTIENT,64-1,5
+         ZAP   PK2,QUOTIENT
+         MVC   OPCT,=X'40202120'
+         ED    OPCT,PK2
+         MVI   OPCT+L'OPCT,PERCENT
+         MVC   OCRLF,WCRLF        PC/370 only.
+         BAL   R10,WRITE
+         CLOSE INVENTRY
+         CLOSE REPORT
+         WTO   'COGS13B ... Sales report on REPORT.TXT'
+         L     R10,SVWRAP
+         BR    R10
+****************************************************************
+*        Literals, if any, will go here                        *
+****************************************************************
+         LTORG
+****************************************************************
+*        File definitions                                      *
+****************************************************************
+INVENTRY DCB   LRECL=41,RECFM=F,MACRF=G,EODAD=ATEND,
+               DDNAME='COGS.DAT'  
+REPORT   DCB   LRECL=62,RECFM=F,MACRF=P,
+               DDNAME='REPORT.TXT'      
+****************************************************************
+*        RETURN ADDRESSES                                      *
+****************************************************************
+SVSETUP  DC    F'0'               SETUP
+SVHDGS   DC    F'0'               HDGS
+SVPROC   DC    F'0'               PROCESS
+SVREAD   DC    F'0'               READ
+SVFORM   DC    F'0'               FORMAT
+SVWRITE  DC    F'0'               WRITE
+SVWRAP   DC    F'0'               WRAPUP
+****************************************************************
+*        Miscellaneous field definitions                       *
+****************************************************************
+WCRLF    DC    X'0D25'            PC/370 ONLY - EBCDIC CR/LF
+EOFSW    DC    CL1'N'             End of file? (Y/N)
+BLANKS   DC    CL62' '
+WCALIF   DC    PL2'0'             Units sold in Calif
+WILL     DC    PL2'0'             Units sold in Illinois
+WUTAH    DC    PL2'0'             Units sold in Utah
+WWISC    DC    PL2'0'             Units sold in Wisconsin
+WTOTAL   DC    PL2'0'             Units sold in all states
+TCALIF   DC    PL2'0'             Grand total for Calif
+TTOTAL   DC    PL2'0'             Grand total nationwide
+PK2      DC    PL2'0'          
+PERCENT  EQU   C'%'
+         COPY  DIVISION
+         COPY  COGS
+****************************************************************
+*        Output (line) definition                              *
+****************************************************************
+OREC     DS    0CL62        1-62      
+ODESC    DS    CL10         1-10  Product description
+         DS    CL7         11-17
+OTOTAL   DS    CL4         18-21  Units sold Nationwide
+         DS    CL9         22-30
+OCALIF   DS    CL4         31-34  Units sold in Calif   
+         DS    CL8         35-42
+OPCT     DS    CL4         43-46  Percent sales from Calif
+         DS    CL14        47-60
+OCRLF    DS    CL2         61-62  PC/370 only - CR/LF
+****************************************************************
+*        Headings definitions                                  *
+****************************************************************
+HD1      DS    0CL62
+         DC    CL60'              COGSWORTH INDUSTRIES      '
+         DC    XL2'0D25'
+HD2      DS    0CL62
+         DC    CL60'       California''s Contribution to Sales'
+         DC    XL2'0D25'
+HD3      DS    0CL62
+         DC    CL60' '
+         DC    XL2'0D25'
+HD4      DS    0CL62
+         DC    CL40'              Nationwide   California   '
+         DC    CL20'Percent of'
+         DC    XL2'0D25'
+HD5      DS    0CL62
+         DC    CL40' Product         Sales        Sales     '
+         DC    CL20' National '
+         DC    XL2'0D25'
+HD6      DS    0CL62
+         DC    CL40'----------    ----------   ----------   '
+         DC    CL20'----------'
+         DC    XL2'0D25'
+         END   BEGIN                                                   
+

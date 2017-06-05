@@ -1,0 +1,16 @@
+STUFF7A  BEGIN
+         PACK  R,N
+         AP    R,Q
+         CP    M,R
+         BE    S
+         SP    Q,R
+S        EQU   *
+         RETURN
+         LTORG
+M        DC       PL2'116'
+N        DC       CL3'123'
+Q        DC       PL2'-7'
+R        DC       PL4'5'
+         END
+
+

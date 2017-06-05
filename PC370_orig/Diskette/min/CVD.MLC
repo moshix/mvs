@@ -1,0 +1,15 @@
+         PRINT NOGEN
+BEGIN    BEGIN
+         REGS
+         LH    R3,FIVE
+         AH    R3,THREE
+         CVD   R3,DBL
+         ED    RESULT,DBL+6
+         WTO   RESULT
+         RETURN
+         LTORG
+FIVE     DC    H'5'
+THREE    DC    H'3'
+RESULT   DC    X'40202120'
+DBL      DC    D'0'
+         END   BEGIN

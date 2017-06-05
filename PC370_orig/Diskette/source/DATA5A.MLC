@@ -1,0 +1,22 @@
+         PRINT NOGEN
+         START 0
+BEGIN    BEGIN
+         MVI   LETTER,W
+         WTO   MESSAGE
+         MVI   LETTER,X
+         WTO   MESSAGE
+         MVI   LETTER,Y
+         WTO   MESSAGE
+         MVI   LETTER,Z
+         WTO   MESSAGE
+         RETURN
+MESSAGE  DS    0CL24
+         DC    CL22'DATA5A ... Letter is <'
+LETTER   DC    CL1' '
+         DC    CL1'>'
+W        EQU   C'A'
+X        EQU   X'C1'
+Y        EQU   B'11000001'
+Z        EQU   193
+         END   BEGIN
+   

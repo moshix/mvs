@@ -1,0 +1,15 @@
+         START 0
+BEGIN    BEGIN
+* ---------------------------
+*   S0C7.MLC BY BILL QUALLS
+*   USING PC/370 V4.2
+*   FORCE DECIMAL EXCEPTION 
+* ---------------------------
+         AP    SUM,ONE
+         AP    SUM,TWO
+         RETURN            
+SUM      DC    PL2'0'
+ONE      DC    PL1'1'
+TWO      DS    PL1'2' (Error)
+         END            
+

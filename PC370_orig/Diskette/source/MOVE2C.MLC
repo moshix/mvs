@@ -1,0 +1,32 @@
+         PRINT NOGEN
+****************************************************************
+*        FILENAME:  MOVE2C.MLC                                 *
+*        AUTHOR  :  Bill Qualls                                *
+*        SYSTEM  :  Compaq 286LTE, PC/370 R4.2                 *
+*        REMARKS :  Demonstrate character moves.               *
+****************************************************************
+         START 0
+BEGIN    BEGIN
+         WTO   IPHONE
+         MVC   OPFX,IPFX
+         MVI   OHYPHEN,C'-'
+         MVC   OLINE,ILINE
+         WTO   OPHONE
+         RETURN
+*
+*        Literals, if any, will go here
+*
+         LTORG
+*
+*        Other field definitions
+*
+IPHONE   DS    0CL7
+IPFX     DC    CL3'555'
+ILINE    DC    CL4'1212'
+*
+OPHONE   DS    0CL8
+OPFX     DS    CL3
+OHYPHEN  DS    CL1
+OLINE    DS    CL4
+         END   BEGIN
+

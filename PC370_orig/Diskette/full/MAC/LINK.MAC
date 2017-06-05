@@ -1,0 +1,28 @@
+LINK	 MACRO EP=?
+	 AIF   /&LABEL$$=/ .GO
+&LABEL$$ EQU   *
+.GO	 AIF   &EP=?.EPLOC
+	 AIF   &EP='.EPLIT
+	 LA    1,=C'&EP..COM'
+	 AGO   .SVC
+.EPLIT	 LA    1,=C&EP
+	 AGO   .SVC
+.EPLOC	 AIF   &EPLOC=(.EPREG
+	 LA    1,&EPLOC
+	 AGO   .SVC
+.EPREG	 AIF   &EPLOC=(1).SVC
+	 LR    1,&EPLOC
+.SVC	 SVC   25
+	 LTR   15,15
+	 BZ    *+34
+	 SVC   9
+	 DC    C'BUG MODULE NOT FOUND'
+	 DC    8X'00'
+	 STM   0,1,*-8
+	 LR    15,0
+	 LA    15,X'0210'(0,15)
+	 BALR  14,15
+	 L     2,*-20
+	 L     1,*-20
+	 SVC   11
+

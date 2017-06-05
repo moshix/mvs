@@ -1,0 +1,21 @@
+STUFF6A  BEGIN
+         CLC   A,B
+         BL    D
+         MVC   C,B
+         MVI   E,C'1'
+         B     F
+D        EQU   *
+         CLI   B,C'D'
+         BE    F
+         MVC   C,A
+         MVI   E,C'9'
+F        EQU   *
+         RETURN
+A        DC    CL3'AB'
+B        DC    CL4'CDEF'
+C        DS    CL2
+E        DC    CL1'*'
+         END
+
+
+

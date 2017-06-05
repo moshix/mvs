@@ -1,0 +1,107 @@
+         PRINT NOGEN                                                   
+****************************************************************
+*        FILENAME:  TEACH3A.MLC                                *
+*        AUTHOR  :  Bill Qualls                                *
+*        SYSTEM  :  Compaq 286LTE, PC/370 R4.2                 *
+*        REMARKS :  Produce a list of tenured instructors.     *
+****************************************************************
+         START 0                                                       
+         REGS
+BEGIN    BEGIN
+         WTO   'TEACH3A ... Begin execution'
+         OI    TEACHERS+10,X'08'  PC/370 ONLY - Convert all
+*                                 input from ASCII to EBCDIC
+         OI    REPORT+10,X'08'    PC/370 ONLY - Convert all
+*                                 output from EBCDIC to ASCII
+         OPEN  TEACHERS                                                    
+         OPEN  REPORT
+         PUT   REPORT,HD1
+         PUT   REPORT,HD2
+         PUT   REPORT,HD3
+         PUT   REPORT,HD4
+LOOP     EQU   *
+         GET   TEACHERS,IREC      Read a single teacher record
+         CLI   ITTEN,C'Y'         Is teacher tenured?
+         BNE   LOOP               No, then skip this record
+         MVC   OTID,ITID          Move teacher ID Nbr to output     
+         MVC   OTNAME,ITNAME      Move teacher Name to output
+         CLC   ITDEG,=CL4'PHD'    Highest degree = PhD?
+         BE    YESPHD             .. Yes, branch
+         MVI   OPHD,C'N'          .. No, Show PhD = 'N'
+         B     OTHERS             .. Branch around YES logic
+YESPHD   EQU   *                  Highest degree is PhD, so...
+         MVI   OPHD,C'Y'          Show PhD = 'Y'
+OTHERS   EQU   *                  Continue moving other fields...
+         MVC   O517,=CL4'517-'    All phone nbrs begin w/ '517-'
+         MVC   OTPHONE,ITPHONE    Move phone nbr to output
+         MVC   OCRLF,WCRLF        PC/370 ONLY - end line w/ CR/LF         
+         PUT   REPORT,OREC        Write report line
+         B     LOOP
+*
+*        EOJ processing
+*
+ATEND    CLOSE TEACHERS
+         CLOSE REPORT
+         WTO   'TEACH3A ... Teacher list on REPORT.TXT'
+         WTO   'TEACH3A ... Normal end of program'
+         RETURN
+*
+*        Literals, if any, will go here
+*
+         LTORG
+*
+*        File definitions
+*
+TEACHERS DCB   LRECL=29,RECFM=F,MACRF=G,EODAD=ATEND,
+               DDNAME='TEACHER.DAT'  
+REPORT   DCB   LRECL=62,RECFM=F,MACRF=P,
+               DDNAME='REPORT.TXT'      
+*
+*        Miscellaneous field definitions
+*
+WCRLF    DC    X'0D25'            PC/370 ONLY - EBCDIC CR/LF
+*
+*        Input record definition
+*
+IREC     DS    0CL29              Teacher record
+ITID     DS    CL3                Teacher ID nbr
+ITNAME   DS    CL15               Teacher name
+ITDEG    DS    CL4                Highest degree
+ITTEN    DS    CL1                Tenured?
+ITPHONE  DS    CL4                Phone nbr
+ITCRLF   DS    CL2                PC/370 only - CR/LF
+*
+*        Output (line) definition
+*
+OREC     DS    0CL62              
+OTID     DS    CL3                Teacher ID nbr
+         DC    CL3' '
+OTNAME   DS    CL15               Teacher name
+         DC    CL4' '
+OPHD     DS    CL1                PhD? (Y/N)
+         DC    CL5' '
+OPHONE   DS    0CL8               Phone nbr
+O517     DS    CL4
+OTPHONE  DS    CL4                Phone nbr
+         DC    CL21' ' 
+OCRLF    DS    CL2                PC/370 only - CR/LF
+*
+*        Headings definitions
+*
+HD1      DS    0CL62
+         DC    CL40'      LIST OF TENURED INSTRUCTORS       '
+         DC    CL20' '
+         DC    XL2'0D25'
+HD2      DS    0CL62
+         DC    CL60' '
+         DC    XL2'0D25'
+HD3      DS    0CL62
+         DC    CL40'ID#        Name         PhD?    Phone   '
+         DC    CL20' '
+         DC    XL2'0D25'
+HD4      DS    0CL62
+         DC    CL40'---   ---------------   ----   -------- '
+         DC    CL20' '
+         DC    XL2'0D25'
+         END   BEGIN                                                   
+

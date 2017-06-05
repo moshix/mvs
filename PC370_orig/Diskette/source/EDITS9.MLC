@@ -1,0 +1,113 @@
+         PRINT NOGEN
+****************************************************************
+*        FILENAME:  EDITS9.MLC                                 *
+*        AUTHOR  :  Bill Qualls                                *
+*        SYSTEM  :  Compaq 286LTE, PC/370 R4.2                 *
+*        REMARKS :  Demonstrate the edit instruction by        *
+*                   implementing examples shown in chapter 9.  *
+****************************************************************
+         START 0
+BEGIN    BEGIN
+****************************************************************
+         WTO   'SEE PAGE 9.3'
+****************************************************************
+         MVC   WK8,MASK
+         ED    WK8,FLDA
+         WTO   WK8
+         MVC   WK8,=X'4020202020202020'
+         ED    WK8,FLDA
+         WTO   WK8
+****************************************************************
+         WTO   'SEE PAGE 9.4'
+****************************************************************
+         MVC   WK6,MASK2
+         ED    WK6,FLDB
+         WTO   WK6
+         MVC   WK6,MASK3
+         ED    WK6,FLDB
+         WTO   WK6
+****************************************************************
+         WTO   'SEE PAGE 9.5'
+****************************************************************
+         MVC   WK9,=X'4020202020214B2020'
+         ED    WK9,FLDA
+         WTO   WK9
+         MVC   WK7,=X'402020214B2020'
+         ED    WK7,FLDB
+         WTO   WK7
+         MVC   WK7,=X'402021204B2020'
+         ED    WK7,FLDB
+         WTO   WK7
+****************************************************************
+         WTO   'SEE PAGE 9.6'
+****************************************************************
+         MVC   WK10,=X'4020206B2020214B2020'
+         ED    WK10,FLDA
+         WTO   WK10
+         MVC   WK7,MASK4
+         ED    WK7,POS
+         WTO   WK7
+         MVC   WK7,MASK4
+         ED    WK7,NEG
+         WTO   WK7
+****************************************************************
+         WTO   'SEE PAGE 9.7'
+****************************************************************
+         MVC   WK8,MASK5
+         ED    WK8,POS
+         WTO   WK8
+         MVC   WK8,MASK5
+         ED    WK8,NEG
+         WTO   WK8
+****************************************************************
+         WTO   'SEE PAGE 9.8'
+****************************************************************
+         MVC   WK9,CR
+         ED    WK9,POS
+         WTO   WK9
+         MVC   WK9,CR
+         ED    WK9,NEG
+         WTO   WK9
+         MVC   WK9,DB
+         ED    WK9,POS
+         WTO   WK9
+         MVC   WK9,DB
+         ED    WK9,NEG
+         WTO   WK9
+         MVC   WK10,CHKA
+         ED    WK10,FLDA
+         WTO   WK10
+         MVC   WK7,CHKB
+         ED    WK7,FLDB
+         WTO   WK7
+****************************************************************
+         WTO   'ALL DONE...'
+****************************************************************
+         RETURN
+*
+*        Literals, if any, will go here
+*
+         LTORG
+*
+*        Other field definitions
+*
+WK6      DS    CL6
+WK7      DS    CL7
+WK8      DS    CL8
+WK9      DS    CL9
+WK10     DS    CL10
+FLDA     DC    PL4'123456'
+FLDB     DC    PL3'0'
+POS      DC    PL3'+123'
+NEG      DC    PL3'-123'
+MASK     DC    X'4020202020202020'       BZZZZZZZ
+MASK2    DC    X'402020202020'           BZZZZZ
+MASK3    DC    X'402020202120'           BZZZZ9
+MASK4    DC    X'402021204B2020'         BZZ9.99
+MASK5    DC    X'402021204B202060'       BZZ9.99-
+CR       DC    X'402021204B2020C3D9'     BZZ9.99CR
+DB       DC    X'402021204B2020C4C2'     BZZ9.99DB
+CHKA     DC    X'5C20206B2021204B2020'   ***,**9.99
+CHKB     DC    X'5C2021204B2020'         ***9.99
+         END   BEGIN
+

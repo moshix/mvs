@@ -1,0 +1,14 @@
+STUFF6D  BEGIN
+         MVI   M,C'L'
+         MVC   L,M
+         CLI   L,C'N'
+         BNE   N
+         MVI   L,C'M'
+N        EQU   *
+         RETURN
+L        DC    CL3'MOM'
+M        DC    CL2'  '
+         END
+
+
+

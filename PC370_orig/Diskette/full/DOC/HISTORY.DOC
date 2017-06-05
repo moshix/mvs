@@ -1,0 +1,430 @@
+ 
+HISTORY.DOC Summary PC/370 Release History
+
+     MMS/370 R1.0 12/28/81 first beta test demo for Z80 CP/M-80
+
+         Successful demo program assembly, link, and execute
+         completed on the following systems:
+
+           1.  Radio Shack Model II with Lifeboat CP/M  v2.2.
+           2.  Cromemco system with Tarbell CP/M  v1.4.
+
+     MMS/370 R1.1 01/04/82 first Distributor evaluation version
+                           sent to Lifeboat Assoc. for evaluation
+
+     MMS/370 R1.2 12/20/82 second beta test
+
+     MMS/370 R1.3 02/12/83 first user release
+
+     A370
+        1.  Add XREAD, XPRNT, XDECI, XDECO, XFILI, XFILO, XDUMP
+        2.  Fix location 0 overlay processing missing END.
+        3.  Force E22 length error for 0 length program.
+     L370
+        1.  Force E08 memory error for 0 length segment.
+        2.  Fix incorrect SEARCH return code due to DEQ.
+        3.  Fix ORG error at end if no literals.
+        4.  Fix bad stack address at program entry with option G.
+        5.  Fix object code error when control Z is first byte of
+            physical block in concatenated object file.
+        6.  Allow alternate disk drive A for L370.LIB if not found
+            on specified drive for object file.
+     E370
+        1.  Add ASSIST support plus interactive debug log option.
+        2.  Add 370 instruction trace and instruction address stop.
+        3.  Add 370 address protection for CP/M and E370 areas.
+
+     MMS/370 R2.2 05/04/83 second user release with new XA extensions
+
+     A370
+       1.  27 new instructions added including BAS, BASR, MVCIN,
+           BSM, and BASSM.
+       2.  Fix made to handle explicit 256 byte SS instructions
+           correctly.
+       3.  Fix DC logic to surpress duplicate references to *.
+       4.  FIX SVC interface to save IX and IY for NEC PC MSDOS.
+     L370
+       1.  Fix stack pointer for execution for option G to prevent
+           initial call from storing address in program area.  Also
+           changed call in prefix to simple jump to emulator entry.
+     E370
+       1.  5 new non-privileged instructions supported along with
+           PSW address mode bit 17.
+       2.  The existing instructions LA, BAL, BALR, EDMK, and TRT
+           all have been modified to function correctly in both
+           24 and 31 bit addressing modes.
+       3.  Fix incorrect instruction length code in BAL 24 bit
+           mode .
+       4.  Fix incorrect EDMK address for single byte PD fields.
+       5.  Fix incorrect SS instruction processing when length is
+           over 128.
+       6.  Fix fixed point multiply and divided overflow when
+           result is negative.
+       7.  Fix sign of remainder for fixed and packed divide.
+       8.  Fix packed decimal compare for negative zero.
+       9.  Fix condition codes for multiply and divide exceptions.
+      10.  Fix Assist XREAD to correctly support 1 byte area.
+      11.  Fix arithmetic shift left overflow logic.
+      12.  Fix packed decimal divide to correctly detect overflow.
+
+    MMS/370 R2.3 06/30/83 third user release with updated XA
+    extensions
+
+     A370
+       1.  Add IPM and other new XA supervisor instructions
+     L370
+     E370
+       1.  Add IPM instruction
+       2.  Change XA mode PSW bit to 32 and display extended mode PSW
+           when in XA mode.
+       3.  Correct BSM logic to skip save when first register is 0.
+       4.  Add option to update 370 registers to MMDBUG command Y.
+       5.  Reduce size of E370 by 500 bytes by changing logic macros
+           to common subroutines for logical RR and RX instructions.
+
+    MMS/370 R3.1 03/08/84 maintenance release with corrections
+
+    A370
+      1.  Fix error created by V type address constant referencing
+          CSECT defined later in same assembly.
+      2.  Fix length attribute of CSECT/DSECT to always be 1.
+    L370
+    E370
+      1.  Fix error in XR and X exclusive OR logic introduced in R2.3
+          when logic was combined in 1 routine to save memory.
+      2.  Fix DP overflow logic to cause divide exception 0CB instead
+          of divide overflow.  Note divide exception cannot be masked
+          like overflow but SPIE can be used to handle it.
+      3.  Check for interrupt every 256 instructions even in kill
+          mode.
+      4.  Only trace IFL entries in 370 mode for N command.
+      5.  Fix NODBUG minimum storage replacement module for MMDBUG to
+          correctly NOP 370 TRACE calls.
+
+    PC/370 R1.0 06/08/85 first freeware release for 8086 MSDOS systems
+
+    A370
+    L370
+      1.  Force option F to always dynamically load E370.EXE. The
+          emulator can no longer be linked with 370 code since L370
+          does not process native 8086 assembler object code format.
+    E370
+      1.  Add SVC's 17-22 to handle extended MSDOS functions such as
+          time.
+
+    PC/370 R1.1 11/11/85 maintenance release
+
+    A370
+      1.  Allow lower case command line.
+      2.  Fix error for zero length data in DC for alignment.
+    L370
+      1.  Allow lower case command line.
+    E370
+      1.  Allow lower case debug command entry.
+      2.  Initialize register 13 to standard save area.
+      3.  Support 370 instruction address reset via J command.
+      4.  Only stop at IFL trace in 370 address stop mode.
+      5.  Attempt to close all files when exiting via <esc> command.
+    DOC
+      1.  Add documentation files describing trace id points.
+
+    PC/370 R1.2 07/18/86 maintenance release plus SEE editor utility
+
+    A370
+      1.  Drop form feed on first page heading.
+      2.  Translate lower case ASCII comments to upper case.
+      3.  Align column headings for cross reference and repeat
+          headings.
+      4.  Fix error when DC F coded without data - now issues error.
+      5.  Rearrange opening of files in pass 2 to insure that no more
+          memory is required in pass 2 than in pass 1.  This allows
+          number of symbols to directly determine maximum assembly
+          possible (SEE is within 30 symbols of maximum now).  Note
+          debug was removed from A370 (8k) to provide more symbol
+          space.  Also note in pass 2, ALC file buffer will be smaller
+          to provide room for object and print file buffers if
+          necessary to not exceed pass 1 memory usage.
+      6.  Tighten TITLE syntax to require correct leading quote.
+    L370
+      1.  Drop form feed on first page heading.
+      2.  Align column headings with data lines.
+      3.  Correct bug causing CSECT reference labels to be truncated.
+    E370
+      1.  Correct bug in XDECI ASSIST instruction to correctly input
+          negative numbers.
+      2.  Translate DDNAME to ASCII for SEARCH and DELETE SVC's.
+      3.  Reverse DMAS, DMAE, BLKE addresses during OPEN/CLOSE along
+          with EODAD and SYNAD addresses to support user defined
+          buffer.
+      4.  Change debug trace to only trace first ID after IFL in 370
+          mode.
+      5.  Support trace ID's IOF and ION to turn interrupts off and
+          on.
+      6.  Fix bug in IOS get text record routine which caused
+          premature end of file when DCB was within 128 bytes of
+          buffer area due to uninitialized register picking up DCB
+          address instead of DMA address during pending EOF
+          processing.
+      7.  Fix bug in IOS random write routine to increment block
+          pointer when writing blocks larger than 128 bytes.
+      8.  Change debug to not kill SVC 9 trace entries from 370 code.
+      9.  Add SVC 23 to perform RENAME using DCB with EBCDIC names.
+          (See SEE.ALC for example use and IHADCB extensions.)
+     10.  Add SVC 24 to microcode printing line of ASCII text on
+          screen with attribute colors. (used to more than double SEE
+          speed).
+     11.  Fix memory management to not allocate from last FQE unless
+          there is room for a remaining smaller FQE pointer.  Force
+          end of memory at x'FF00' to leave room for stack.
+     12.  Support S save/unsave debug command to protect current trace
+          ID while running in kill mode.  (very useful to obtain high
+          speed execution up to selected point in program).
+     13.  Save 8086 flags in high R0 for BIOS SVC's such as KEYBOARD.
+     14.  Add explicit EBCDIC/ASCII translation and line control
+          options to SVC's 0-24 via high bits of R2:
+            bit 0 - explicit control if on, else use option E
+            bit 1 - force EBCDIC translation if on, else use ASCII
+            bit 2 - force addition of line control, else none
+
+            (For example ICM R2,8,=X'80' would force no translation
+             and no line control regardless of option E setting.)
+     15.  Fix debug N trace listing to translate SVC 9 EBCDIC Id's.
+
+     DOC
+      1.  Add SEE.ALC source code utility to edit or browse an ASCII
+          text file in full screen color mode.  Keystrokes are
+          compatible with Turbo Pascal and PFS:WRITE.  The editor
+          supports files up to 512k.  SEE includes character graphics
+          to support line drawings and organizational chart drawings.
+          SEE also supports creation of session keystroke file (.KSF)
+          which can be reused to recreate SEE session with full screen
+          colors and with keyboard pause and wait control.
+      2.  Add PRINT.ALC source code utility to print source programs
+          and PC370.DOC documentation file with page control.
+      3.  Add information on electronic bulletin board and PC-SIG
+          distribution via disk #402.
+      4.  Add DW3NUM.ALC source code utility to insert line numbers on
+          all non-blank lines in a Displaywrite III text document.
+          Numbers are placed in left margin and reset at beginning of
+          each page.  This program serves as a model for other
+          utilities that could be written to process Displaywrite III
+          document files directly.  This utility squeezes file and
+          lists file on console in the process of inserting line
+          numbers.
+      5.  Drop form feed on first page heading for PRINTDOC.ALC.
+
+    PC/370 R2.0 05/16/87 major update with 512 address space support
+
+    A370
+      1.  Converted to EXE format with 64k data segment and buffer
+          segment.
+      2.  Now supports 3 times as many labels and literals.
+      3.  File handle I/O with pathing much more efficient.
+      4.  Fix error if DSECT's contain anything but DS instructions.
+      5.  Allow references to ENTRY symbols within same module.
+    L370
+      1.  Converted to EXE format with 64k data segment and buffers
+          segment.
+      2.  Now supports code modules up to 50k.
+      3.  File handle I/O with pathing much more efficient.
+      4.  New option M creates 370 MOD file without COM prefix.
+    E370
+      1.  Converted to EXE format running in high 64k segment.
+      2.  The standard instruction set plus ASSIST now supports
+          direct addressing up to the maximum available memory
+          under MS-DOS 2.0+ (512k+).
+      3.  Error in one byte overlapped pack instruction corrected.
+      4.  Error in BXH and BXLE with negative updated index values
+          fixed.
+      5.  Memory management now supports the full address space
+          using 8 byte free queue elements (4 byte address and
+          4 byte length).  ASCASF FQE chain pointer is located at
+          X'118'in new address space control block.  The same
+          registers for SVC 10 and 11 are used.
+      6.  File management support has been rewritten using MS-DOS
+          file handle I/O to support pathing and random or
+          sequential access to multiple files.  Each file can
+          have up to 64K buffer.  Maximum files open is
+          controlled by CONFIG.SYS FILES= parameter.  See
+          DOC\SYSTEM.DOC and CPY\IHADCB.CPY for more information.
+      7.  The interactive debug facility has been expanded to
+          provide additional support for virtual address space
+          separate from emulator address space.  The Z command
+          determines which address space functions refer to.  The
+          debug facility is included in A370 and L370 as well as
+          E370.  A new "I" command added, dumps full word counter
+          which is source record count in A370, logical object record
+          in L370, and 370 instruction counter in E370.  Address stop
+          on this word can be used to stop execution at any desired
+          point.  However, note that in kill mode, the counter may be
+          incremented more than once between trace ids preventing
+          address stop on equal from triggering.
+      8.  The interface between linked COM modules and the E370.EXE
+          emulator has been redesigned to use the MS-DOS standard EXEC
+          function instead of somewhat non-standard overlay load.  Now
+          the first 16 bytes of each linked COM module contains the
+          EXEC mainline which links to E370.EXE in the high 64k of
+          available memory.  E370.EXE initializes the virtual address
+          space origin 16 bytes past the beginning of the COM module
+          with executable code starting at X'210' into module or
+          relative X'200'.  COM mainline will abort if there is not
+          room for COM module plus 64k for E370.EXE.
+      9.  E370.EXE now supports SVC 25 to load any kind of file
+          including linked COM files into free memory.  See
+          DOC\SYSTEM.DOC and CPY\IHASCB.CPY.
+     10.  E370.EXE now supports SVC 26 an 27 for attach and detach of
+          COM 370 programs which run in their own relative address
+          spaces.  See DEMO\DEMOPSW series of demo programs for
+          example.
+     11.  Fix trace and PSW address of EX target instructions.
+
+    PC/370 R2.0A 05/24/87 fixes to 2.0
+
+    A370
+      1.  EQU's preceeding first CSECT caused 0 length blank CSECT
+          error.
+    L370
+    E370
+      1.  Error in Freemain svc 11 when releasing block between two
+          existing free blocks chained to third free block.
+      2.  I/O supervisor now takes SYNAD exit if bad RBA causes random
+          read or write to fail due to pointing beyond disk capacity.
+
+    PC/370 R3.0  08/30/87 new macro preprocessor, floating point,
+          scientific subroutines, generic interrupt SVC, ASCII string
+          constants, MVS shell demo with SIO channel simulator
+    A370
+      1.  Support for E, D, and L floating point constants added.
+      2.  ASCII string constants in double quotes added and self
+          defining string constants fixed to handle C'''' etc.
+      3.  Error in DS or DC destroyed location counter causing
+          additional erroneous base errors in following instructions.
+      4.  Treat blank lines like comments instead of syntax errors.
+    L370
+      1.  Error in concatenating object files when previous file ends
+          exactly on 128 block boundary.
+      2.  Add option I to surpress all interrupts during execution.
+      3.  Add option P to surpress floating point even if 80x87 avail.
+    E370
+      1.  Floating point instructions added using 80x87.
+      2.  SVC's 28-35 added to assist use of ASCII strings, generic
+          interrupt to issue any MS-DOS or BIOS interrupt with user
+          defined PC registers, plus scientific subroutine assist
+          using 80x87 routines for square root, 2**X, tangent,
+          arctangent, logs.
+      3.  Fixed ASCII file output translation option (was translating
+          after write) in PUT svc.
+      4.  Correct ASCII/EBCDIC translation of left bracket and GE
+          symbols.
+      5.  Correct debug jump command to handle addresses over 64k in
+          370 mode.
+      6.  Correct MP to return specification error if L'A LE L'B, L'B
+          GT 8, or high bytes of A for length L'B not zero.
+
+    PC/370 R3.1  09/02/87 maintenance to R3.0 based on user feedback
+
+    A370
+      1.  Fix error in object code ORG when DS is used in multiple
+          CSECT module causing L370 link error due to ORG exceeding
+          length of CSECT (offset to start of non-zero CSECT was not
+          being subtracted to calculate relative CSECT ORG address).
+          Explicit ORG's worked fine, only a DS generated ORG caused
+          error.
+    L370
+    E370
+
+    PC/370 R3.2  09/07/87 maintenance to R3.1 based on user feedback
+
+    A370
+      1.  Allow maximum 80 character ALC source with seq. #.
+      2.  Fix label equated to CSECT/DSECT which caused L370 errors.
+      3.  Flag DC error for RLD's for DSECT labels which caused L370
+          errors.
+    L370
+    E370
+      1.  Fix ZAP to correct regression bug with R2.0 where any number
+          with zero in low nibble gives positive sign and zero
+          condition.
+
+    PC/370 R4.0  11/08/87 maintenance to R3.1 based on user feedback
+
+    A370
+      1.  Add support for COPY statement to include source code from
+          any MS-DOS path\filename.  The default suffix is CPY.
+    L370
+      1.  Add option B to create file identical to COM file but with
+          suffix BIN for use with Micro Focus COBOL.
+    E370
+      1.  Support resident option invoked by directly executing the
+          emulator EXE module.
+      2.  Support calls from Micro Focus COBOL in resident mode using
+          standard linkage conventions and V=R addressing mode.
+      3.  Modify OPEN logic to allow use of SYNAD exit even though
+          file may not be open due to error such as file not found.
+          Add error and function codes in R0 and R1 for use by SYNAD
+          exit in determining error (see LIB\SYNERROR.ALC).
+
+    PC/370 R4.1  11/20/87 maintenance to R4.0 based on user feedback
+
+    A370
+      1.  Correct ORG to correctly handle CSECT or DSECT name as well
+          as any relative expression (The code was only allowing
+          relative expression operand rather than special label type).
+    L370
+
+    E370
+      1.  Correct serious bug in release 4.0 which stores 8 byte free
+          queue element directly after the end of each BIN module.
+          (This code to build free area behind COM modules can cause
+          COBOL run time system to crash after exiting from
+          subroutine depending on use of area overlayed).
+      2.  Add optional parameter to define size of system queue area
+          (SQA) memory in the resident emulator address space for use
+          by COBOL subroutines.  Size is in hex paragraphs and default
+          is 10 or 256 bytes.  Through use of SQA, COBOL subroutines
+          can now perform standard file I/O with dynamic buffer
+          allocation (See BAT\RUNCBL.BAT demo for example SQA and
+          I/O use).
+      3.  Enhance interactive debug to support resident reusability by
+          restoring all traces at beginning of each COM execution and
+          at beginning of all COBOL subroutines called with option D
+          specified at link edit.  Also toggle command K can be used
+          to restore traces at any point in program execution (This
+          allows quickly reaching a selected point in program and then
+          restoring traces for complete instruction tracing).
+      3.  Support user defined standard COBOL return code using value
+          in register 15 (low 16 bits) at exit.
+
+    PC/370 R4.2  01/05/88 Micro Focus XM protected mode support
+
+    A370
+    L370
+      1.  Add option U to allow undefined external references.
+    E370
+      1.  Support Micro Focus XM COBOL protected mode call to PC/370
+          assembler subroutine in BIN file (See USER.DOC for more).
+          The resident interrupt was moved from hex DC to hex 60.
+          (See PTF.DOC for fix to change interrupt # if it conflicts.)
+      2.  Fix 0C9 on CVB with negative zero packed decimal input.
+      3.  Correct EBCDIC to ASCII translate tables to handle
+          > { and [ conversion in both directions (half fixed in 3.0).
+      4.  Flag error for text file with LRECL<2.
+      5.  Fix SRP to use only low 6 bits in second operand for shift.
+          (If the 6 bit number was positive, 8 bits were used.)
+      6.  MVS standard parm list with address, half word count, and
+          EBCDIC parm field is now pointed to by R1 at entry.
+      7.  If floating point option is on and 80X87 is installed,
+          hardware assist is used for CVB and CVD to speed up
+          instruction by up to 4 times for large numbers.
+      8.  Add MVS program interruption element (PIE) control block
+          pointed to by R2 at entry to SPIE trap.  This allows full
+          recovery from trap without losing content of registers.
+          (See CPY\IHAPIE.CPY for more information.)
+      9.  Fix incorrect PSW on exception of executed instruction.
+     10.  Add SVC 36 to load overlay file at specified virtual
+          address.
+     11.  Add SVC 37 to define SVC user exit table.
+          See DEMO\DEMOTRAP.ALC for examples.
+     12.  Add production version of emulator E370P42.EXE without
+          interactive debug or ASSIST facility to save 10k.
+ 

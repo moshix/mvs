@@ -1,0 +1,13 @@
+DP       BEGIN
+         DP    A,B
+         DP    C,D
+         DP    E,F
+         RETURN
+A        DC    PL3'47'
+B        DC    PL1'9'
+C        DC    PL5'1276'
+D        DC    PL2'100'
+E        DC    PL4'10'
+F        DC    PL2'25'
+         END
+

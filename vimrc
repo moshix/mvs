@@ -1,12 +1,39 @@
 set smartindent
 set tabstop=4
+set number
 set shiftwidth=4
 set expandtab
+highlight ColoColumn ctermbg=lightgrey guibg=lightgrey
+set cc=80
+set showcmd
+set cursorline
+set wildmenu
+set lazyredraw
+set showmatch
+set incsearch
+set hlsearch
+set smartcase
+"set title
+"set background=dark
+"colorscheme solarized
+"highlight OverLength ctermbg=red ctermfg=white guibg=#592929 
+"match OverLength /\%81v.*/
 if version < 600
 syntax clear
 elseif exists("b:current_syntax")
 finish
 endif
+" strips trailing whitespace at the end of files. this
+" is called on buffer write in the autogroup above.
+function! <SID>StripTrailingWhitespaces()
+" save last search & cursor position
+    let _s=@/
+    let l = line(".")
+    let c = col(".")
+    %s/\s\+$//e
+    let @/=_s
+    call cursor(l, c)
+endfunction
 syn case ignore
 syn keyword jclKwd pgm proc class dsn[ame] msgclass space disp contained
 syn keyword jclKwd parm member cond msglevel order lrecl recfm unit contained

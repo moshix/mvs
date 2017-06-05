@@ -1,0 +1,6 @@
+CALL      MACRO PGM?
+          AIF   /&LABEL$$=/ .GO
+&LABEL$$ EQU   *
+.GO       L     15,=V(&1)
+          BALR  14,15
+

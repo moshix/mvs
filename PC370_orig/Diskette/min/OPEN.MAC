@@ -1,0 +1,10 @@
+OPEN	 MACRO DCB?
+	 AIF   /&LABEL$$=/ .GO
+&LABEL$$ EQU   *
+.GO	 AIF   &1=(.REG
+	 LA    2,&1
+	 AGO   .SVC
+.REG	 AIF   &1=(2).SVC
+	 LR    2,&1
+.SVC	 SVC   1
+

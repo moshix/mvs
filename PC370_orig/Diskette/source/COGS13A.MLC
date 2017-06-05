@@ -1,0 +1,129 @@
+         PRINT NOGEN                                                   
+****************************************************************
+*        FILENAME:  COGS13A.MLC                                *
+*        AUTHOR  :  Bill Qualls                                *
+*        SYSTEM  :  Compaq 286LTE, PC/370 R4.2                 *
+*        REMARKS :  Determine nationwide dollar sales for      *
+*                   COGSWORTH INDUSTRIES.                      *
+****************************************************************
+         START 0                                                       
+         REGS
+BEGIN    BEGIN
+         WTO   'COGS13A ... Begin execution'
+         BAL   R10,SETUP
+MAIN     EQU   *
+         CLI   EOFSW,C'Y'
+         BE    EOJ
+         BAL   R10,PROCESS
+         B     MAIN
+EOJ      EQU   *
+         BAL   R10,WRAPUP
+         WTO   'COGS13A ... Normal end of program'
+         RETURN
+****************************************************************
+*        SETUP - Those things which happen one time only,      *
+*                before any records are processed.             *
+****************************************************************
+SETUP    EQU   *
+         ST    R10,SVSETUP
+         OI    INVENTRY+10,X'08'  PC/370 ONLY - Convert all
+*                                 input from ASCII to EBCDIC
+         OPEN  INVENTRY
+         BAL   R10,READ
+         L     R10,SVSETUP
+         BR    R10
+****************************************************************
+*        READ - Read a record.                                 *
+****************************************************************
+READ     EQU   *
+         ST    R10,SVREAD
+         GET   INVENTRY,IREC      Read a single product record
+         B     READX
+ATEND    EQU   *
+         MVI   EOFSW,C'Y'
+READX    EQU   *
+         L     R10,SVREAD
+         BR    R10
+****************************************************************
+*        PROCESS - Those things which happen once per record.  *
+****************************************************************
+PROCESS  EQU   * 
+         ST    R10,SVPROC
+         PACK  WCALIF,ICALIF      Each product's sales must
+         PACK  WILL,IILL           be packed so they can be 
+         PACK  WUTAH,IUTAH          added to total for this
+         PACK  WWISC,IWISC           product...
+         ZAP   WTOTAL,=P'0'       Initialize the total to zero
+         AP    WTOTAL,WCALIF       and start adding...
+         AP    WTOTAL,WILL
+         AP    WTOTAL,WUTAH
+         AP    WTOTAL,WWISC
+         PACK  WSELL,ISELL        Unit sell price
+         ZAP   PK5,WTOTAL         Length of WTOTAL is PL2 
+         MP    PK5,WSELL           and length of WSELL is PL3 
+         AP    WDOLLARS,PK5         so need PL5 for product.
+         BAL   R10,READ
+         L     R10,SVPROC
+         BR    R10
+****************************************************************
+*        WRAPUP - Those things which happen one time only,     *
+*                 after all records have been processed.       *
+****************************************************************
+WRAPUP   EQU   *
+         ST    R10,SVWRAP
+         ED    ODOLLARS,WDOLLARS
+         WTO   OMSG        
+         CLOSE INVENTRY
+         L     R10,SVWRAP
+         BR    R10
+****************************************************************
+*        Literals, if any, will go here                        *
+****************************************************************
+         LTORG
+****************************************************************
+*        File definitions                                      *
+****************************************************************
+INVENTRY DCB   LRECL=41,RECFM=F,MACRF=G,EODAD=ATEND,
+               DDNAME='COGS.DAT'  
+****************************************************************
+*        RETURN ADDRESSES                                      *
+****************************************************************
+SVSETUP  DC    F'0'               SETUP
+SVPROC   DC    F'0'               PROCESS
+SVREAD   DC    F'0'               READ
+SVWRAP   DC    F'0'               WRAPUP
+****************************************************************
+*        Miscellaneous field definitions                       *
+****************************************************************
+EOFSW    DC    CL1'N'             End of file? (Y/N)
+WCALIF   DC    PL2'0'             Units sold in Calif
+WILL     DC    PL2'0'             Units sold in Illinois
+WUTAH    DC    PL2'0'             Units sold in Utah
+WWISC    DC    PL2'0'             Units sold in Wisconsin
+WTOTAL   DC    PL2'0'             Units sold in all states
+WSELL    DC    PL3'0'             Sell for (each) 999V99
+WDOLLARS DC    PL4'0'             Nationwide dollar sales
+PK5      DC    PL5'0'         
+****************************************************************
+*        Input record definition                               *
+****************************************************************
+IREC     DS    0CL41        1-41  Inventory record
+IDESC    DS    CL10         1-10  Product description
+ICALIF   DS    CL3         11-13  Units sold in Calif
+IILL     DS    CL3         14-16  Units sold in Illinois
+IUTAH    DS    CL3         17-19  Units sold in Utah
+IWISC    DS    CL3         20-22  Units sold in Wisconsin
+IBEGIN   DS    CL3         23-25  Beginning inventory
+IPURCH   DS    CL3         26-28  Purchases throughout year
+IQOH     DS    CL3         29-31  Actual quantity on hand
+ICOST    DS    CL4         32-35  Cost (each) 99V99
+ISELL    DS    CL4         36-39  Sell for (each) 99V99
+ICRLF    DS    CL2         40-41  PC/370 only - CR/LF
+****************************************************************
+*        Output message definition                             *
+****************************************************************
+OMSG     DS    0CL49                  
+         DC    CL39'COGS13A ... Nationwide dollar sales are'
+ODOLLARS DC    XL10'4020206B2021204B2020'   BZZ,ZZ9.99
+         END   BEGIN                                                   
+

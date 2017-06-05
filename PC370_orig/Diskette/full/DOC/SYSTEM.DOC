@@ -1,0 +1,635 @@
+SYSTEM.DOC PC/370 release 4.1 system services documentation
+
+Chapter table of contents:
+
+  1.  Introduction
+  2.  File input and output services
+  3.  Program load and execution services
+  4.  SVC documentation in SVC # order
+  4.  Floating point system documentation
+
+*********
+
+Chapter 1.  Introduction
+
+*********
+
+The PC/370 system supports a number of supervisor services through
+the standard 370 SVC interface.  In supervisor state, each SVC invokes
+pseudo microcode which performs the function requested at native
+processor speed.  In problem state each SVC causes a standard SVC
+interrupt storing the current PSW at location X'20' and loading the
+new PSW from location X'60'.  Supervisor call routines can be user
+written to map any SVC into any desired function in problem state.
+
+In supervisor state, svc's 1-7 provide a set of input and output
+facilities using MS-DOS file handle I/O and an extended data control
+block defined by the user which allows access to sequential and random
+files.  Svc's 10-11 provide virtual memory dynamic management.  In
+addition to the other misc. functions provided, svc 34 provides a
+general purpose interrupt interface which can be used to map PC/370
+area into PC registers and issue any MS-DOS function call or BIOS
+interrupt.  Svc's 128-191 map into BIOS interrupts using simple
+register to register mapping.  Svc's 200-241 map into MS-DOS function
+calls 0-41 using simple register to register mapping.  Note function
+calls above 41 can be issued using svc 34 interface which is the
+preferred method for future releases.
+
+*********
+
+Chapter 2.  File input and output services
+
+*********
+
+The PC/370 supervisor calls to the I/O supervisor all require register
+2 to point to the DCB.  The SVC's are as follows:
+
+ SVC  FUNCTION  OPTIONS
+
+   1  OPEN
+   2  CLOSE
+   3  READ      register 1 must be address of block or zero
+   4  WRITE     register 1 must be address of block or zero
+   5  GET       register 1 must be address of area or zero
+   6  PUT       register 1 must be address of area or zero
+   7  DELETE
+   8  SEARCH
+  23  RENAME
+
+The PC/370 system supports sequential and random access to
+files using MS-DOS file handle I/O with directory pathing.
+To access a file, a data control block (DCB) must be defined
+in the program with fields defined as shown in the dummy
+section (DSECT) called IHADCB found in CPY\IHADCB.CPY and
+demonstrated in UTIL\PRINTDOC.ALC.   All fields must be defined
+prior to open and cannot be changed while the file is open
+with the exception of RCD, BUF, and RBA as described below.
+
+An explanation of each field in the DCB follows:
+
+  1.  DCBDCB - DCB identifier consisting of the four EBCDIC
+               characters ADCB.  These characters are
+               verified each time an I/O routine is called
+               with the address of the DCB in register 2.
+               An attempt is made to exit to the synchronous
+               error exit address if there is no match.
+
+  2.  DCBDSN - address of up to 64 character EBCDIC path and
+               file name followed by a zero byte.  This field
+               is automatically translated to ASCII as
+               required.
+
+  3.  DCBFID - MS-DOS assigned file handle at open time.
+               This field must be initialized to high values
+               or open routine will assume file is already
+               open and take SYNAD exit.
+
+  4.  DCBFLG - file condition flags used by I/O routines.
+               This field must be initialized to zero except
+               user defined buffer bit DFUBUF and user
+               requested ASCII file conversion bit DFTRAN may
+               be turned on.  No other bits may be modified
+               by user.  If the DFTRAN (X'08') bit is set, input
+               records are translated to EBCDIC in the record area.
+               Output records are translated to ASCII in the record
+               area, written, and then translated back to EBCDIC.
+               The entire LRECL area is translated.  For text mode,
+               each record must end with EBCDIC line feed.
+
+  5.  DSORG  - data set organization EBCDIC code:
+
+                 S for sequential
+                 R for random file access.
+
+  6.  MACRF  - data set access EBCDIC code:
+
+                 R for read block with length of BLKSZ
+                 W for write block with length of BLKSZ
+                 (note PRECL can override BLKSZ on write)
+                 G for get logical record into RCD area
+                 P for put logical record form RCD area
+
+  7.  RECFM  - data set record format EBCDIC code:
+
+                 F - fixed length records with length LRECL
+                     for get/put sequential access or length
+                     BLKSZ for read/write random or
+                     sequential access.
+                 V - variable length records with length
+                     stored in first 2 bytes (valid lengths
+                     range from 3 to 64k).  Maximum length
+                     allowed for a file is LRECL and only
+                     sequential get/put modes supported.
+                 T - text records ending with end of record
+                     code (EOR usually X'0A' line feed).
+                     Maximum length allowed for a file is
+                     LRECL and only sequential get/put modes
+                     supported.
+
+  8.  EOR    - end of record code for text (default NL X'0A')
+
+  9.  EOF    - end of file code for text (default X'1A')
+
+ 10.  LRECL  - length of logical record. Maximum is 64K less 17 bytes.
+               Minimum is 3 for RECFM=V, 2 for RECFM=T or 1 for
+               RECFM=F.
+
+ 11.  BLKSZ  - length of block.  Maximum is 64K less 17 bytes
+               and minimum is 3.  If zero is specified, a
+               default block of 8k will be dynamically
+               allocated and deallocated at open and close
+               respectively.  BLKSZ should be specified for
+               read/write access.  For sequential access,
+               larger block size reduces contention between
+               multiple files by reading or writing entire
+               blocks at one time rather than for each
+               record.  If insufficient memory is available,
+               the maximum available will be allocated.
+
+ 12.  EODAD  - end of file exit address. This cannot be changed
+               while file is open.
+
+ 13.  SYNAD  - synchronous error exit.  This cannot be changed while
+               file is open.  If register 2 does not point to a valid
+               DCBDCB ID field not exit is taken and interactive debug
+               is invoked.  If exit is taken, register 0 contains
+               error code and register 1 contains function code which
+               can be used by to produce error message by calling
+               subroutine LIB\SYNERROR.ALC which is in the default
+               system relocatable library L370.LIB.
+
+ 14.  RCD    - record area address for get/put only.  This
+               address may be changed on each get or put by
+               placing new address in register 1.  If register 1
+               contains zero, then current DCB area will be used.
+
+ 15.  BLK    - block area address used for direct I/O via MS-
+               DOS.  If DFUBUF is not set at open, this area
+               is dynamically allocated and deallocated using
+               BLKSZ or default for length.  If DFUBUF is set, then
+               new block address can be set for each read or write
+               by placing new address in register 1.  If register 1
+               contains zero, then current DCB block will be used.
+
+ 16.  RBA   -  relative byte address for random access
+               read/write.  First byte of file is zero.  This field
+               must be reset for each random read or write.
+
+ 17.  REN   -  address of file rename followed by zero.
+               Only used by RENAME SVC.  Both DCBDSN and REN must be
+               initialized in a closed DCB prior to RENAME SVC 23.
+
+ 18.  IOCNT -  physical I/O count since open.  Larger
+               BLKSZ will reduce physical I/O count for
+               sequential file access.
+
+ 19.  PRECL -  physical record length on last read or
+               write.  This field is initialized to zero
+               at open.  On write, BLKSZ will be calculated
+               if this field is zero, else this field will
+               override length allowing short blocks to be
+               written.  This is useful in processing files
+               of unknown length with fixed block logic.
+               The last block read may be short, and the
+               corresponding last block written may be short.
+
+Do not modify the reserved areas which are only used by
+PC/370 IOS while file is open.  See UTIL\PRINTDOC.ALC for
+example of file access method.
+
+*********
+
+Chapter 3.  Program load and execution services
+
+*********
+
+    SVC  FUNCTION  OPTIONS
+
+     15  USEREXIT  Transfer control to native code user exit at
+                   relative address in reg 15 via far call
+
+     25  LOAD      Reg 1 points to ASCIIZ path/filename
+                   on return, reg 0 has file address, reg 1 has length
+
+     26  ATTACH    Reg 0 must have file address of COM file and
+                   reg 1 must have desired length of attached addr.
+                   space
+
+     27  DETACH    If in attached address space, exit to next
+                   instruction after attach in mother address space
+                   else exit to MS-DOS
+
+     36  RELOAD    Reload file int memory at location in reg 0.
+                   Reg 1 must have file address and reg 15 must have
+                   maximum length of file allowed to be loaded into
+                   preallocated area.
+
+The PC/370 system includes support for dynamic loading and execution
+of 370 modules assembled and linked by A370.EXE and L370.EXE.
+Any file including COM and MOD type files can be loaded into free
+memory by use of the LOAD SVC 25.  The only argument required is
+the address of the path and file name in register 1.  The file name
+must end with a suffix of the form .XXX or a zero byte.  The largest
+free memory area will be allocated and the file loaded into it.
+Register 0 will be set to the address of the area, and register 1 will
+be set to the length of the file.  The unused portion of the allocated
+area will be freed.  If the load operation was successful, register 15
+will be set to zero, else it will be set to 1.  Demo test program
+DEMOSVC.ALC illustrates the use of the load function to load an 8086
+assembly language subroutine and execute it via user exit SVC 15.
+
+Any 370 COM file created by L370.EXE and loaded via the load SVC 25
+above, can be executed it its own address space via the attach SVC 26.
+Register 0 must be set to point to the COM file (set by load SVC 25)
+and register 1 must be set to address space size (minimum set by load
+SVC 25),  If additional space is to be included in the attached
+address space for dynamic use via GETMAIN/FREEMAIN SVC's 10/11, then
+the area to be added must be allocated in the mother address space
+prior to issuing attach SVC 26 and the total length of the COM file
+plus the allocated free space placed in register 1.  A COM file can be
+executed multiple times via attach by reloading registers 0 and 1 and
+reissuing SVC 26.  On second and following calls, the same address
+space control block built on the first call in the COM prefix area
+is reused (See CPY\IHASCB.CPY for layout) since it overlays original
+COM prefix data.
+
+Execution of the attached address space can be terminated via a detach
+SVC 27 which restores the mother address space and continues execution
+at the next instruction following the attach SVC 26.  The only other
+way to terminate the attached address space normally is to issue an
+exit SVC 0 which exits directly to MS-DOS.  A detach SVC 27 in an
+address space which has no mother, will cause exit to MS-DOS.
+
+An alternative to using attach/detach to execute dynamically loaded
+370 code is to use simple branch and link.  For 370 code linked into
+COM file, the 370 code starts X'210' from the beginning of the COM
+file.  For code linked into MOD type file by L370.EXE using option M,
+the 370 code starts immediately at the beginning of the file (i.e. the
+file load address returned in register 0 by load SVC 25).
+
+For example of each type program loading and execution, see
+DEMO\MVS.ALC and DEMO\DEMOPSW.ALC demo programs.
+
+The virtual address space established for the execution of COM files
+created by L370.EXE has the following memory layout.  For a sample
+DSECT of the address space control block, see CPY\IHASCB.CPY.
+
+ 000 INITIAL PROGRAM LOAD PSW
+ 008 INITIAL PROGRAM LOAD CCW1
+ 010 INITIAL PROGRAM LOAD CCW2
+ 018 EXTERNAL OLD PSW
+ 020 SUPERVISOR CALL OLD PSW
+ 028 PROGRAM OLD PSW
+ 030 MACHINE CHECK OLD PSW
+ 038 INPUT/OUTPUT OLD PSW
+ 040 CHANNEL STATUS WORD
+ 048 CHANNEL ADDRESS WORD
+ 050 INTERVAL TIMER
+ 058 EXTERNAL NEW PSW
+ 060 SUPERVISOR CALL NEW PSW
+ 068 PROGRAM NEW PSW
+ 070 MACHINE CHECK NEW PSW
+ 078 INPUT/OUTPUT NEW PSW
+ 080 MVS PARM AREA POINTED TO BY REGISTER 1 AT ENTRY (A,H,EBCDIC TEXT)
+ 100 SVC ATTACH INSTRUCTION
+ 102 SVC DETACH INSTRUCTION POINTED TO BY REG 14 AT ENTRY
+ 104 ADDRESS SPACE CONTROL BLOCK ASCB FOR CURRENT COM PROGRAM
+ 124 RESERVED
+ 138 SAVE AREA POINTED TO BY REG 13 AT ENTRY
+ 180 PC/370 PACKAGE IDENTIFICATION RECORD
+ 200 BEGINNING OF 370 CODE AND DEFAULT ENTRY POINTED TO BY REG 15
+     AT ENTRY IF NO OTHER ENTRY POINT SPECIFIED ON ALC END STATEMENT.
+
+*********
+
+Chapter 4.  All PC/370 supervisor services in SVC order
+
+*********
+
+    SVC  FUNCTION        REGISTERS input/output
+
+      0  exit to MS-DOS  none
+      1  open file       reg 2 = DCB address (see I/O section
+                         documentation)
+      2  close file      reg 2 = DCB address
+      3  read block      reg 2 = DCB, reg 1 must be address of block
+                         or zero
+      4  write block     reg 2 = DCB, reg 1 must be address of block
+                         or zero
+      5  get record      reg 2 = DCB, reg 1 must be address of area or
+                         zero
+      6  put record      reg 2 = DCB, reg 1 must be address of area or
+                         zero
+      7  delete file     reg 2 = DCB address
+      8  search file     reg 2 = DCB address
+                         /reg 0 = return code 0 if found
+      9  program trace   3 character trace ID follows SVC
+     10  get memory      reg 1 = length
+                         /reg 2 = address, reg 0 = 0 if ok
+                         if reg 0 > 0, then reg 1 = maximum memory
+                         available
+     11  free memory     reg 1 = length and reg 2 = address
+                         /reg 0 = 0 if ok
+     12  ASCII to EBCDIC reg 1 = address and reg 2 = length
+     13  EBCDIC to ASCII reg 1 = address and reg 2 = length
+     14  set SPIE        if reg 1 = 0, remove SPIE else set SPIE exit
+                         to reg 1
+                         at SPIE entry, reg 0 contains instruction
+                         length in high 16 bits, interruption code in
+                         low 16 bits, reg 1 contains interruption
+                         address, and reg 2 contains program
+                         interruption element block (see
+                         CPY\IHAPIE.CPY).
+     15  user exit       reg 15 = entry point to COM 80x86 code via
+                         far call
+     16  instr. count    /reg 1 = current 370 instruction count
+     17  load user exit  reg 1 = ASCIIZ path/file name
+                         /reg 0=addr.reg 1=len.
+     18  time of date    /reg 0 = hour, minute, second, 100th second,
+                         reg 1 = year, reg 2 = day, month, day of week
+     19  allocate memory reg 1 = address of MS-DOS real block, reg 2 =
+                         length
+                         /if reg 0 not zero, then reg 2 = max.
+                         available
+     20  deallocate mem. reg 1 = address of MS-DOS real block
+     21  input byte      reg 1 = device address, reg 0 = byte
+     22  output byte     reg 1 = device, reg 0 = byte
+     23  rename file     reg 2 = DCB address
+     24  display line    reg 1 = attributes, reg 2 = address, reg 15 =
+                         row/col
+     25  load file       reg 1 = path/filename
+                         /reg 0 = address, reg 1 = length
+     26  attach program  reg 0 = COM file address, reg 1 = address
+                         space length
+     27  detach program  none (return to instruction after attach)
+     28  svc 209 EBCDIC  set EBCDIC to ASCII trans. for WTO svc 209
+                         (default)
+     29  svc 209 ASCII   turn off EBCDIC to ASCII translation
+     30  svc 209 CR      turn on carriage return and line feed
+                         (default)
+     31  svc 209 no CR   turn off carriage return and line feed
+     32  VA to SEG:OFF   convert virtual address in R1 to
+                         segment:offset in R0
+     33  SEG:OFF to VA   convert segment:offset in R0 to virtual
+                         address in R1
+     34  interrupt       general purpose interrupt facility which
+                         supports all MS-DOS and BIOS interrupts using
+                         PC register vector table pointed to by R1
+                         must be defined as follows (see
+                         CPY\IHAPCB.CPY):
+
+                            0  PCVT DC C'PCVT'  ID REQUIRED BY SVC 34
+                            4  PCIN DS H        INTERRUPT # (0-255)
+                            6  PCPF DS H        PF FLAGS REGISTER
+                            8  PCAX DS H        AX
+                           10  PCBX DS H        BX
+                           12  PCCX DS H        CX
+                           14  PCDX DS H        DX
+                           16  PCDS DS H        DS
+                           18  PCSI DS H        SI
+                           20  PCES DS H        ES
+                           22  PCDI DS H        DI
+
+                         PC registers are loaded from PCVT for
+                         interrupt. PC register results are also
+                         stored in PCVT area immediately after
+                         interrupt.  Note segment:offset addresses
+                         such as DS:DX, DS:SI, or ES:DI required
+                         by interrupts can be calculated via SVC 32.
+                         Likewise returned segment:offset results can
+                         be translated back to PC/370 virtual
+                         addresses via SVC 33.  This is a very
+                         powerful and therefore dangerous instruction.
+                         SVC's 128-191 and SVC's 200-241 should be
+                         used in place of this more general SVC when
+                         possible since they are a little faster (they
+                         don't load and store all PC registers and
+                         don't require PCVT setup).  They are also
+                         much safer since an error in PCVT setup could
+                         invoke wrong interrupt or pass bad registers
+                         to any function including reboot interrupt,
+                         write to disk, etc SVC 34 does verify PCVT
+                         identifier and range of PCIN within 0-255.
+                         If verify fails, program interruption
+                         19 occurs.  If carry bit is set by interrupt,
+                         condition code 3 is set, else condition code
+                         0 is set.
+
+     35  80x87 assist    Scientific subroutine function assist via
+                         80x87. Register 1 contains function # and
+                         values are passed via floating point
+                         registers.  See chapter on floating
+                         point for more information.
+
+     36  RELOAD          Load file into memory at address in reg 0.
+                         Reg 1 must have file address and reg 15 must
+                         have maximum file length allowed to be loaded
+                         in preallocated area.
+
+     37  SVCTRAP         Define svc trap table via register 1 which
+                         contains address of user exit routine to be
+                         used with each svc.  If register 1 is zero
+                         current svc trap table is cancelled.  After
+                         table is defined, each svc call functions as
+                         follows:
+
+                           1.  If table+4*(svc #) contains zero,
+                               execute real PC/370 svc normally.
+                           2.  If svc trap active mode is set,
+                               execute real PC/370 svc normally.
+                           3.  If table+4*(svc #) is not zero,
+                               store current psw at old svc psw x'20',
+                               set trap active mode, and branch to
+                               trap exit address in table entry.
+
+                         LPSW instruction will always reset trap
+                         active mode, and normal exit from trap
+                         is via LPSW OLDSVC.  All svc calls within
+                         trap routine including the svc which
+                         invoked trap will process as real svcs
+                         normally without storing psw.  See DEMO\
+                         DEMOTRAP.ALC program for examples.
+
+    128 - 191 issue BIOS interrupt number = svc # - X'80' with PC
+              registers mapped as follows before and after interrupt:
+
+        AX - low bytes of register 0
+        BX - low bytes of register 1
+        CX - low bytes of register 14
+        DX - low bytes of register 15
+
+        If carry set by call, then CC =3 else CC = 0.
+        8086 flags returned in high bytes of R0.
+
+    200 - 241 issue interrupt 21H with PC registers mapped as follows:
+
+        For all svc's 200-241:
+
+          AH - MS-DOS function call number = svc number -200
+          AL - low byte  of register 0
+          BX - low bytes of register 1
+
+        for svc # 201-208, 211, 213, 214, and 225:
+
+          DL - low byte register 2
+
+        for svc 209, 210, 212, and 215-241:
+
+          DS:DS - segment:offset from virtual address in register 2
+          CX    - returned in register 14
+          DX    - returned in register 15
+
+          One of the most frequently used SVC's is 209 (write to
+          operator).  For example, to print message on standard output
+          device via MS-DOS function call 9, the following 2 PC/370
+          instructions can be used:
+
+           LA  R2,=C'THIS IS A DEMO WTO MESSAGE$'
+           SVC 209
+
+          The above example will print message on console and issue
+          carriage return and line feed following message ending with
+          $.  To turn off automatic carriage return and line feed,
+          issue SVC 31 prior to SVC 209.  To eliminate overhead of
+          converting from default EBCDIC strings to ASCII for 209,
+          issue SVC 29 prior to SVC 209 and use PC/370 assembler
+          extension for ASCII strings in double quotes.  For
+          example, this is the most efficient method of issuing
+          messages:
+
+            SVC 29  TURN OFF EBCDIC TO ASCII CONVERSION FOR 209
+             .
+             .
+            LA  R2,=C"THIS IS A DEMO WTO MESSAGE$"
+            SVC 209
+
+*********
+
+Chapter 5.  Floating Point System Documentation
+
+*********
+
+ A.  Introduction
+
+     PC/370 release 4.0 contains support for the entire 370 floating
+     point instruction set using the Intel 80x87 co-processor.  If the
+     co-processor is not installed, all floating point instructions
+     cause operation exceptions as they would on a 370 without the
+     floating point option.  There is a new option in the L370 linkage
+     editor (option P) which can be used to force turning off floating
+     point option even when co-processor is installed.  Default is to
+     support floating point if it is installed and 370 module has been
+     linked using release 3.0+ linkage editor.  In addition to the
+     standard floating point instructions, two additional levels of
+     support have been added.  Section F describes a set of SVC's
+     which invoke extended microcode functions on the 80x87 chip such
+     as square root, logs, etc.  These SVC's are fast but most require
+     special scaling of arguments.  DOC\USER.DOC describes a set of
+     scientific subroutines written in ALC which can be called to
+     efficiently calculate functions over extended range of real
+     numbers.
+
+ B.  Data formats
+
+     The Intel 80x87 actually only supports one IEEE floating point
+     format which has 64 bit mantissa and exponent range of 10**4932
+     which exceeds both the 370 short and long (double precision)
+     formats of 24 and 56 bit mantissa's.  Therefore, both the short
+     and long operations are done with extra precision.  The 370
+     extended format instructions are all supported but the precision
+     actually available is only 64 bits versus the 112 on a 370.  When
+     short and long numbers are loaded into the 80x87, they are padded
+     with zeros to the 64 bit length required.  When an extended
+     number is loaded into the 80x87, the last 8 bits are obtained
+     from the second register in the specified extended register pair.
+     The PC/370 cross assembler now supports E, D, and L data formats
+     when the 80x87 is installed.
+
+ C.  Data exceptions
+
+     The standard 370 exponent overflow, exponent underflow, and
+     floating point divide exceptions are all supported.  The program
+     mask can be set to control whether program exception is allowed.
+     One deviation from standard 370 convention, is to return the
+     maximum floating point number with correct sign when overflow
+     occurs instead of an invalid number.  This is consistent with
+     IEEE standard.
+
+ D.  Floating point instructions
+
+     1.  Note that all operations are normalized using 80x87 and that
+         the 370 unnormalized function identical to normalized
+         instructions.
+
+     2.  Compare short and long include all 64 bits in comparison.  To
+         round number to specific number of bits in short or long
+         format, use the LRER or LRDR instruction prior to compare.
+
+ E.  Interactive debug facilities for floating point
+
+     1.  When floating point support is active (i.e. option P is on
+         and the 80x87 co-processor is installed), the R command will
+         display third line with floating point register contents in
+         hex.  Note that the actual floating point register areas in
+         memory are stored in 80x87 temporary real format to allow
+         register to register instructions to execute faster since no
+         conversion from or to 370 format is required.
+
+ F.  Extended 80x87 microcoded arithmetic functions
+
+     The following extended arithmetic floating point functions are
+     supported via SVC 35 with the function number in register 1.
+     Arguments and results are in the floating point registers F0 and
+     F2.
+
+     #   Formula:                Notes:
+
+     1.  F0 = LOG10(2)           constant
+     2.  F0 = LOGE(2)            constant
+     3.  F0 = LOG2(E)            constant
+     4.  F0 = LOG2(10)           constant
+     5.  F0 = PI                 constant 3.14159....
+     6.  F0 = ARCTAN(F2/F0)      0 <= F2 <= F0 < IFI (infinity)
+     7.  F2/F0 = TAN(F0)         0 <= F0 <= PI/4 (sets F0 and F2)
+     8.  F0 = SQRT(F0)           0 <= F0 < IFI
+     9.  F0 = F2 * LOG2(F0)      0 < F0 < IFI, -IFI < F2 < IFI
+    10.  F0 = F2 * LOG2(F0+1)    0 <= F0 < (1-(SQRT(2)/2)), _IFI < F2
+                                 < IFI
+    11.  F0 = 2**F0              -IFI < F0 < IFI (note 1)
+    12.  F0 = R0                 convert to real
+    13.  R0 = F0                 convert to integer
+    14.  F0 = MOD(F0/F2)         return fraction of F0 mod F2 in F0
+                                 (note 2)
+    15.  F0 = SIN(F0)            argument may be any real radian value
+                                 (note 3)
+    16.  F0 = COS(F0)            argument may be any real radian value
+                                 (note 3)
+    17.  F0 = TAN(F0)            argument may be any real radian value
+                                 (note 3)
+
+   Notes:
+
+     1.  This function uses equivalence expression to derive 2**F0 for
+         all values of F0 rather than just the 0.0-0.5 range supported
+         via the F2XM1 80x87 instruction.
+
+     2.  Note this uses FPREM 80x87 instruction repeatedly to
+         calculate exact remainder via successive subtraction.
+
+     3.  Note 15-17 perform scaling of argument via FPREM 80x87
+         instruction and use FPTAN 80x87 instruction to derive
+         tangent, sine and cosine.
+
+   Register 15 is set to one of the following values at exit from svc:
+
+    hex
+
+     00 - no errors detected
+     80 - 80x87 not operational
+     40 - invalid function number in register 1
+     20 - 80x87 precision error (inexact result such as 1/3 etc.)
+     10 - 80x87 underflow error (zero returned)
+     08 - 80x87 overflow  error (max 370 value returned)
+     04 - 80x87 zero divide     (max 370 value returned)
+     02 - 80x87 denormalized operand error (should not occur)
+     01 - 80x87 invalid operation error    (should not occur)

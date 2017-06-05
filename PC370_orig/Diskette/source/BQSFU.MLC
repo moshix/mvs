@@ -1,0 +1,589 @@
+         PRINT NOGEN                                                   
+****************************************************************
+*        FILENAME:  BQSFU.MLC                                  *
+*        AUTHOR  :  Bill Qualls                                *
+*        SYSTEM  :  Compaq 286LTE, PC/370 R4.2                 *
+*        REMARKS :  Sequential File Update Sample Program      *
+****************************************************************
+         START 0                                                       
+         REGS
+BEGIN    BEGIN
+         WTO   'BQSFU ... Begin execution'
+         BAL   R10,SETUP
+MAIN     EQU   *
+         CLI   EOFMAST,C'Y'
+         BE    EOJ
+         CLI   EOFTRANS,C'Y'
+         BE    EOJ
+         BAL   R10,PROCESS
+         B     MAIN
+EOJ      EQU   *
+         BAL   R10,WRAPUP
+         WTO   'BQSFU ... Normal end of program'
+         RETURN
+****************************************************************
+*        SETUP - Those things which happen one time only,      *
+*                before any records are processed.             *
+****************************************************************
+SETUP    EQU   *
+         ST    R10,SVSETUP
+         OI    MASTERIN+10,X'08'  PC/370 ONLY - Convert all
+*                                 input from ASCII to EBCDIC
+         OI    TRANSIN+10,X'08'   PC/370 ONLY - Convert all
+*                                 input from ASCII to EBCDIC
+         OI    MASTEROT+10,X'08'  PC/370 ONLY - Convert all
+*                                 output from EBCDIC to ASCII
+         OI    REPORT+10,X'08'    PC/370 ONLY - Convert all
+*                                 output from EBCDIC to ASCII
+         OPEN  MASTERIN 
+         OPEN  TRANSIN
+         OPEN  MASTEROT                                        
+         OPEN  REPORT
+         BAL   R10,READMST
+         BAL   R10,READTRN
+         L     R10,SVSETUP
+         BR    R10
+****************************************************************
+*        HDGS - Print headings.                                *
+****************************************************************
+HDGS     EQU   *
+         ST    R10,SVHDGS
+         AP    PGS,=P'1'          Add 1 to page count
+         MVC   HDPGS,=X'40202120' Edit pattern for page count
+         ED    HDPGS,PGS          Move page count to heading
+         PUT   REPORT,FORMFEED    PC/370 ONLY
+         PUT   REPORT,HD1
+         PUT   REPORT,HD2
+         PUT   REPORT,HD3
+         PUT   REPORT,HD4
+         ZAP   LNS,=P'0'          Reset line count to zero
+         L     R10,SVHDGS
+         BR    R10
+****************************************************************
+*        PROCESS - Those things which happen once per record.  *
+****************************************************************
+PROCESS  EQU   * 
+         ST    R10,SVPROC
+         CLC   INBR,TNBR          Attempt match on customer nbr 
+         BH    PROC2              Transaction low
+         BL    PROC3              Master low 
+         BAL   R10,MATCH          Otherwise a match was found
+         B     PROCESSX           
+PROC2    EQU   *                  No master for this transaction
+         BAL   R10,TRANSLOW       
+         B     PROCESSX
+PROC3    EQU   *                  No transaction for this master
+         BAL   R10,MASTLOW
+PROCESSX EQU   *
+         L     R10,SVPROC
+         BR    R10
+****************************************************************
+*        MASTLOW - No updates for this master record.          *
+*                  Just write this record and go to next.      *
+****************************************************************
+MASTLOW  EQU   * 
+         ST    R10,SVMSTLOW
+         MVC   OREC,IREC          Move input to output    
+         BAL   R10,WRITENEW       Write new master record 
+         BAL   R10,READMST        Read next master record
+         L     R10,SVMSTLOW
+         BR    R10
+****************************************************************
+*        MATCH - Transaction for existing master record.       *
+****************************************************************
+MATCH    EQU   * 
+         ST    R10,SVMATCH
+         CLI   TACD,ADD           Attempt to add?
+         BE    MATCH2             Can't do it - already exists
+         CLI   TACD,CHANGE        Attempt to change?
+         BE    MATCH3             OK to change existing record
+         CLI   TACD,DELETE        Attempt to delete?
+         BE    MATCH4             OK to delete existing record
+         BAL   R10,BADCODE        Error - unrecognized code
+         BAL   R10,READTRN        Read next transaction
+         B     MATCHX
+MATCH2   EQU   *                  Attempt to add
+         BAL   R10,BADADD         Can't add - it already exists
+         BAL   R10,READTRN        Read next transaction
+         B     MATCHX
+MATCH3   EQU   *                  Attempt to change
+         BAL   R10,CHANGEIT       OK to change existing record
+         BAL   R10,READTRN        Read next transaction
+         BAL   R10,READMST        Read next master
+         B     MATCHX
+MATCH4   EQU   *                  Attempt to delete
+         BAL   R10,DELETEIT       OK to delete existing record
+         BAL   R10,READTRN        Read next transaction
+         BAL   R10,READMST        Read next master
+MATCHX   EQU   *
+         L     R10,SVMATCH
+         BR    R10
+****************************************************************
+*        TRANSLOW - Transaction without a matching master.     *
+****************************************************************
+TRANSLOW EQU   * 
+         ST    R10,SVTRNLOW
+         CLI   TACD,ADD           Attempt to add?
+         BE    TRANSLO2           OK since it doesn't exist   
+         CLI   TACD,CHANGE        Attempt to change?
+         BE    TRANSLO3           Can't change - doesn't exist
+         CLI   TACD,DELETE        Attempt to delete?
+         BE    TRANSLO4           Can't delete - not there     
+         BAL   R10,BADCODE        Error - Unrecognized code
+         BAL   R10,READTRN        Read next transaction
+         B     TRANSLOX
+TRANSLO2 EQU   *                  Attempt to add    
+         BAL   R10,ADDIT          OK to add - not there already
+         BAL   R10,READTRN        Read next transaction
+         B     TRANSLOX
+TRANSLO3 EQU   *                  Attempt to change
+         BAL   R10,BADCHANG       Can't change - doesn't exist
+         BAL   R10,READTRN        Read next transaction
+         B     TRANSLOX
+TRANSLO4 EQU   *                  Attempt to delete
+         BAL   R10,BADDELET       Can't delete - doesn't exist
+         BAL   R10,READTRN        Read next transaction
+TRANSLOX EQU   *
+         L     R10,SVTRNLOW
+         BR    R10
+****************************************************************
+*        BADCODE - Bad Transaction Code                        *
+****************************************************************
+BADCODE  EQU   * 
+         ST    R10,SVBADCOD
+         BAL   R10,CHKLNS
+         MVC   RREC,BLANKS
+         BAL   R10,WRITE
+         MVC   RDATA,TREC
+         MVC   RMSG,=CL16'CODE NOT A/C/D'
+         BAL   R10,WRITE
+         AP    #REJECTS,=P'1'
+BADCODEX EQU   *            
+         L     R10,SVBADCOD
+         BR    R10
+****************************************************************
+*        BADADD - Bad Add Attempted                            *
+****************************************************************
+BADADD   EQU   * 
+         ST    R10,SVBADADD
+         BAL   R10,CHKLNS
+         MVC   RREC,BLANKS
+         BAL   R10,WRITE
+         MVC   RDATA,IREC
+         MVC   RMSG,=CL16'RECORD ON FILE'
+         BAL   R10,WRITE
+         MVC   RDATA,TREC
+         MVC   RMSG,=CL16'ADD UNSUCCESSFUL'
+         BAL   R10,WRITE
+         AP    #REJECTS,=P'1'
+BADADDX  EQU   *            
+         L     R10,SVBADADD
+         BR    R10
+****************************************************************
+*        BADCHG - Bad Change Attempted                         *
+****************************************************************
+BADCHANG EQU   * 
+         ST    R10,SVBADCHG
+         BAL   R10,CHKLNS
+         MVC   RREC,BLANKS
+         BAL   R10,WRITE
+         MVC   RDATA,TREC
+         MVC   RMSG,=CL16'CHNG NOT ON FILE'
+         BAL   R10,WRITE
+         AP    #REJECTS,=P'1'
+BADCHGX  EQU   *            
+         L     R10,SVBADCHG
+         BR    R10
+****************************************************************
+*        BADDEL - Bad Delete Attempted                         *
+****************************************************************
+BADDELET EQU   * 
+         ST    R10,SVBADDEL
+         BAL   R10,CHKLNS
+         MVC   RREC,BLANKS
+         BAL   R10,WRITE
+         MVC   RDATA,TREC
+         MVC   RMSG,=CL16'DLTE NOT ON FILE'
+         BAL   R10,WRITE
+         AP    #REJECTS,=P'1'
+BADDELX  EQU   *            
+         L     R10,SVBADDEL
+         BR    R10
+****************************************************************
+*        ADDIT - Add a new record to master file               *
+****************************************************************
+ADDIT    EQU   * 
+         ST    R10,SVADDIT
+         MVC   ONBR,TNBR
+         MVC   OLNAME,TLNAME
+         MVC   OFNAME,TFNAME
+         MVC   OADDR,TADDR
+         MVC   OCITY,TCITY
+         MVC   OSTATE,TSTATE
+         MVC   OZIP,TZIP
+         MVC   OACD,TACD
+         MVC   OCRLF,TCRLF
+         MVC   OREC,TREC
+         BAL   R10,WRITENEW
+         BAL   R10,CHKLNS
+         MVC   RREC,BLANKS
+         BAL   R10,WRITE
+         MVC   RDATA,TREC
+         MVC   RMSG,=CL16'ADD SUCCESSFUL'         
+         BAL   R10,WRITE
+         AP    #ADDED,=P'1'
+ADDITX   EQU   *            
+         L     R10,SVADDIT
+         BR    R10
+****************************************************************
+*        CHANGEIT - Apply changes to existing master record    *
+****************************************************************
+CHANGEIT EQU   * 
+         ST    R10,SVCHGIT
+*
+*        COPY EXISTING RECORD TO OUTPUT RECORD
+*        THEN MAKE THE REQUESTED CHANGES
+*
+         MVC   OREC,IREC
+         CLC   TLNAME,BLANKS
+         BE    CHGIT2
+         MVC   OLNAME,TLNAME
+CHGIT2   EQU   *
+         CLC   TFNAME,BLANKS
+         BE    CHGIT3
+         MVC   OFNAME,TFNAME
+CHGIT3   EQU   *
+         CLC   TADDR,BLANKS
+         BE    CHGIT4
+         MVC   OADDR,TADDR 
+CHGIT4   EQU   *
+         CLC   TCITY,BLANKS
+         BE    CHGIT5
+         MVC   OCITY,TCITY 
+CHGIT5   EQU   *
+         CLC   TSTATE,BLANKS
+         BE    CHGIT6
+         MVC   OSTATE,TSTATE
+CHGIT6   EQU   *
+         CLC   TZIP,BLANKS
+         BE    CHGIT7
+         MVC   OZIP,TZIP  
+CHGIT7   EQU   *
+         MVC   OACD,TACD     
+         BAL   R10,WRITENEW
+*
+*        SHOW THE RECORD BEFORE AND AFTER CHANGES
+*
+         BAL   R10,CHKLNS
+         MVC   RREC,BLANKS
+         BAL   R10,WRITE
+         MVC   RDATA,IREC      
+         MVC   RMSG,=CL16'BEFORE CHANGE'
+         BAL   R10,WRITE
+         MVC   RDATA,OREC
+         MVC   RMSG,=CL16'AFTER CHANGE'
+         BAL   R10,WRITE
+         AP    #CHANGED,=P'1'
+CHGITX   EQU   *            
+         L     R10,SVCHGIT
+         BR    R10
+****************************************************************
+*        DELETEIT - Delete an existing master record           *
+*                   (To delete it, just don't write it out.)   *
+****************************************************************
+DELETEIT EQU   * 
+         ST    R10,SVDELIT
+         BAL   R10,CHKLNS
+         MVC   RREC,BLANKS
+         BAL   R10,WRITE
+         MVC   RDATA,IREC      
+         MVC   RMSG,=CL16'RECORD DELETED'
+         BAL   R10,WRITE
+         AP    #DELETED,=P'1'
+DELETEX  EQU   *            
+         L     R10,SVDELIT
+         BR    R10
+****************************************************************
+*        READMST - Read a master record.                       *
+****************************************************************
+READMST  EQU   *
+         ST    R10,SVREADM
+         GET   MASTERIN,IREC
+         AP    #OLDIN,=P'1'
+         B     READMX
+ATENDMST EQU   *
+         MVI   EOFMAST,C'Y'
+READMX   EQU   *
+         L     R10,SVREADM
+         BR    R10
+****************************************************************
+*        READOFF - Read a transaction record.                  *
+****************************************************************
+READTRN  EQU   *
+         ST    R10,SVREADT
+         GET   TRANSIN,TREC
+         AP    #TRANSIN,=P'1'
+         B     READTX
+ATENDTRN EQU   *
+         MVI   EOFTRANS,C'Y'
+READTX   EQU   *
+         L     R10,SVREADT
+         BR    R10
+****************************************************************
+*        CHKLNS - Check lines printed. Full page?              *
+****************************************************************
+CHKLNS   EQU   *
+         ST    R10,SVCHKLNS
+         CP    LNS,MAXLNS
+         BL    CHKLNSX
+         BAL   R10,HDGS
+CHKLNSX  EQU   *
+         L     R10,SVCHKLNS
+         BR    R10
+****************************************************************
+*        WRITE - Write a single detail line.                   *
+****************************************************************
+WRITE    EQU   *
+         ST    R10,SVWRITE
+         PUT   REPORT,RREC        Write report line
+         AP    LNS,=P'1'
+         L     R10,SVWRITE
+         BR    R10
+****************************************************************
+*        WRITE - Write a new master record.                    *
+****************************************************************
+WRITENEW EQU   *
+         ST    R10,SVWRITEN
+         PUT   MASTEROT,OREC
+         AP    #NEWOUT,=P'1'
+         L     R10,SVWRITEN
+         BR    R10
+****************************************************************
+*        WRAPUP - Those things which happen one time only,     *
+*                 after all records have been processed.       *
+****************************************************************
+WRAPUP   EQU   *
+         ST    R10,SVWRAP
+*                                 At this point we know that
+*                                 at least one of the input
+*                                 files is at EOF. Process
+*                                 other file as "unmatched"
+*                                 until at EOF also.
+WRAPUP2  EQU   *
+         CLI   EOFMAST,C'Y'
+         BE    WRAPUP3
+         BAL   R10,MASTLOW
+         B     WRAPUP2
+WRAPUP3  EQU   *
+         CLI   EOFTRANS,C'Y'
+         BE    WRAPUP4
+         BAL   R10,TRANSLOW
+         B     WRAPUP3
+WRAPUP4  EQU   *
+         CLOSE MASTERIN
+         CLOSE TRANSIN
+         CLOSE MASTEROT
+         BAL   R10,DOCOUNTS
+         CLOSE REPORT
+         WTO   'BQSFU ... Audit list on REPORT.TXT'
+         L     R10,SVWRAP
+         BR    R10
+****************************************************************
+*        DOCOUNTS - Show counts for audit                      *
+****************************************************************
+DOCOUNTS EQU   *
+         ST    R10,SVCOUNTS
+         BAL   R10,HDGS
+         MVC   AREC,BLANKS
+         BAL   R10,WRITE
+*
+         MVC   ADESC,=CL25'Transactions In'
+         MVC   ACOUNT,EDCOUNT
+         ED    ACOUNT,#TRANSIN
+         BAL   R10,WRITE
+*         
+         MVC   ADESC,=CL25'Transactions Rejected'
+         MVC   ACOUNT,EDCOUNT
+         ED    ACOUNT,#REJECTS
+         BAL   R10,WRITE
+*         
+         MVC   ADESC,=CL25'Old Masters In' 
+         MVC   ACOUNT,EDCOUNT
+         ED    ACOUNT,#OLDIN
+         BAL   R10,WRITE
+*         
+         MVC   ADESC,=CL25'Old Masters Deleted'
+         MVC   ACOUNT,EDCOUNT
+         ED    ACOUNT,#DELETED
+         BAL   R10,WRITE
+*         
+         MVC   ADESC,=CL25'Old Masters Changed'
+         MVC   ACOUNT,EDCOUNT
+         ED    ACOUNT,#CHANGED
+         BAL   R10,WRITE
+*         
+         MVC   ADESC,=CL25'New Masters Added'
+         MVC   ACOUNT,EDCOUNT
+         ED    ACOUNT,#ADDED
+         BAL   R10,WRITE
+*         
+         MVC   ADESC,=CL25'New Masters Out'
+         MVC   ACOUNT,EDCOUNT
+         ED    ACOUNT,#NEWOUT
+         BAL   R10,WRITE
+*         
+         L     R10,SVCOUNTS
+         BR    R10
+****************************************************************
+*        Literals, if any, will go here                        *
+****************************************************************
+         LTORG
+****************************************************************
+*        File definitions                                      *
+****************************************************************
+MASTERIN DCB   LRECL=62,RECFM=F,MACRF=G,EODAD=ATENDMST,
+               DDNAME='BQSFUMST.DAT' 
+TRANSIN  DCB   LRECL=62,RECFM=F,MACRF=G,EODAD=ATENDTRN,
+               DDNAME='BQSFUTRN.DAT'
+MASTEROT DCB   LRECL=62,RECFM=F,MACRF=P,
+               DDNAME='BQSFUNEW.DAT'
+REPORT   DCB   LRECL=80,RECFM=F,MACRF=P,
+               DDNAME='REPORT.TXT'      
+****************************************************************
+*        RETURN ADDRESSES                                      *
+****************************************************************
+SVSETUP  DC    F'0'               SETUP
+SVHDGS   DC    F'0'               HDGS
+SVPROC   DC    F'0'               PROCESS
+SVREADM  DC    F'0'               READMST
+SVREADT  DC    F'0'               READTRN
+SVWRITE  DC    F'0'               WRITE
+SVWRITEN DC    F'0'               WRITENEW
+SVWRAP   DC    F'0'               WRAPUP
+SVCHKLNS DC    F'0'               CHKLNS
+SVMATCH  DC    F'0'               MATCH
+SVMSTLOW DC    F'0'               MASTLOW
+SVTRNLOW DC    F'0'               TRANSLOW
+SVCOUNTS DC    F'0'               DOCOUNTS
+SVBADCOD DC    F'0'               BADCODE 
+SVBADADD DC    F'0'               BADADD  
+SVBADCHG DC    F'0'               BADCHANG
+SVBADDEL DC    F'0'               BADDELET
+SVADDIT  DC    F'0'               ADDIT
+SVCHGIT  DC    F'0'               CHANGEIT
+SVDELIT  DC    F'0'               DEELTEIT
+****************************************************************
+*        Miscellaneous field definitions                       *
+****************************************************************
+EOFMAST  DC    CL1'N'             End of master file? (Y/N)
+EOFTRANS DC    CL1'N'             End of transaction file? (Y/N)
+EDCOUNT  DC    X'40206B2020206B202120'   BZ,ZZZ,ZZ9
+PGS      DC    PL2'0'             Nbr of pages printed.
+LNS      DC    PL2'20'            Lines printed on this page.
+MAXLNS   DC    PL2'20'            Max nbr lines per page.
+*                                 My line counts exclude hdgs.
+BLANKS   DS    0CL80
+         DC    CL78' ',XL2'0D25'
+****************************************************************
+*        Transaction codes                                     *
+****************************************************************
+ADD      EQU   C'A'
+CHANGE   EQU   C'C'
+DELETE   EQU   C'D'
+****************************************************************
+*        Counts for audit purposes                             *
+****************************************************************
+#TRANSIN DC    PL4'0'    Transactions In
+#REJECTS DC    PL4'0'    Transactions Rejected
+#OLDIN   DC    PL4'0'    Old Masters In 
+#DELETED DC    PL4'0'    Old Masters Deleted
+#CHANGED DC    PL4'0'    Old Masters Changed
+#ADDED   DC    PL4'0'    New Masters Added
+#NEWOUT  DC    PL4'0'    New Masters Out 
+****************************************************************
+*        Input record definition - Master In                   *
+****************************************************************
+IREC     DS    0CL62      1-62    Master record 
+INBR     DS    CL5        1- 5    Customer nbr  
+ILNAME   DS    CL10       6-15    Last name   
+IFNAME   DS    CL10      16-25    First name    
+IADDR    DS    CL15      26-40    Address  
+ICITY    DS    CL10      41-50    City      
+ISTATE   DS    CL2       51-52    State    
+IZIP     DS    CL5       53-57    Zip      
+         DS    CL2       58-59    Unused   
+IACD     DS    CL1       60-60    Transaction code (A/C/D)
+ICRLF    DS    CL2       61-62    PC/370 only - CR/LF
+****************************************************************
+*        Input record definition - Transaction                 *
+****************************************************************
+TREC     DS    0CL62      1-62    Transaction record
+TNBR     DS    CL5        1- 5    Customer nbr  
+TLNAME   DS    CL10       6-15    Last name   
+TFNAME   DS    CL10      16-25    First name    
+TADDR    DS    CL15      26-40    Address  
+TCITY    DS    CL10      41-50    City      
+TSTATE   DS    CL2       51-52    State    
+TZIP     DS    CL5       53-57    Zip      
+         DS    CL2       58-59    Unused   
+TACD     DS    CL1       60-60    Transaction code (A/C/D)
+TCRLF    DS    CL2       61-62    PC/370 only - CR/LF
+****************************************************************
+*        Output record definition - Master Out                 *
+****************************************************************
+OREC     DS    0CL62      1-62    Master record 
+ONBR     DS    CL5        1- 5    Customer nbr  
+OLNAME   DS    CL10       6-15    Last name   
+OFNAME   DS    CL10      16-25    First name    
+OADDR    DS    CL15      26-40    Address  
+OCITY    DS    CL10      41-50    City      
+OSTATE   DS    CL2       51-52    State    
+OZIP     DS    CL5       53-57    Zip      
+         DS    CL2       58-59    Unused   
+OACD     DS    CL1       60-60    Transaction code (A/C/D)
+OCRLF    DS    CL2       61-62    PC/370 only - CR/LF
+****************************************************************
+*        Output (line) definition                              *
+****************************************************************
+RREC     DS    0CL80      1-80    Report record
+RDATA    DC    CL60' '    1-60    Transaction Data
+         DC    CL2' '    61-62
+RMSG     DC    CL16' '   63-78    Audit message
+RCRLF    DS    CL2       79-80    PC/370 only - CR/LF
+****************************************************************
+*        Output record definition - Audit                      *
+*        !!! NOTE HOW SPACE FOR RREC IS REDEFINED !!!          *
+****************************************************************
+         ORG   RREC
+AREC     DS    0CL80      1-87    Audit Line    
+ADESC    DC    CL25' '    1-25    Description on count
+ACOUNT   DC    CL10' '   26-35    Count         
+         DC    CL43' '   36-78  
+ACRLF    DS    CL2       79-80    PC/370 only - CR/LF
+         ORG
+****************************************************************
+*        Headings definitions                                  *
+****************************************************************
+FORMFEED DS    0CL80              PC/370 only
+*        DC    X'0C'              EBCDIC formfeed
+*        DC    CL77' '
+         DC    78C'_'             For testing...
+         DC    X'0D25'            EBCDIC CR/LF
+HD1      DS    0CL80
+         DC    CL40'               Name & Address Update Pro'
+         DC    CL26'gram                  Page'
+HDPGS    DC    CL4'BZZ9'
+         DC    CL8' '
+         DC    XL2'0D25'
+HD2      DS    0CL80
+         DC    CL78'                       Audit Listing'
+         DC    XL2'0D25'
+HD3      DS    0CL80
+         DC    CL78' '
+         DC    XL2'0D25'
+HD4      DS    0CL80
+         DC    CL40'----+----1----+----2----+----3----+----4'
+         DC    CL38'----+----5----+----6  MESSAGES'
+         DC    XL2'0D25'
+         END   BEGIN                                                   
+

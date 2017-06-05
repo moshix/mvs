@@ -1,0 +1,31 @@
+         PRINT NOGEN                                                   
+****************************************************************
+*        FILENAME:  BAL4F.MLC                                  *
+*        AUTHOR  :  Bill Qualls                                *
+*        SYSTEM  :  Compaq 286LTE, PC/370 R4.2                 *
+*        REMARKS :  Chapter 4 Exercise - Predict output.       *
+****************************************************************
+         START 0                                                       
+         REGS
+BEGIN    BEGIN
+         BAL   R9,SUB1
+         BAL   R9,SUB2
+         RETURN
+SUB1     EQU   *
+         ST    R9,SVSUB1
+         WTO   'BEGIN SUB1'
+         BAL   R9,SUB2
+         WTO   'LEAVE SUB1'
+         L     R9,SVSUB2
+         BR    R9
+SUB2     EQU   *
+         ST    R9,SVSUB2
+         WTO   'BEGIN SUB2'
+         WTO   'LEAVE SUB2'
+         L     R9,SVSUB2
+         BR    R9
+         LTORG
+SVSUB1   DC    F'0'
+SVSUB2   DC    F'0'
+         END   BEGIN                                                   
+

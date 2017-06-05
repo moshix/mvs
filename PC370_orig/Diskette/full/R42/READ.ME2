@@ -1,0 +1,11 @@
+PC/370 Users:
+
+This version distributed on one 3.5 DS/DD diskette instead of
+three 5.25 DS/DD diskettes has E370P42.EXE removed along with
+SEE.COM and PRINTDOC.COM.  SEE.COM and PRINTDOC.COM can be
+created by running BAT\BLDUTIL.BAT after running INSTALL.BAT.
+
+Don Higgins 11/28/88
+
+
+

@@ -1,0 +1,256 @@
+         PRINT NOGEN                                                   
+****************************************************************
+*        FILENAME:  COGS9B.MLC                                 *
+*        AUTHOR  :  Bill Qualls                                *
+*        SYSTEM  :  Compaq 286LTE, PC/370 R4.2                 *
+*        REMARKS :  Produce report for COGSWORTH INDUSTRIES    *
+*                   showing inventory discrepancies.           *
+*                   Modify COGS7B.MLC to use ED instruction.   *
+****************************************************************
+         START 0                                                       
+         REGS
+BEGIN    BEGIN
+         WTO   'COGS9B ... Begin execution'
+         BAL   R10,SETUP
+MAIN     EQU   *
+         CLI   EOFSW,C'Y'
+         BE    EOJ
+         BAL   R10,PROCESS
+         B     MAIN
+EOJ      EQU   *
+         BAL   R10,WRAPUP
+         WTO   'COGS9B ... Normal end of program'
+         RETURN
+****************************************************************
+*        SETUP - Those things which happen one time only,      *
+*                before any records are processed.             *
+****************************************************************
+SETUP    EQU   *
+         ST    R10,SVSETUP
+         OI    INVENTRY+10,X'08'  PC/370 ONLY - Convert all
+*                                 input from ASCII to EBCDIC
+         OI    REPORT+10,X'08'    PC/370 ONLY - Convert all
+*                                 output from EBCDIC to ASCII
+         OPEN  INVENTRY
+         OPEN  REPORT
+         BAL   R10,HDGS
+         BAL   R10,READ
+         L     R10,SVSETUP
+         BR    R10
+****************************************************************
+*        HDGS - Print headings.                                *
+****************************************************************
+HDGS     EQU   *
+         ST    R10,SVHDGS
+         PUT   REPORT,HD1
+         PUT   REPORT,HD2
+         PUT   REPORT,HD3
+         PUT   REPORT,HD4
+         PUT   REPORT,HD5
+         L     R10,SVHDGS
+         BR    R10
+****************************************************************
+*        PROCESS - Those things which happen once per record.  *
+****************************************************************
+PROCESS  EQU   * 
+         ST    R10,SVPROC
+         BAL   R10,FORMAT
+         BAL   R10,WRITE
+         BAL   R10,READ
+         L     R10,SVPROC
+         BR    R10
+****************************************************************
+*        READ - Read a record.                                 *
+****************************************************************
+READ     EQU   *
+         ST    R10,SVREAD
+         GET   INVENTRY,IREC      Read a single product record
+         AP    #IN,=P'1'          Increment record count
+         B     READX
+ATEND    EQU   *
+         MVI   EOFSW,C'Y'
+READX    EQU   *
+         L     R10,SVREAD
+         BR    R10
+****************************************************************
+*        FORMAT - Format a single detail line.                 *
+****************************************************************
+FORMAT   EQU   *
+         ST    R10,SVFORM
+         MVC   OREC,BLANKS
+         MVC   ODESC,IDESC        Description
+         PACK  WBEGIN,IBEGIN      Beginning inventory
+         MVC   OBEGIN,WMASK
+         ED    OBEGIN,WBEGIN
+         PACK  WPURCH,IPURCH      Purchases
+         MVC   OPURCH,WMASK
+         ED    OPURCH,WPURCH
+         PACK  WCALIF,ICALIF      Each product's sales must
+         PACK  WILL,IILL           be packed so they can be 
+         PACK  WUTAH,IUTAH          added to total for this
+         PACK  WWISC,IWISC           product...
+         ZAP   WTOTAL,=P'0'       Initialize the total to zero
+         AP    WTOTAL,WCALIF       and start adding...
+         AP    WTOTAL,WILL
+         AP    WTOTAL,WUTAH
+         AP    WTOTAL,WWISC
+         MVC   OSALES,WMASK
+         ED    OSALES,WTOTAL
+         ZAP   WENDING,WBEGIN     Ending inventory =
+         AP    WENDING,WPURCH       Beginning + Purchases 
+         SP    WENDING,WTOTAL        - Sales
+         MVC   OENDING,WMASK
+         ED    OENDING,WENDING
+         PACK  WQOH,IQOH          Actual ending inventory
+         MVC   OQOH,WMASK
+         ED    OQOH,WQOH
+         MVC   OCRLF,WCRLF        PC/370 only.
+         CP    WQOH,WENDING       Compare actual vs. expected
+         BE    DODIFF
+         BL    SHORT
+         AP    #OVER,=P'1'        Count overages
+         B     DODIFF
+SHORT    EQU   *
+         AP    #SHORT,=P'1'       Count shortages
+DODIFF   EQU   *
+         ZAP   WDIFF,WENDING      Difference = Expected - Actual
+         SP    WDIFF,WQOH        
+         MVC   ODIFF,WMASK2
+         ED    ODIFF,WDIFF
+FORMATX  EQU   *
+         L     R10,SVFORM
+         BR    R10
+****************************************************************
+*        WRITE - Write a single detail line.                   *
+****************************************************************
+WRITE    EQU   *
+         ST    R10,SVWRITE
+         PUT   REPORT,OREC        Write report line
+         L     R10,SVWRITE
+         BR    R10
+****************************************************************
+*        WRAPUP - Those things which happen one time only,     *
+*                 after all records have been processed.       *
+****************************************************************
+WRAPUP   EQU   *
+         ST    R10,SVWRAP
+         MVC   OREC,BLANKS
+         MVC   OCRLF,WCRLF        PC/370 only.
+         BAL   R10,WRITE          Skip a line.
+         MVC   OREC(23),=CL23'BZZ9 records processed.'
+         MVC   OREC(4),WMASK
+         ED    OREC(4),#IN        Count all
+         BAL   R10,WRITE
+         MVC   OREC(23),=CL23'BZZ9 indicate shortage.'
+         MVC   OREC(4),WMASK
+         ED    OREC(4),#SHORT     Count shortages
+         BAL   R10,WRITE
+         MVC   OREC(23),=CL23'BZZ9 indicate overage. '
+         MVC   OREC(4),WMASK
+         ED    OREC(4),#OVER      Count overages
+         BAL   R10,WRITE
+         CLOSE INVENTRY
+         CLOSE REPORT
+         WTO   'COGS9B ... Discrepancies report on REPORT.TXT'
+         L     R10,SVWRAP
+         BR    R10
+****************************************************************
+*        Literals, if any, will go here                        *
+****************************************************************
+         LTORG
+****************************************************************
+*        File definitions                                      *
+****************************************************************
+INVENTRY DCB   LRECL=41,RECFM=F,MACRF=G,EODAD=ATEND,
+               DDNAME='COGS.DAT'  
+REPORT   DCB   LRECL=67,RECFM=F,MACRF=P,
+               DDNAME='REPORT.TXT'      
+****************************************************************
+*        RETURN ADDRESSES                                      *
+****************************************************************
+SVSETUP  DC    F'0'               SETUP
+SVHDGS   DC    F'0'               HDGS
+SVPROC   DC    F'0'               PROCESS
+SVREAD   DC    F'0'               READ
+SVFORM   DC    F'0'               FORMAT
+SVWRITE  DC    F'0'               WRITE
+SVWRAP   DC    F'0'               WRAPUP
+****************************************************************
+*        Miscellaneous field definitions                       *
+****************************************************************
+WCRLF    DC    X'0D25'            PC/370 ONLY - EBCDIC CR/LF
+EOFSW    DC    CL1'N'             End of file? (Y/N)
+BLANKS   DC    CL67' '
+WCALIF   DC    PL2'0'             Units sold in Calif
+WILL     DC    PL2'0'             Units sold in Illinois
+WUTAH    DC    PL2'0'             Units sold in Utah
+WWISC    DC    PL2'0'             Units sold in Wisconsin
+WTOTAL   DC    PL2'0'             Units sold in all states
+WBEGIN   DC    PL2'0'             Beginning inventory
+WPURCH   DC    PL2'0'             Purchases
+WENDING  DC    PL2'0'             Ending inventory (expected)
+WQOH     DC    PL2'0'             Ending inventory (actual)
+WDIFF    DC    PL2'0'             Difference
+#IN      DC    PL2'0'             Input record count
+#OVER    DC    PL2'0'             Records showing overage
+#SHORT   DC    PL2'0'             Records showing shortage
+WMASK    DC    X'40202120'        BZZ9
+WMASK2   DC    X'4020202060'      BZZZ-
+****************************************************************
+*        Input record definition                               *
+****************************************************************
+IREC     DS    0CL41        1-41  Inventory record
+IDESC    DS    CL10         1-10  Product description
+ICALIF   DS    CL3         11-13  Units sold in Calif
+IILL     DS    CL3         14-16  Units sold in Illinois
+IUTAH    DS    CL3         17-19  Units sold in Utah
+IWISC    DS    CL3         20-22  Units sold in Wisconsin
+IBEGIN   DS    CL3         23-25  Beginning inventory
+IPURCH   DS    CL3         26-28  Purchases throughout year
+IQOH     DS    CL3         29-31  Actual quantity on hand
+ICOST    DS    CL4         32-35  Cost (each) 99V99
+ISELL    DS    CL4         36-39  Sell for (each) 99V99
+ICRLF    DS    CL2         40-41  PC/370 only - CR/LF
+****************************************************************
+*        Output (line) definition                              *
+****************************************************************
+OREC     DS    0CL67        1-67      
+ODESC    DS    CL10         1-10  Product description
+         DS    CL3         11-13
+OBEGIN   DS    CL4         14-17  Beginning inventory
+         DS    CL4         18-21
+OPURCH   DS    CL4         22-25  Purchases
+         DS    CL4         26-29
+OSALES   DS    CL4         30-33  Units sold
+         DS    CL5         34-38
+OENDING  DS    CL4         39-42  Ending inventory (expected)
+         DS    CL4         43-46
+OQOH     DS    CL4         47-50  Ending inventory (actual)
+         DS    CL4         51-54
+ODIFF    DS    CL5         55-59  Difference
+         DS    CL6         60-65
+OCRLF    DS    CL2         66-67  PC/370 only - CR/LF
+****************************************************************
+*        Headings definitions                                  *
+****************************************************************
+HD1      DS    0CL67
+         DC    CL40'                    COGSWORTH INDUSTRIES'
+         DC    CL25' '
+         DC    XL2'0D25'
+HD2      DS    0CL67
+         DC    CL40'               Inventory Discrepancies R'
+         DC    CL25'eport'
+         DC    XL2'0D25'
+HD3      DS    0CL67
+         DC    CL65' '
+         DC    XL2'0D25'
+HD4      DS    0CL67
+         DC    CL40'Product      Begin + Purch - Sales = Exp'
+         DC    CL25'ect   Actual   Diff      '
+         DC    XL2'0D25'
+HD5      DS    0CL67
+         DC    CL40'----------   -----   -----   -----   ---'
+         DC    CL25'---   ------   ----      '
+         DC    XL2'0D25'
+         END   BEGIN                                                   
+

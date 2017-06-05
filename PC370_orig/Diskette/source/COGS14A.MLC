@@ -1,0 +1,165 @@
+         PRINT NOGEN                                                   
+****************************************************************
+*        FILENAME:  COGS14A.MLC                                *
+*        AUTHOR  :  Bill Qualls                                *
+*        SYSTEM  :  Compaq 286LTE, PC/370 R4.2                 *
+*        REMARKS :  Create binary data file using COGS.DAT     *
+****************************************************************
+         START 0                                                       
+         REGS
+BEGIN    BEGIN
+         WTO   'COGS14A ... Begin execution'
+         BAL   R10,SETUP
+MAIN     EQU   *
+         CLI   EOFSW,C'Y'
+         BE    EOJ
+         BAL   R10,PROCESS
+         B     MAIN
+EOJ      EQU   *
+         BAL   R10,WRAPUP
+         WTO   'COGS14A ... Normal end of program'
+         RETURN
+****************************************************************
+*        SETUP - Those things which happen one time only,      *
+*                before any records are processed.             *
+****************************************************************
+SETUP    EQU   *
+         ST    R10,SVSETUP
+         OI    INVENTRY+10,X'08'  PC/370 ONLY - Convert all
+*                                 input from ASCII to EBCDIC
+         OPEN  INVENTRY           
+         OPEN  BINARY             NOTE: Output in EBCDIC
+         BAL   R10,READ
+         L     R10,SVSETUP
+         BR    R10
+****************************************************************
+*        PROCESS - Those things which happen once per record.  *
+****************************************************************
+PROCESS  EQU   * 
+         ST    R10,SVPROC
+         BAL   R10,FORMAT
+         BAL   R10,WRITE
+         BAL   R10,READ
+         L     R10,SVPROC
+         BR    R10
+****************************************************************
+*        READ - Read a record.                                 *
+****************************************************************
+READ     EQU   *
+         ST    R10,SVREAD
+         GET   INVENTRY,IREC      Read a single product record
+         B     READX
+ATEND    EQU   *
+         MVI   EOFSW,C'Y'
+READX    EQU   *
+         L     R10,SVREAD
+         BR    R10
+****************************************************************
+*        FORMAT - Format a single detail line.                 *
+****************************************************************
+FORMAT   EQU   *
+         ST    R10,SVFORM
+         MVC   ODESC,IDESC
+         PACK  DBL,ICALIF         Convert CALIF to binary 
+         CVB   R3,DBL
+         STH   R3,OCALIF
+         PACK  DBL,IILL           Convert ILL to binary 
+         CVB   R3,DBL
+         STH   R3,OILL 
+         PACK  DBL,IUTAH          Convert UTAH to binary 
+         CVB   R3,DBL
+         STH   R3,OUTAH 
+         PACK  DBL,IWISC          Convert WISC to binary 
+         CVB   R3,DBL
+         STH   R3,OWISC 
+         PACK  DBL,IBEGIN         Convert BEGIN to binary 
+         CVB   R3,DBL
+         STH   R3,OBEGIN
+         PACK  DBL,IPURCH         Convert PURCH to binary 
+         CVB   R3,DBL
+         STH   R3,OPURCH
+         PACK  DBL,IQOH           Convert QOH to binary 
+         CVB   R3,DBL
+         STH   R3,OQOH  
+         PACK  DBL,ICOST          Convert COST to binary 
+         CVB   R3,DBL
+         STH   R3,OCOST
+         PACK  DBL,ISELL          Convert SELL to binary 
+         CVB   R3,DBL
+         STH   R3,OSELL
+         L     R10,SVFORM
+         BR    R10
+****************************************************************
+*        WRITE - Write a single output record.                 *
+****************************************************************
+WRITE    EQU   *
+         ST    R10,SVWRITE
+         PUT   BINARY,OREC    
+         AP    #OUT,=P'1'
+         L     R10,SVWRITE
+         BR    R10
+****************************************************************
+*        WRAPUP - Those things which happen one time only,     *
+*                 after all records have been processed.       *
+****************************************************************
+WRAPUP   EQU   *
+         ST    R10,SVWRAP
+         CLOSE INVENTRY
+         CLOSE BINARY
+         WTO   'COGS14A ... Binary file COGS.BIN created.'
+         ED    MSG#OUT,#OUT
+         WTO   MSG
+         L     R10,SVWRAP
+         BR    R10
+****************************************************************
+*        Literals, if any, will go here                        *
+****************************************************************
+         LTORG
+****************************************************************
+*        File definitions                                      *
+****************************************************************
+INVENTRY DCB   LRECL=41,RECFM=F,MACRF=G,EODAD=ATEND,
+               DDNAME='COGS.DAT'  
+BINARY   DCB   LRECL=28,RECFM=F,MACRF=P,
+               DDNAME='COGS.BIN'      
+****************************************************************
+*        RETURN ADDRESSES                                      *
+****************************************************************
+SVSETUP  DC    F'0'               SETUP
+SVPROC   DC    F'0'               PROCESS
+SVREAD   DC    F'0'               READ
+SVFORM   DC    F'0'               FORMAT
+SVWRITE  DC    F'0'               WRITE
+SVWRAP   DC    F'0'               WRAPUP
+****************************************************************
+*        Miscellaneous field definitions                       *
+****************************************************************
+WCRLF    DC    X'0D25'            PC/370 ONLY - EBCDIC CR/LF
+EOFSW    DC    CL1'N'             End of file? (Y/N)
+#OUT     DC    PL2'0'             Count of records written
+DBL      DC    D'0'               To convert packed to binary
+         COPY  COGS
+****************************************************************
+*        Output record definition                              *
+****************************************************************
+         DS    0H                 Force halfword alignment
+OREC     DS    0CL28        1-28  Inventory record
+ODESC    DS    CL10         1-10  Product description
+OCALIF   DS    H           11-12  Units sold in Calif
+OILL     DS    H           13-14  Units sold in Illinois
+OUTAH    DS    H           15-16  Units sold in Utah
+OWISC    DS    H           17-18  Units sold in Wisconsin
+OBEGIN   DS    H           19-20  Beginning inventory
+OPURCH   DS    H           21-22  Purchases throughout year
+OQOH     DS    H           23-24  Actual quantity on hand
+OCOST    DS    H           25-26  Cost (each) 99V99
+OSELL    DS    H           27-28  Sell for (each) 99V99
+****************************************************************
+*        Output message (count of records written)             *
+****************************************************************
+MSG      DS    0CL32
+         DC    CL11'COGS14A ...'
+MSG#OUT  DC    XL4'40202120'
+         DC    CL17' records written.'
+         END   BEGIN                                                   
+

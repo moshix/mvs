@@ -1,0 +1,17 @@
+STUFF6B  BEGIN
+         MVC   X,Y
+         MVI   Z,C'9'
+         CLI   X,C'L'
+         BE    W
+         CLC   X,Z
+         BL    W
+         MVC   Z,Y
+W        EQU   *
+         RETURN
+X        DC    CL2'JK'
+Y        DC    CL5'LMNOP'
+Z        DC    CL4'QRST'
+         END
+
+
+

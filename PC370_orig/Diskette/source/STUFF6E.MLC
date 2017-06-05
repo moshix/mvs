@@ -1,0 +1,15 @@
+STUFF6E  BEGIN
+P        CLC   S,R
+         BH    Q
+         MVC   R,T
+         MVI   R,C'2'
+         B     P
+Q        EQU   *
+         RETURN
+T        DC    CL3'123'
+S        DC    CL2'33'
+R        DC    CL2'33'
+         END
+
+
+

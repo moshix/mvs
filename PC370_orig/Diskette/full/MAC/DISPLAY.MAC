@@ -1,0 +1,8 @@
+DISPLAY  MACRO
+&LABEL$$ LA    15,&1
+LOOP&N$  IC    2,0(15)
+	 SVC   202
+	 CLI   0(15),X'0A'
+	 LA    15,1(0,15)
+	 BNE   LOOP&N$
+

@@ -1,0 +1,309 @@
+         PRINT NOGEN                                                   
+****************************************************************
+*        FILENAME:  OFFER10C.MLC                               *
+*        AUTHOR  :  Bill Qualls                                *
+*        SYSTEM  :  Compaq 286LTE, PC/370 R4.2                 *
+*        REMARKS :  Produce list of course offerings for all   * 
+*                   semesters. Includes page break logic.      *
+*                   Multiple level control break example.      *
+****************************************************************
+         START 0                                                       
+         REGS
+BEGIN    BEGIN
+         WTO   'OFFER10C ... Begin execution'
+         BAL   R10,SETUP
+MAIN     EQU   *
+         CLI   EOFSW,C'Y'
+         BE    EOJ
+         BAL   R10,PROCESS
+         B     MAIN
+EOJ      EQU   *
+         BAL   R10,WRAPUP
+         WTO   'OFFER10C ... Normal end of program'
+         RETURN
+****************************************************************
+*        SETUP - Those things which happen one time only,      *
+*                before any records are processed.             *
+****************************************************************
+SETUP    EQU   *
+         ST    R10,SVSETUP
+         OI    OFFER+10,X'08'     PC/370 ONLY - Convert all
+*                                 input from ASCII to EBCDIC
+         OI    REPORT+10,X'08'    PC/370 ONLY - Convert all
+*                                 output from EBCDIC to ASCII
+         OPEN  OFFER                                                    
+         OPEN  REPORT
+         BAL   R10,READ
+         MVC   HOLDSEM,ISEM       Major control break 
+         MVC   HOLDDEPT,IDEPT     Minor control break
+         L     R10,SVSETUP
+         BR    R10
+****************************************************************
+*        HDGS - Print headings.                                *
+****************************************************************
+HDGS     EQU   *
+         ST    R10,SVHDGS
+         AP    PGS,=P'1'          Add 1 to page count
+         MVC   HDPGS,=X'40202120' Edit pattern for page count
+         ED    HDPGS,PGS          Move page count to heading
+         PUT   REPORT,FORMFEED    PC/370 ONLY
+         MVC   HDSEM,HOLDSEM      
+         PUT   REPORT,HD1
+         PUT   REPORT,HD2
+         PUT   REPORT,HD3
+         PUT   REPORT,HD4
+         PUT   REPORT,HD5
+         ZAP   LNS,=P'0'          Reset line count to zero
+         L     R10,SVHDGS
+         BR    R10
+****************************************************************
+*        PROCESS - Those things which happen once per record.  *
+****************************************************************
+PROCESS  EQU   * 
+         ST    R10,SVPROC
+         BAL   R10,CHKSEM         See if new semester
+         BAL   R10,CHKDEPT        See if new department
+         AP    #SEM,=P'1'         Count sections by semester
+         AP    #DEPT,=P'1'        Count sections by department
+         BAL   R10,CHKLNS
+         BAL   R10,FORMAT         
+         BAL   R10,WRITE
+         BAL   R10,READ                         
+         L     R10,SVPROC
+         BR    R10
+****************************************************************
+*        READ - Read a record.                                 *
+****************************************************************
+READ     EQU   *
+         ST    R10,SVREAD
+         GET   OFFER,IREC         Read a single offer record
+         B     READX
+ATEND    EQU   *
+         MVI   EOFSW,C'Y'
+READX    EQU   *
+         L     R10,SVREAD
+         BR    R10
+****************************************************************
+*        CHKSEM - Check for change in semester                 *
+*                 (major control break)                        *
+****************************************************************
+CHKSEM   EQU   *
+         ST    R10,SVCHKSEM
+         CLC   HOLDSEM,ISEM       Compare w/ current
+         BE    CHKSEMX            Same semester, get out
+         BAL   R10,ENDSEM         Process semester break
+         MVC   HOLDSEM,ISEM       Update major break field
+         MVC   HOLDDEPT,IDEPT     Update minor break field
+CHKSEMX  EQU   *
+         L     R10,SVCHKSEM
+         BR    R10
+****************************************************************
+*        CHKDEPT - Check for change in department              *
+*                  (minor control break)                       *
+****************************************************************
+CHKDEPT  EQU   *
+         ST    R10,SVCHKDEP
+         CLC   HOLDDEPT,IDEPT     Compare w/ current
+         BE    CHKDEPTX           Same department, get out
+         BAL   R10,ENDDEPT        Process department break
+         MVC   HOLDDEPT,IDEPT     Update control break field
+CHKDEPTX EQU   *
+         L     R10,SVCHKDEP
+         BR    R10
+****************************************************************
+*        ENDSEM - End semester                                 * 
+*                 (Process major control break)                *
+*                 Show count of sections for this semester.    *
+*                 Force next semester to another page.         *
+****************************************************************
+ENDSEM   EQU   *
+         ST    R10,SVENDSEM
+         BAL   R10,ENDDEPT        Change in semester implies
+*                                 change in department as well.
+         MVC   OREC(40),BLANKS    This area used several ways
+         MVC   OREC+6(25),=C'*** Sem XXX BZZ9 sections'
+         MVC   OREC+14(3),HOLDSEM 
+         MVC   OREC+18(4),=X'40202120'
+         ED    OREC+18(4),#SEM 
+         BAL   R10,WRITE
+         MVC   OREC(40),BLANKS
+         ZAP   #SEM,=P'0'         Reset counter
+         ZAP   LNS,MAXLNS         Force next sem. to new page
+         L     R10,SVENDSEM   
+         BR    R10
+****************************************************************
+*        ENDDEPT- End department                               * 
+*                 (Process minor control break)                *
+*                 Print count of sections in department        *
+*                 if that count is two or more.                *
+*                 Regardless, skip a line.                     *
+****************************************************************
+ENDDEPT  EQU   *
+         ST    R10,SVENDDEP
+         CP    #DEPT,=P'2'
+         BL    ENDDEPT2
+         MVC   OREC(40),BLANKS    This area used several ways
+         BAL   R10,WRITE          Blank line before count
+         MVC   OREC+7(24),=C'** Dept XX BZZ9 sections'
+         MVC   OREC+15(2),HOLDDEPT
+         MVC   OREC+18(4),=X'40202120'
+         ED    OREC+18(4),#DEPT
+         BAL   R10,WRITE
+ENDDEPT2 EQU   *
+         MVC   OREC(40),BLANKS
+         BAL   R10,WRITE
+         ZAP   #DEPT,=P'0'        Reset counter
+         L     R10,SVENDDEP
+         BR    R10
+****************************************************************
+*        CHKLNS - Check lines printed. Full page?              *
+****************************************************************
+CHKLNS   EQU   *
+         ST    R10,SVCHKLNS
+         CP    LNS,MAXLNS
+         BL    CHKLNSX
+         BAL   R10,HDGS
+CHKLNSX  EQU   *
+         L     R10,SVCHKLNS
+         BR    R10
+****************************************************************
+*        FORMAT - Format a single detail line.                 *
+****************************************************************
+FORMAT   EQU   *
+         ST    R10,SVFORM 
+         MVC   OREC(40),BLANKS
+         MVC   OCID,ICID          Course ID    
+         MVC   OSECT,ISECT        Section number
+         MVC   OTID,ITID          Teacher ID
+         MVC   OCRLF,WCRLF        PC/370 Only
+         L     R10,SVFORM 
+         BR    R10
+****************************************************************
+*        WRITE - Write a single detail line.                   *
+****************************************************************
+WRITE    EQU   *
+         ST    R10,SVWRITE
+         PUT   REPORT,OREC        Write report line
+         AP    LNS,=P'1'
+         L     R10,SVWRITE
+         BR    R10
+****************************************************************
+*        WRAPUP - Those things which happen one time only,     *
+*                 after all records have been processed.       *
+****************************************************************
+WRAPUP   EQU   *
+         ST    R10,SVWRAP        
+         BAL   R10,ENDSEM         Final control break process
+         CLOSE OFFER
+         CLOSE REPORT
+         WTO   'OFFER10C ... Course list on REPORT.TXT'
+         L     R10,SVWRAP
+         BR    R10
+****************************************************************
+*        Literals, if any, will go here                        *
+***************************************************************
+         LTORG
+****************************************************************
+*        File definitions                                      *
+****************************************************************
+OFFER    DCB   LRECL=18,RECFM=F,MACRF=G,EODAD=ATEND,
+               DDNAME='OFFER.DAT'  
+REPORT   DCB   LRECL=42,RECFM=F,MACRF=P,
+               DDNAME='REPORT.TXT'      
+****************************************************************
+*        RETURN ADDRESSES                                      *
+****************************************************************
+SVSETUP  DC    F'0'               SETUP
+SVHDGS   DC    F'0'               HDGS
+SVPROC   DC    F'0'               PROCESS
+SVREAD   DC    F'0'               READ
+SVFORM   DC    F'0'               FORMAT
+SVWRITE  DC    F'0'               WRITE
+SVWRAP   DC    F'0'               WRAPUP
+SVCHKLNS DC    F'0'               CHKLNS
+SVCHKSEM DC    F'0'               CHKSEM
+SVCHKDEP DC    F'0'               CHKDEPT
+SVENDSEM DC    F'0'               ENDSEM
+SVENDDEP DC    F'0'               ENDDEPT
+****************************************************************
+*        Miscellaneous field definitions                       *
+****************************************************************
+WCRLF    DC    X'0D25'            PC/370 ONLY - EBCDIC CR/LF
+EOFSW    DC    CL1'N'             End of file? (Y/N)
+PGS      DC    PL2'0'             Nbr of pages printed.
+LNS      DC    PL2'10'            Lines printed on this page.
+MAXLNS   DC    PL2'10'            Max nbr lines per page.
+*                                 My line counts exclude hdgs.
+BLANKS   DC    CL40' '
+HOLDSEM  DC    CL3' '             Hold semester 
+HOLDDEPT DC    CL2' '             Hold department
+#SEM     DC    PL2'0'             Sections in a semester
+#DEPT    DC    PL2'0'             Sections in a semester/dept
+****************************************************************
+*        Input record definition                               *
+****************************************************************
+IREC     DS    0CL18      1-18    Offer record
+ISEM     DS    CL3        1- 3    Semester  
+ICID     DS    0CL5       4- 8    Course ID
+IDEPT    DS    CL2        4- 5    Department
+         DS    CL3        6- 8    Course number
+ISECT    DS    CL1        9- 9    Section number
+ITID     DS    CL3       10-12    Teacher ID
+IROOM    DS    CL4       13-16    Room number
+IOCRLF   DS    CL2       17-18    PC/370 only - CR/LF
+****************************************************************
+*        Output (line) definition                              *
+****************************************************************
+OREC     DS    0CL42      1-42    
+         DC    CL10' '    1-10
+OCID     DS    CL5       11-15    Course ID
+         DC    CL6' '    16-21
+OSECT    DS    CL1       22-22    Section number     
+         DC    CL8' '    23-30 
+OTID     DS    CL3       31-33    Teacher ID
+         DC    CL7' '    34-40
+OCRLF    DS    CL2       41-42    PC/370 only - CR/LF
+****************************************************************
+*        Headings definitions                                  *
+****************************************************************
+*
+*  ----+----1----+----2----+----3----+----4
+*            COURSE OFFERINGS      PageBZZ9
+*              Semester XXX
+*  
+*           Course   Section   Teachers
+*           ------   -------   --------
+*            XXXXX      X        XXX
+*
+*            XXXXX      X        XXX
+*            XXXXX      X        XXX
+*
+*            Dept XX BZZ9 sections 
+*
+*            Sem XXX BZZ9 sections
+*
+FORMFEED DS    0CL42              PC/370 only
+*        DC    X'0C'              EBCDIC formfeed
+*        DC    CL39' '
+         DC    40C'_'             For testing...
+         DC    X'0D25'            EBCDIC CR/LF
+HD1      DS    0CL42
+         DC    CL36'          COURSE OFFERINGS      Page'         
+HDPGS    DC    CL4'BZZ9'
+         DC    XL2'0D25'
+HD2      DS    0CL42
+         DC    CL21'            Semester '                      
+HDSEM    DS    CL3           
+         DC    CL16' '
+         DC    XL2'0D25'
+HD3      DS    0CL42
+         DC    CL40' '
+         DC    XL2'0D25'
+HD4      DS    0CL42
+         DC    CL40'         Course   Section   Teacher     '
+         DC    XL2'0D25'
+HD5      DS    0CL42
+         DC    CL40'         ------   -------   -------     '
+         DC    XL2'0D25'
+         END   BEGIN                                                   
+

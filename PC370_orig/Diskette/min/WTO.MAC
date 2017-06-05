@@ -1,0 +1,14 @@
+WTO	 MACRO ,L'&1
+	 AIF   &1='.LIT
+&LABEL$$ IC    0,&1+&2
+	 MVI   &1+&2,C'$'
+	 LA    2,&1
+	 SVC   209
+	 STC   0,&1+&2
+	 AGO   .END
+.LIT	 ANOP
+TEXT	 SETC  &1
+&LABEL$$ LA    2,=C'&TEXT.$'
+	 SVC   209
+.END	 ANOP
+

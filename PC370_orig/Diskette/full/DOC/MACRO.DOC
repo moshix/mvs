@@ -1,0 +1,483 @@
+ 
+MACRO.DOC PC/370 macro pre-processor documentation
+
+Resolution of macros in a PC370 Assembler source program is achieved
+by means of a preprocessor.  To invoke the preprocessor, just type the
+following:
+
+M370 filespec
+
+"filespec" is in the standard DOS format for file specification.  The
+file extension is optional: if one is specified, it can be just
+anything; if none is specified, MLC is the default. To indicate a file
+with no extension, you must terminate the name by a period with
+nothing behind.
+
+The source program will be examined, with all references to macro
+instructions causing the appropriate expansion to be performed.  A new
+file with the same file name and ALC as the extension will be created
+on the same drive as the input, ready to be passed to A370.  For
+instance, typing M370 MYPROG will cause MYPROG.MLC to be read from the
+default drive and MYPROG.ALC to be written on the same drive.
+
+Macros themselves must each constitute one separate file with the
+filename equal to the macro name and the extension equal to MAC, for
+instance OPEN.MAC.  Macros will always be read from the default drive
+(if this drive is a RAM disk, access is extremely fast).
+
+Macros can have both positional and keyword parameters.  In a macro,
+references to parameters is via the & character:
+
+   - &n ("n" being replaced by one digit from 1 to 9) refers to the
+     nth positional parameter;
+
+   - &xxxxxxxx ("xxxxxxxx" being replaced by a name from one to eight
+     letters and/or digits) refers to keyword parameter xxxxxxxx.
+
+There are two predefined and system-maintained keyword parameters:
+
+   - &LABEL$$ refers to the label; it always returns an eight-
+     character label padded with blanks if necessary;
+
+   - &N$ references an internal three-digit counter incremented by one
+     at every occurrence of a macro instruction in the source program:
+     it can be appended to labels generated in the macro expansion to
+     make them unique.
+
+References to parameters may be inserted anywhere:  between commas,
+parentheses or quotes, and even in comments.  If a parameter is to be
+immediately followed by letters or digits, a separating period must be
+used, for instance &PARM.DATA (the period will be dropped at expansion
+time).  In other cases, the period is optional:  for instance, one may
+code &PARM(R1) or &PARM.(R1) indifferently.  If a parameter is to be
+followed by a period, two consecutive periods must be coded, for
+instance &NAME..COM.
+
+The length of a parameter can be tested in a AIF instruction by coding
+K'&xxxxxxxx as the subject; the complement must then be a numeric
+value.
+
+Macros may contain five special opcodes:
+
+  MACRO  which, if present, must be in the very first line of the
+  macro.  It is used to supply the default values of the parameters.
+  The MACRO statement may extend on multiple lines.
+
+  SETC  which is used to set a new value in an existing parameter or
+  in a macro work-parameter. The first execution of a SETC instruction
+  for a new parameter name creates that parameter: no prior definition
+  is needed.  The format of the SETC instruction is as follows:
+
+         xxxxxxxx SETC  value
+
+  "xxxxxxxx" is the name of the parameter, without the leading &
+  character.  "value" is any value; if it is enclosed in quotes, these
+  quotes will not be returned when the parameter is referenced.
+
+  AIF  in which only one condition can be tested.  The relation signs
+  supported are = # > <.  If, after resolution of all &parameters, the
+  two sides of the equation are composed of digits only, regardless of
+  the respective numbers of digits, the comparison is numeric
+  (negative values are not supported).  If K'&parameter is coded as
+  the first member and the second member is composed of digits only,
+  the comparison is also numeric.  Otherwise, the comparison is
+  alphanumeric and the length of the complement determines the number
+  of characters compared from the subject.  Both the subject and the
+  complement may be coded as is, quotes being optional.  The
+  complement may contain any character except the period because the
+  period indicates the end of the complement.  At the same time, the
+  period is the first character of the label where to go if the
+  condition is true.
+
+  AGO  in which you code a label where to proceed unconditionally.
+  This label should begin with a period.
+
+  ANOP  which is a no-op.
+
+Labels start with a period and can be 2 to 8 characters long.  They
+can be attached to a AIF, AGO or ANOP instruction or to any regular
+Assembler statement in which case the label is erased during the
+expansion process.  All AIF and AGO statements referencing a label
+must come before this label; in other words, branching backward is not
+permitted.
+
+Lines of comments may be inserted in a macro simply by coding .* in
+the first two positions. These lines will be ignored during the
+expansion of the macro.
+
+         *****************************
+
+In the input source program, references to macros can freely be coded.
+Parameters may extend on multiple lines.  Each of these input lines is
+changed into a comment line on the output.
+
+If continuation lines are used, the continued line must stop on a
+comma as the last character or followed by at least one blank and
+optional comments; the continuation line may restart in any position.
+No continuation indicator in column 72 is needed.
+
+Positional and keyword parameters may be intermixed.  If the value of
+a parameter is a literal in quotes, these quotes are passed as an
+integral part of the value: if necessary, you can get rid of them by
+issuing a SETC statement moving the parameter into itself.
+Consecutive commas can be coded to skip a positional parameter and
+keep its default value.
+
+         *****************************
+
+Here are two examples of macros:
+
+DCB  MACRO DSORG=S,RECFM=F,MACRF=G,LRECL=80,BLKSIZE=0,
+        EODAD=0,SYNAD=&EODAD,RECORD=0
+&LABEL$$ DS    0F,0CL86
+  DC    C'ADCB'
+  AIF   &DDNAME=(.DDX  format DDNAME=(FIELD) ?
+  DC    A(DCBDD&N$)    no, use generated ddname field
+  AGO   .DDZ
+.DDX  DC    A(&DDNAME)
+.DDZ  AIF   &MACRF>P.BDAM  is MACRF equal to R or W ?
+  DC    X'FFFF',X'00'
+  DC    CL1'&DSORG',CL1'&MACRF',CL1'&RECFM'
+  DC    X'0A1A'
+  DC    H'&LRECL',H'&BLKSIZE'
+  DC    A(&EODAD,&SYNAD,&RECORD)
+  DC    54X'00'
+  AGO   .DDN
+.BDAM  AIF   '&RECORD'='0'.NOREC  has RECORD parameter been omitted ?
+  DC    X'FFFF',X'40'
+  AGO   .DSORG
+.NOREC  DC    X'FFFF',X'00'
+.DSORG  DC    CL1'&DSORG',CL1'&MACRF',CL1'&RECFM'
+  DC    X'0A1A'
+  AIF   '&BLKSIZE'='0'.NOBLK   has BLKSIZE been omitted ?
+  DC    H'&BLKSIZE',H'&BLKSIZE'
+  AGO   .ADRS
+.NOBLK  DC    H'&LRECL',H'&LRECL'
+.ADRS  DC    A(&EODAD,&SYNAD,0,&RECORD)
+  DC    50X'00'
+.DDN  AIF   &DDNAME=(.END  is DDNAME a field name ?
+DDNAME  SETC  &DDNAME  to remove quotes if any
+DCBDD&N$ DC    C'&DDNAME',X'00'
+.END  ANOP
+
+Note in the above example that the default value for SYNAD is that
+specified or assumed for EODAD.
+
+
+
+OPEN  MACRO
+  AIF   '&LABEL$$'='        '.GO  is label field blank?
+&LABEL$$ EQU   *
+.GO  AIF   &1=(.REG  is it OPEN  (register) ?
+  LA    2,&1
+  AGO   .SVC
+.REG  AIF   &1=(2).SVC  is it OPEN (2) ?
+  LR    2,&1
+.SVC  SVC   1
+
+
+
+Here is an example of a program using the BEGIN, WTO, OPEN, GET, PUT,
+CLOSE, RETURN and DCB macros:
+
+
+TEST  BEGIN
+  WTO   'DEMONSTRATING THE USE OF MACROS'
+  OPEN  FILE1
+  OPEN  FILE2
+LOOP  GET   FILE1,RECORD
+  PUT   FILE2,RECORD
+  B     LOOP
+EOJ  CLOSE FILE1
+  CLOSE FILE2
+  RETURN
+FILE1  DCB   LRECL=256,RECFM=T,MACRF=G,EODAD=EOJ,
+        DDNAME='MYFILE.IN'
+FILE2  DCB   LRECL=256,RECFM=T,MACRF=P,
+        DDNAME='MYFILE.OUT'
+RECORD  DS    CL256
+  END
+
+Run BAT\RUNMAC.BAT for macro demo programs.
+
+********************************************************************
+
+      If you find the macro preprocessor useful and want to support
+      future enhancements, please send $20.00 to:
+
+      Jacques Roy
+      XL SOFTWARE INC.
+      1000 St-Jean-Baptiste #120
+      Quebec City CANADA G2E 5G5
+
+********************************************************************
+
+The following macros are included in the MAC directory for use with
+the M370.COM preprocessor.  For more information on M370, see
+DOC\USER.DOC and BAT\RUNMAC.BAT.
+
+BEGIN  SAVE={YES|NO},BASES={1|2}
+
+  Generate CSECT and standard program beginning.
+  Parameters are optional. Defaults are SAVE=YES,BASES=1.
+  Unless SAVE=NO is specified, a save area is defined and register 13
+  is established as the first base register. Register 12 will be
+  established as the second base register if BASES=2 is specified.
+  If SAVE=NO is specified, register 12 is established as the only base
+  register: in this case, the program should not modify the contents
+  of register 13.
+
+CALL   pgm
+
+  Load address of external subroutine pgm into register 15 and
+  branch and link via register 14 to address in register 15.
+
+CLOSE  dcb
+
+  Close a file.  The parameter is mandatory and must be either the
+  name of a DCB, or a register in brackets pointing to a DCB.
+
+
+DCB  DDNAME=ddname
+  DSORG=org
+  RECFM=format
+  MACRF=macro
+  LRECL=reclength
+  BLKSIZE=blklength
+  EODAD=eof
+  SYNAD=err
+  RECORD=fieldname
+
+  Generate a DCB for PC/370 file access.  See DOC\SYSTEM.DOC for more
+  information.  Only DDNAME is required; all other parameters have
+  default values.  Parameters can be specified in any order.
+
+  "ddname" can be: - a filename of one to eight characters only (no
+       device specification, no extension);
+     - a literal in quotes of 1 to 64 characters that represents a
+       valid DOS file specification;
+     - the name in brackets of a 1 to 64-character field
+       containing a valid DOS file specification, in EBCDIC.
+  "org"       can be S or R; the default is S.
+  "format"    can be F, V or T; the default is F.
+  "macro"     can be G, P, R or W; the default is G.
+  "reclength" is a number representing the record length; the default
+       is 80.
+  "blklength" is a number representing the block size; the default is
+       0.
+  "eof"       is the address where to go at end of file; default is 0;
+       must be
+       supplied for an input file.
+  "eof"       is the address where to go in case of an error while
+       attempting to handle the file; default is the same as for
+       EODAD.
+  "record"    is the address of a field where data will be read into
+       or written from; default is no such field: record area will be
+       specified in GET, PUT, READ or WRITE macros.
+
+DISPLAY  fieldname
+
+  Display text contained in fieldname on console.  Text must be in
+  ASCII with ending line feed X'0A'.
+
+
+FREEMAIN R,LV=length,A=address
+  E,LV=length,A=address
+  V,A=values
+
+  Release dynamically allocated memory.
+  Use only one of the three possible formats.
+
+  If R or E (register or elementary format) is coded as the first
+  parameter, both LV and A are mandatory. "length" is either the
+  number of bytes to be released or a register in brackets containing
+  the number of bytes to be released.  "address" is either the name of
+  a full word or a register in brackets containing the address of the
+  memory area to be released.
+
+  If V (variable format) is coded as the first parameter, only A is
+  mandatory. "values" must be the name of two consecutive full words
+  that must respectively contain the address and the size of the
+  memory area to be released.
+
+
+GET  dcb,record
+
+  Read next sequential fixed, variable, or text record from buffered
+  file.  The first parameter is mandatory and must be either the name
+  of a DCB, or a register in brackets pointing to a DCB.
+  The second parameter is optional and may be either the name of a
+  field or a register in brackets pointing to a field into which the
+  record will be read.  If the second parameter is omitted, the area
+  pointed to by the RECORD parameter in the DCB will be used and its
+  address will be passed in register 1.
+
+
+GETMAIN  RU,LV=length
+  EU,LV=length,A=fieldname
+  VU,LA=sizes,A=values
+
+  Dynamically allocate memory.
+  Use only one of the three possible formats.
+
+  If RU (unconditional register request) is coded as the first
+  parameter, LV is mandatory and "length" is either the number of
+  bytes requested or a register in brackets containing the number of
+  bytes requested.  The address of the allocated memory will be
+  returned in register 1.
+
+  If EU (unconditional elementary request) is coded as the first
+  parameter, both LV and A are mandatory. "length" is either the
+  number of bytes requested or a register in brackets containing the
+  number of bytes requested.   "fieldname" must be the name of a full
+  word into which the address of the allocated memory will be
+  returned.
+
+  If VU (unconditional variable request) is coded as the first
+  parameter, both LA and A are mandatory. "sizes" must be the name of
+  two consecutive full words that must respectively contain the
+  minimum and the maximum number of bytes requested.   "values" must
+  be the name of two consecutive full words that will respectively be
+  used to receive the address and the size of the allocated memory.
+
+
+LINK  EP=filename
+  EP='literal'
+  EPLOC=fieldname
+  EPLOC=(register)
+
+  Dynamically load a module, branch and link to it, and then release
+  memory.  Module's entry point is assumed to be at X'210'.
+  Use only one of the four forms for parameters.  "filename" is one to
+  eight characters only: the default drive and the extension of COM
+  are assumed.  "literal', or "fieldname", or field pointed to by
+  "register", must contain an EBCDIC character string representing a
+  valid DOS file specification.
+
+
+LOAD  EP=filename
+  EP='literal'
+  EPLOC=fieldname
+  EPLOC=(register)
+
+  Dynamically load a module (can be any file type). Register 15 will
+  contain the address where the module was loaded and register 1 will
+  contain the module's length.  Register 0 will contain the module's
+  entry point assumed to be at X'210' from the beginning (only
+  applicable if loading a COM module generated by PC370).
+  Use only one of the four forms for parameters.  "filename" is one to
+  eight characters only: the default drive and the extension of COM
+  are assumed.  "literal', or "fieldname", or field pointed to by
+  "register", must contain an EBCDIC character string representing a
+  valid DOS file specification.
+
+
+OPEN  dcb
+
+  Open a file.  The parameter is mandatory and must be either the name
+  of a DCB, or a register in brackets pointing to a DCB.
+
+
+PUT  dcb,record
+
+  Write next sequential fixed, variable, or text record to buffered
+  file.  The first parameter is mandatory and must be either the name
+  of a DCB, or a register in brackets pointing to a DCB.
+  The second parameter is optional and may be either the name of a
+  field or a register in brackets pointing to a field from which the
+  record will be written.  If the second parameter is omitted, the
+  area pointed to by the RECORD parameter in the DCB will be used.
+
+
+READ  dcb,record,{rbn | RBN=rbn | RBA=rba}
+
+  Read a block from a file.  The first parameter is mandatory and must
+  be either the name of a DCB, or a register in brackets pointing to a
+  DCB.  The second parameter is optional and may be either the name of
+  a field or a register in brackets pointing to a field into which the
+  record will be read.  If the second parameter is skipped (by coding
+  two consecutive commas), the area pointed to by the RECORD parameter
+  in the DCB will be used and its address will be passed in register
+  1.  The third parameter is mandatory and may be either positional or
+  the keyword RBN or RBA.  The value may be either a number, or the
+  name of a full-word containing the number, or a register in brackets
+  containing the number.  "rbn" is the relative block number of the
+  record (first block is 0).  "rba" is the relative byte address of
+  the record (first byte is 0).
+
+
+REGS
+
+  Generate R0 through R15 register equates.
+
+RETURN  RC=nnnn,SAVE={YES|NO}
+
+  Exit using standard linkage conventions. Parameters are optional;
+  default is SAVE=YES.  If RC is specified, return code nnnn is placed
+  in register 15; otherwise, register 15 is restored like all other
+  registers.  Specify SAVE=NO if SAVE=NO was specified in the BEGIN
+  macro.
+
+
+WRITE  dcb,record,{rbn | RBN=rbn | RBA=rba}
+
+  Write a block to a file.  The first parameter is mandatory and must
+  be either the name of a DCB, or a register in brackets pointing to a
+  DCB.  The second parameter is optional and may be either the name of
+  a field or a register in brackets pointing to a field from which the
+  record will be written.  If the second parameter is skipped (by
+  coding two consecutive commas), the area pointed to by the RECORD
+  parameter in the DCB will be used.  The third parameter is mandatory
+  and may be either positional or the keyword RBN or RBA.  The value
+  may be either a number, or the name of a full-word containing the
+  number, or a register in brackets containing the number.  "rbn" is
+  the relative block number of the record (first block is 0).  "rba"
+  is the relative byte address of the record (first byte is 0).
+
+
+WTO  message,length
+
+  Display a message to the console.  The first parameter is mandatory
+  and must be either a literal in quotes or   the name of a field
+  containing the message to be displayed, in EBCDIC.  The second
+  parameter is optional and applies only if the first parameter is a
+  field name. It is used to indicate the number of characters to be
+  displayed if this number is other than the field's length.
+
+
+WTOR  message,reply
+
+  Display a message to the console and wait for reply.  The first
+  parameter is optional and may be either a literal in quotes or
+  the name of a field containing the message to be displayed, in
+  EBCDIC.  The first parameter may be skipped (by coding WTOR  ,reply)
+  if no message need be displayed and only a reply is to be
+  solicited.  The second parameter is mandatory and must be the name
+  of a field into which the reply will be placed, in EBCDIC and padded
+  with blanks if necessary.  Operator needs not issue a carriage
+  return when reply field is full.
+
+
+WTORPC  message,reply
+
+  Display a message to the console and wait for reply.  Exactly the
+  same coding as for WTOR above, except that it is achieved using
+  typical PC features and that the reply's maximum length is 16
+  characters.  When entering the reply, the backspace and left-arrow
+  can be used to correct typing errors.  Moreover, if the same WTORPC
+  is executed again, the right-arrow as well as the F1-F3 keys can be
+  used to repeat characters from the previous reply.  The carriage
+  return must always be issued to transmit the reply.
+
+
+      ***********************************
+
+Feel free to develop your own macros in addition to those supplied
+with the system.  If you would like to make other users benefit from
+general-purpose macros you have written, please send your macro
+definitions, documentation and example of use to:
+
+   Jacques Roy
+   XL SOFTWARE INC.
+   1000 St-Jean-Baptiste #120
+   Quebec City  CANADA  G2E 5G5

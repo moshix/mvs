@@ -1,0 +1,160 @@
+ 
+INTRO.DOC Introduction to PC/370
+
+Copyright 1988 Donald S. Higgins
+
+Don Higgins
+6365 - 32 Avenue North
+St. Petersburg, Florida 33710
+
+E-MAIL via CompuServe 73047,1113
+
+The PC/370 package is a PC shareware package which supports the
+assembly, link edit, and execution of IBM 370 assembler programs
+on a PC with 256k and MS-DOS release 2.0+.  See READ.ME file in
+root directory for registration information.
+
+The PC/370 package consists of four main programs:
+
+  1.  M370.COM macro preprocessor which reads macro assembler file
+      and produces expanded basic assembler source code.
+
+  2.  A370.EXE is an IBM 370 cross assembler which reads 370 source
+      code file and produces object code file plus optional listing
+      file.
+
+  3.  L370.EXE is an IBM 370 cross linkage editor which reads object
+      code and produces a directly executable 370 native machine code
+      file plus optional CSECT listing file.
+
+  4.  E370R42.EXE is an IBM 370 machine code emulator which is
+      dynamically invoked at execution time to support execution of
+      370 native machine code including the standard problem state
+      instruction set plus packed decimal and floating point
+      instructions.  Direct execution of E370 makes it resident to
+      eliminate the time required to dynamically load it at each 370
+      program execution time, and to also support calls to 370
+      subroutines from Micro Focus COBOL/2 programs running under
+      the default real MS-DOS mode on any 80x86 machine or the
+      extendedmemory XM protected mode on 80286 or 80386 machines.
+
+The package also comes with several 370 assembler language utilities
+including:
+
+  1.  SEE.COM      -  full screen text editor with PFS:Write and
+                      Wordstar keystroke compatibility.
+  2.  PRINTDOC.COM -  format utility to print documentation with
+                      page numbers.
+  3.  T370.COM     -  object code translator to allow uploading 370
+                      object code files for direct OS/VS linkage
+                      editing on 370 mainframe without reassembly.
+
+The PC/370 package consists of the following component directories:
+
+  1.  R42  - root directory containing all PC/370 executable code.
+  2.  DOC  - documentation ASCII text files.
+  3.  BAT  - demo command procedures plus install procedure.
+  4.  LIB  - 370 source code for L370.LIB system subroutine library.
+  5.  CPY  - 370 source code for copy members.
+  6.  MAC  - 370 source code for macros.
+  7.  CBL  - 370 source code for COBOL 370 subroutine demo.
+  8.  DEMO - 370 source code for demo programs.
+  9.  UTIL - 370 source code for utilities SEE, PRINTDOC, and T370.
+
+On 3.5" diskette, all of the above directories are on single disk.
+On 5.25" diskettes, 3 volumes are required starting with the
+R42 volume which contains BAT\INSTALL.BAT command file.
+
+The PC/370 documentation consists for the following machine readable
+files which can be printed via the utility PRINTDOC.COM:
+
+  1.  INTRO.DOC    - overview of product.
+  2.  HELP.DOC     - common questions and answers
+  3.  USER.DOC     - program options required to use all of the PC/370
+                     facilities at the application programmer level.
+  4.  SYSTEM.DOC   - program options available for use by system
+                     programmers.
+  5.  MACRO.DOC    - macro preprocessor options plus included macros.
+  6.  UTILITY.DOC  - utility program options.
+  7.  HISTORY.DOC  - history of PC/370 releases and features
+  8.  PTF.DOC      - private temporary fixes for previous releases.
+
+The PC/370 command procedures in the \BAT directory are as follows:
+
+  1.  INSTALL - copy all PC/370 directories to hard disk with R42
+                as root and all others as sub-directories.
+  2.  RUNDEMO - run all the demo programs in the \DEMO directory.
+                This will verify installation and illustrate the
+                PC/370 facilities.  Note last section of demo
+                requires 80x87 math co-processor for floating point
+                demo.  This section can be skipped if no co-processor
+                is installed.
+  3.  RUNUTIL - run demo of the SEE text editor, PRINTDOC print
+                utility, and T370 object code format utility.
+  4.  RUNMAC  - run demo of macro pre-processor facility.
+  5.  RUNCBL  - run demo of Micro Focus VS COBOL 370 subroutine.
+  6.  BLDLIB  - rebuild L370.LIB system relocatable subroutine
+                library from source code in \LIB.
+  7.  BLDUTIL - rebuild utilities from source code in \UTIL.
+
+
+All of the above commands are designed assuming that the current
+directory is R42 and that all of the other 8 directories are defined
+in the R42 directory.  No parameters are required.
+
+To code and execute a simple sample program, type the following after
+running the installation procedure file INSTALL.BAT and setting the
+current directory to \R42:
+
+  STEP     COMMAND                  COMMENTS
+
+    1      SEE DEMO                 invoke full screen editor to
+                                    create DEMO.ALC 370 assembler
+                                    source file.
+    2      DEMO CSECT               first line - define section
+    3           USING *,15          second     - define base register
+    4           LA    2,=C'HELLO$'  third      - address of msg. text
+    5           SVC   209           fourth     - request console msg.
+    6           BR    14            fifth      - exit to MS-DOS
+    7           END                 sixth      - end of program
+
+    8      <esc>                    enter escape key to save DEMO.ALC
+                                    and exit to MS-DOS
+    9      A370 DEMO/LX             assemble DEMO.ALC and create
+                                    DEMO.OBJ object code file and
+                                    DEMO.PRN listing with symbol
+                                    cross reference.
+   10      L370 DEMO/LX             link DEMO.OBJ object file and
+                                    create DEMO.COM executable file
+                                    and DEMO.LST CSECT listing file.
+   11      DEMO.COM                 execute DEMO.COM which will load
+                                    E370R42.EXE to execute 370 machine
+                                    code in DEMO.COM and print "HELLO"
+                                    on the console.
+   12      DEMO.COM T               execute DEMO.COM again with test
+                                    parameter which invokes debug
+                                    facility.
+   13.     T                        At debug prompt, enter T to trace
+                                    each instruction while executing
+                                    the demo program.
+
+   14.     TYPE DEMO.PRN            print assembly listing.
+
+   15.     TYPE DEMO.LST            print link edit listing.
+
+I hope you find the PC/370 package useful.  Please send feedback on
+your usage of the product and suggestions you may have.  Please
+register if you want assistance with the current product and want
+to support future development and enhancements.
+
+If you are not familiar with IBM 370 assembler language, I recommend
+you obtain the text, "IBM 370 Assembler Language with ASSIST,
+Structured Concepts, and Advanced Topics", by Charles J. Kacmar at
+Texas A&M University, and published by Prentice Hall in September
+1987, ISBN 0-13-455742-5.
+
+____________
+
+IBM      - trademark of International Business Machines
+MS-DOS   - trademark of Microsoft
+VS COBOL - trademark of Micro Focus Inc.

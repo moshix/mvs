@@ -1,0 +1,15 @@
+         PRINT NOGEN                                                   
+****************************************************************
+*        FILENAME:  HELLO.MLC                                  *
+*        AUTHOR  :  Bill Qualls                                *
+*        SYSTEM  :  Compaq 286LTE, PC/370 R4.2                 *
+*        REMARKS :  This program will display a message.       *
+****************************************************************
+         START 0                                                       
+         REGS
+BEGIN    BEGIN
+         WTO   MESSAGE
+         RETURN
+MESSAGE  DC    C'Hello world!'
+         END   BEGIN
+

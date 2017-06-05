@@ -1,0 +1,5 @@
+DEMOMAC1 BEGIN
+         WTO   'HELLO FROM THE PC/370 WORLD OF MACROS'
+         RETURN
+         END
+

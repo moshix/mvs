@@ -1,0 +1,50 @@
+         PRINT NOGEN                                                   
+****************************************************************
+*        FILENAME:  TEACH1D.MLC                                *
+*        AUTHOR  :  Bill Qualls                                *
+*        SYSTEM  :  Compaq 286LTE, PC/370 R4.2                 *
+*        REMARKS :  A card-image list of teacher records.      *
+****************************************************************
+         START 0                                                       
+         REGS
+BEGIN    BEGIN
+         WTO   'TEACH1D ... Begin execution'
+         OI    TEACHERS+10,X'08'  PC/370 ONLY - Convert all
+*                                 input from ASCII to EBCDIC
+         OI    REPORT+10,X'08'    PC/370 ONLY - Convert all
+*                                 output from EBCDIC to ASCII
+         OPEN  TEACHERS                                                    
+         OPEN  REPORT
+LOOP     GET   TEACHERS,IREC      Read a single teacher record
+         PUT   REPORT,IREC        Write the record
+         B     LOOP               Repeat
+*
+*        EOJ processing
+*
+ATEND    CLOSE TEACHERS
+         CLOSE REPORT
+         WTO   'TEACH1D ... Teacher list on REPORT.TXT'
+         WTO   'TEACH1D ... Normal end of program'
+         RETURN
+*
+*        Literals, if any, will go here
+*
+         LTORG
+*
+*        File definitions
+*
+TEACHERS DCB   LRECL=29,RECFM=F,MACRF=G,EODAD=ATEND,
+               DDNAME='TEACHER.DAT'  
+REPORT   DCB   LRECL=29,RECFM=F,MACRF=P,
+               DDNAME='REPORT.TXT'
+*
+*        Miscellaneous field definitions
+*
+CRLF     DC    X'0D25'            PC/370 ONLY - EBCDIC CR/LF
+*
+*        Input record definition
+*
+IREC     DS    0CL29              Teacher record
+IDATA    DS    CL27               Teacher data
+ICRLF    DS    CL2                PC/370 only - CR/LF
+         END   BEGIN                                                   

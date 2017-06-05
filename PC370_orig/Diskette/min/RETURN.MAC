@@ -1,0 +1,11 @@
+RETURN	 MACRO RC=?,SAVE=YES
+	 AIF   &SAVE#NO.OK
+&LABEL$$ LM    14,12,12(13)
+	 AGO   .RC
+.OK	 ANOP
+&LABEL$$ L     13,4(13)
+	 LM    14,12,12(13)
+.RC	 AIF   &RC=?.GO
+	 LA    15,&RC
+.GO	 BR    14
+

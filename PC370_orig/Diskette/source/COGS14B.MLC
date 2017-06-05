@@ -1,0 +1,217 @@
+         PRINT NOGEN                                                   
+****************************************************************
+*        FILENAME:  COGS14B.MLC                                *
+*        AUTHOR  :  Bill Qualls                                *
+*        SYSTEM  :  Compaq 286LTE, PC/370 R4.2                 *
+*        REMARKS :  Produce report for COGSWORTH INDUSTRIES    *
+*                   showing inventory discrepancies.           *
+*                   Modify COGS9B.MLC to use binary input.     *
+****************************************************************
+         START 0                                                       
+         REGS
+BEGIN    BEGIN
+         WTO   'COGS14B ... Begin execution'
+         BAL   R10,SETUP
+MAIN     EQU   *
+         CLI   EOFSW,C'Y'
+         BE    EOJ
+         BAL   R10,PROCESS
+         B     MAIN
+EOJ      EQU   *
+         BAL   R10,WRAPUP
+         WTO   'COGS14B ... Normal end of program'
+         RETURN
+****************************************************************
+*        SETUP - Those things which happen one time only,      *
+*                before any records are processed.             *
+****************************************************************
+SETUP    EQU   *
+         ST    R10,SVSETUP
+         OI    REPORT+10,X'08'    PC/370 ONLY - Convert all
+*                                 output from EBCDIC to ASCII
+         OPEN  INVENTRY           NOTE: Input in EBCDIC
+         OPEN  REPORT
+         BAL   R10,HDGS
+         BAL   R10,READ
+         L     R10,SVSETUP
+         BR    R10
+****************************************************************
+*        HDGS - Print headings.                                *
+****************************************************************
+HDGS     EQU   *
+         ST    R10,SVHDGS
+         PUT   REPORT,HD1
+         PUT   REPORT,HD2
+         PUT   REPORT,HD3
+         PUT   REPORT,HD4
+         PUT   REPORT,HD5
+         L     R10,SVHDGS
+         BR    R10
+****************************************************************
+*        PROCESS - Those things which happen once per record.  *
+****************************************************************
+PROCESS  EQU   * 
+         ST    R10,SVPROC
+         BAL   R10,FORMAT
+         BAL   R10,WRITE
+         BAL   R10,READ
+         L     R10,SVPROC
+         BR    R10
+****************************************************************
+*        READ - Read a record.                                 *
+****************************************************************
+READ     EQU   *
+         ST    R10,SVREAD
+         GET   INVENTRY,IREC      Read a single product record
+         B     READX
+ATEND    EQU   *
+         MVI   EOFSW,C'Y'
+READX    EQU   *
+         L     R10,SVREAD
+         BR    R10
+****************************************************************
+*        FORMAT - Format a single detail line.                 *
+****************************************************************
+FORMAT   EQU   *
+         ST    R10,SVFORM
+         MVC   OREC,BLANKS
+         MVC   ODESC,IDESC        Description
+         LH    R3,IBEGIN          Beginning inventory
+         CVD   R3,DBL     
+         MVC   OBEGIN,WMASK
+         ED    OBEGIN,DBL+6
+         LH    R4,IPURCH          Purchases
+         CVD   R4,DBL
+         MVC   OPURCH,WMASK
+         ED    OPURCH,DBL+6
+         LH    R5,ICALIF          Each product's sales
+         AH    R5,IILL             by state must be added to
+         AH    R5,IUTAH             get total for product...
+         AH    R5,IWISC            
+         CVD   R5,DBL
+         MVC   OSALES,WMASK
+         ED    OSALES,DBL+6
+         LR    R6,R3              Ending Inventory =   
+         AR    R6,R4                Beginning + Purchases 
+         SR    R6,R5                 - Sales
+         CVD   R6,DBL
+         MVC   OENDING,WMASK
+         ED    OENDING,DBL+6
+         LH    R3,IQOH            Actual ending inventory
+         CVD   R3,DBL               (Reusing register 3)
+         MVC   OQOH,WMASK           (Reusing register 3)
+         ED    OQOH,DBL+6
+         SR    R6,R3              Difference =
+         CVD   R6,DBL               Expected - Actual
+         MVC   ODIFF,WMASK2
+         ED    ODIFF,DBL+6
+         MVC   OCRLF,WCRLF        PC/370 only.
+         L     R10,SVFORM
+         BR    R10
+****************************************************************
+*        WRITE - Write a single detail line.                   *
+****************************************************************
+WRITE    EQU   *
+         ST    R10,SVWRITE
+         PUT   REPORT,OREC        Write report line
+         L     R10,SVWRITE
+         BR    R10
+****************************************************************
+*        WRAPUP - Those things which happen one time only,     *
+*                 after all records have been processed.       *
+****************************************************************
+WRAPUP   EQU   *
+         ST    R10,SVWRAP
+         CLOSE INVENTRY
+         CLOSE REPORT
+         WTO   'COGS14B ... Discrepancies report on REPORT.TXT'
+         L     R10,SVWRAP
+         BR    R10
+****************************************************************
+*        Literals, if any, will go here                        *
+****************************************************************
+         LTORG
+****************************************************************
+*        File definitions                                      *
+****************************************************************
+INVENTRY DCB   LRECL=28,RECFM=F,MACRF=G,EODAD=ATEND,
+               DDNAME='COGS.BIN'  
+REPORT   DCB   LRECL=62,RECFM=F,MACRF=P,
+               DDNAME='REPORT.TXT'      
+****************************************************************
+*        RETURN ADDRESSES                                      *
+****************************************************************
+SVSETUP  DC    F'0'               SETUP
+SVHDGS   DC    F'0'               HDGS
+SVPROC   DC    F'0'               PROCESS
+SVREAD   DC    F'0'               READ
+SVFORM   DC    F'0'               FORMAT
+SVWRITE  DC    F'0'               WRITE
+SVWRAP   DC    F'0'               WRAPUP
+****************************************************************
+*        Miscellaneous field definitions                       *
+****************************************************************
+WCRLF    DC    X'0D25'            PC/370 ONLY - EBCDIC CR/LF
+EOFSW    DC    CL1'N'             End of file? (Y/N)
+BLANKS   DC    CL62' '
+WMASK    DC    X'40202120'        BZZ9
+WMASK2   DC    X'4020202060'      BZZZ-
+DBL      DC    D'0'               For packed/binary conversions
+****************************************************************
+*        Input record definition                               *
+****************************************************************
+         DS    0H                 Force halfword alignment
+IREC     DS    0CL28        1-28  Inventory record
+IDESC    DS    CL10         1-10  Product description
+ICALIF   DS    H           11-12  Units sold in Calif
+IILL     DS    H           13-14  Units sold in Illinois
+IUTAH    DS    H           15-16  Units sold in Utah
+IWISC    DS    H           17-18  Units sold in Wisconsin
+IBEGIN   DS    H           19-20  Beginning inventory
+IPURCH   DS    H           21-22  Purchases throughout year
+IQOH     DS    H           23-24  Actual quantity on hand
+ICOST    DS    H           25-26  Cost (each) 99V99
+ISELL    DS    H           27-28  Sell for (each) 99V99
+****************************************************************
+*        Output (line) definition                              *
+****************************************************************
+OREC     DS    0CL62        1-62      
+ODESC    DS    CL10         1-10  Product description
+         DS    CL3         11-13
+OBEGIN   DS    CL4         14-17  Beginning inventory
+         DS    CL4         18-21
+OPURCH   DS    CL4         22-25  Purchases
+         DS    CL4         26-29
+OSALES   DS    CL4         30-33  Units sold
+         DS    CL5         34-38
+OENDING  DS    CL4         39-42  Ending inventory (expected)
+         DS    CL4         43-46
+OQOH     DS    CL4         47-50  Ending inventory (actual)
+         DS    CL4         51-54
+ODIFF    DS    CL5         55-59  Difference
+         DS    CL1         60-60
+OCRLF    DS    CL2         61-62  PC/370 only - CR/LF
+****************************************************************
+*        Headings definitions                                  *
+****************************************************************
+HD1      DS    0CL62
+         DC    CL40'                    COGSWORTH INDUSTRIES'
+         DC    CL20' '
+         DC    XL2'0D25'
+HD2      DS    0CL62
+         DC    CL40'               Inventory Discrepancies R'
+         DC    CL20'eport'
+         DC    XL2'0D25'
+HD3      DS    0CL62
+         DC    CL60' '
+         DC    XL2'0D25'
+HD4      DS    0CL62
+         DC    CL40'Product      Begin + Purch - Sales = Exp'
+         DC    CL20'ect   Actual   Diff'
+         DC    XL2'0D25'
+HD5      DS    0CL62
+         DC    CL40'----------   -----   -----   -----   ---'
+         DC    CL20'---   ------   ----'
+         DC    XL2'0D25'
+         END   BEGIN                                                   
+

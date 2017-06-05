@@ -1,0 +1,47 @@
+WTOR	 MACRO ?,??
+	 AIF   &1=?.READ
+	 AIF   &1='.LIT
+&LABEL$$ LA    14,L'&1
+	 LA    15,&1
+	 AGO   .NOP
+.LIT	 ANOP
+&LABEL$$ LA    14,L'LIT&N$
+	 LA    15,LIT&N$
+.NOP	 NOP   0
+LOOP&N$  MVC   LOOP&N$-1(1),0(15)
+	 LA    1,LOOP&N$-1
+	 LA    2,1
+	 SVC   13
+	 IC    2,LOOP&N$-1
+	 SVC   202
+	 LA    15,1(0,15)
+	 BCT   14,LOOP&N$
+.READ	 LA    14,L'&2
+	 LA    15,&2
+	 XR    0,0
+READ&N$  SVC   201
+	 STC   0,0(15)
+	 CLI   0(15),X'0D'
+	 BE    EOF&N$
+	 LR    1,15
+	 LA    2,1
+	 SVC   12
+	 LA    15,1(0,15)
+	 BCT   14,READ&N$
+	 LA    2,X'0D'
+	 SVC   202
+	 B     END&N$
+	 AIF   &1#'.NOLIT
+LIT&N$	 DC    C&1
+.NOLIT	 AIF   &PAD=NO.NOPAD
+EOF&N$	 MVI   0(15),C' '
+	 LA    15,1(0,15)
+	 BCT   14,EOF&N$
+	 AGO   .END
+.NOPAD	 ANOP
+EOF&N$	 BCTR  15,0
+.END	 ANOP
+END&N$	 EQU   *
+	 LA    2,X'0A'
+	 SVC   202
+

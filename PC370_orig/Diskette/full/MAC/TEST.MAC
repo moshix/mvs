@@ -1,0 +1,23 @@
+TEST	 MACRO	?,?,?,?,?,?,?,TIME=YES
+	 DC	0H'0'
+	 DC	AL1(XXX&N$-*-5),AL1(L'XXX&N$-1),CL1'&TIME',X'00'
+	 AIF	&3=?.X2
+	 AIF	&4=?.X3
+	 AIF	&5=?.X4
+	 AIF	&6=?.X5
+.X6	 &1	&2,&3,&4,&5,&6
+XXX&N$	 DC	C'&1  &2,&3,&4,&5,&6 '
+	 AGO	.END
+.X5	 &1	&2,&3,&4,&5
+XXX&N$	 DC	C'&1  &2,&3,&4,&5 '
+	 AGO	.END
+.X4	 &1	&2,&3,&4
+XXX&N$	 DC	C'&1  &2,&3,&4 '
+	 AGO	.END
+.X3	 &1	&2,&3
+XXX&N$	 DC	C'&1  &2,&3 '
+	 AGO	.END
+.X2	 &1	&2
+XXX&N$	 DC	C'&1  &2 '
+.END	 ANOP
+

@@ -1,0 +1,117 @@
+         TITLE 'DEMO8Q.ALC - 8 DEMO8QS PROBLEM'
+* CONVERTED TO 8086 BY DON HIGGINS 03/30/85
+*
+* COPYRIGHT 1983 MACRO MICRO SYSTEMS, INC.
+* AUTHOR.  DON HIGGINS.
+* DATE.    10/23/82.
+* REMARKS. SOLVE 8 DEMO8QS PROBLEM WITH RECURSIVE ROUTINE.
+*
+* PROGRAM RAN 85 SECONDS WITH JRT PASCAL ON 4MHZ Z80
+* PROGRAM RAN 55 SECONDS WITH A370 ON SAME SYSTEM
+*
+DEMO8Q   CSECT
+         LR    BASE,ENTRY
+         USING DEMO8Q,BASE
+         L     ENTRY,=V(PET)
+         BALR  LINK,ENTRY
+         LA    STKPTR,STACK-LSENTRY
+         USING DSTACK,STKPTR
+         LA    N,1
+         BAL   LINK,GENQ
+         L     ENTRY,=V(PET)
+         BALR  LINK,ENTRY
+         SVC   EXIT
+GENQ     EQU   *
+         LA    STKPTR,LSENTRY(STKPTR)
+         ST    H,STKH
+         ST    LINK,STKLINK
+         LA    H,1
+LOOP     EQU   *
+         LA    ACOL,COL-1(H)
+         CLI   0(ACOL),TRUE
+         BNE   NEXT
+         LA    R1,8(N)
+         SR    R1,H
+         LA    AUP,UP-1(R1)
+         CLI   0(AUP),TRUE
+         BNE   NEXT
+         LA    R1,0(N,H)
+         BCTR  R1,0
+         LA    ADOWN,DOWN-1(R1)
+         CLI   0(ADOWN),TRUE
+         BNE   NEXT
+         STC   H,X-1(N)
+         MVI   0(ACOL),FALSE
+         MVI   0(AUP),FALSE
+         MVI   0(ADOWN),FALSE
+         LA    N,1(N)
+         CH    N,=H'8'
+         BH    PRINT
+         BAL   LINK,GENQ
+         B     CONT
+PRINT    EQU   *
+         LA    K,8
+         LA    ALINE,LINE+1
+PLOOP    EQU   *
+         SR    R0,R0
+         IC    R0,X-1(K)
+         CVD   R0,PWORK
+         MVC   0(4,ALINE),=X'40202020'
+         ED    0(4,ALINE),PWORK+6
+         LA    ALINE,5(ALINE)
+         BCT   K,PLOOP
+         LA    R2,LINE
+         SVC   WTO
+CONT     EQU   *
+         BCTR  N,0
+         LA    R1,0(H,N)
+         BCTR  R1,0
+         LA    ADOWN,DOWN-1(R1)
+         MVI   0(ADOWN),TRUE
+         LA    R1,8(N)
+         SR    R1,H
+         LA    AUP,UP-1(R1)
+         MVI   0(AUP),TRUE
+         LA    ACOL,COL-1(H)
+         MVI   0(ACOL),TRUE
+NEXT     EQU   *
+         LA    H,1(H)
+         CH    H,=H'8'
+         BNH   LOOP
+         L     H,STKH
+         L     LINK,STKLINK
+         SH    STKPTR,=AL2(LSENTRY)
+         BR    LINK
+         LTORG
+EXIT     EQU   0
+WTO      EQU   209
+R0       EQU   0
+R1       EQU   1
+R2       EQU   2
+N        EQU   3
+ACOL     EQU   4
+AUP      EQU   5
+ADOWN    EQU   6
+AX       EQU   7
+H        EQU   8
+ALINE    EQU   9
+K        EQU   10
+BASE     EQU   12
+STKPTR   EQU   13
+LINK     EQU   14
+ENTRY    EQU   15
+COL      DC    8AL1(TRUE)
+UP       DC    15AL1(TRUE)
+DOWN     DC    15AL1(TRUE)
+X        DC    8AL1(0)
+STACK    DC    8F'0,0'
+LINE     DC    CL50' ',C'$'
+PWORK    DC    D'0'
+TRUE     EQU   0
+FALSE    EQU   1
+DSTACK   DSECT
+STKH     DS    F
+STKLINK  DS    F
+LSENTRY  EQU   *-DSTACK
+         END   DEMO8Q
+

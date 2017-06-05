@@ -1,0 +1,36 @@
+READ	 MACRO DCB?,0,RBN?,RBA=?,RBN=&3
+	 AIF   /&LABEL$$=/ .GO
+&LABEL$$ EQU   *
+.GO	 AIF   &1=(.REG1
+	 LA    2,&1
+	 AGO   .RBA
+.REG1	 AIF   &1=(2).RBA
+	 LR    2,&1
+.RBA	 AIF   &RBA=?.RBN
+	 AIF   &RBA=(.REG2
+	 AIF   &RBA<A.RBAABS
+	 MVC   36(4,2),&RBA
+	 AGO   .AREA
+.REG2	 ST    &RBA,36(0,2)
+	 AGO   .AREA
+.RBAABS  MVC   36(4,2),=F'&RBA'
+	 AGO   .AREA
+.RBN	 AIF   &RBN=(.REG3
+	 AIF   &RBN<A.RBNABS
+	 L     1,&RBN
+	 AGO   .MULT
+.REG3	 LR    1,&RBN
+	 AGO   .MULT
+.RBNABS  L     1,=F'&RBN'
+.MULT	 MH    1,18(0,2)
+	 ST    1,36(0,2)
+.AREA	 AIF   &2=(.REG4
+	 LA    1,&2
+	 AGO   .SVC
+.REG4	 AIF   &2=(1).SVC
+	 LR    1,&2
+.SVC	 SVC   3
+	 AIF   '&2'#'0'.END
+	 L     1,32(0,2)
+.END	 ANOP
+

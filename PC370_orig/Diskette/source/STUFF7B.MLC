@@ -1,0 +1,14 @@
+STUFF7B  BEGIN
+         ZAP   X,Z
+         UNPK  Y,X
+         MVZ   Y+2(1),=X'F0'
+         MVC   W,Y+1
+         SP    Z,X
+         RETURN
+         LTORG
+W        DS    CL2
+X        DC    CL3'555'
+Y        DC    CL3'ABC'
+Z        DC    PL4'1234'
+         END
+

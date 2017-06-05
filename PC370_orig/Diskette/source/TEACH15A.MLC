@@ -1,0 +1,139 @@
+         PRINT NOGEN                                                   
+****************************************************************
+*        FILENAME:  TEACH15A.MLC                               *
+*        AUTHOR  :  Bill Qualls                                *
+*        SYSTEM  :  Compaq 286LTE, PC/370 R4.2                 *
+*        REMARKS :  List of teachers with title, such as       *
+*                   'DR. BENSON' or 'PROF. HINCKLEY'.          *
+****************************************************************
+*        This program illustrates table logic where a          *
+*        character field is treated as a table whose elements  *
+*        are each one byte in length.                          *
+****************************************************************
+*        Note: this type of problem is best done with the      *
+*        TRT and EX instructions but those have not been       *
+*        discussed yet.                                        *
+****************************************************************
+         START 0                                                       
+         REGS
+BEGIN    BEGIN
+         WTO   'TEACH15A ... Begin execution'
+         BAL   R10,SETUP
+MAIN     EQU   *
+         CLI   EOFTEACH,C'Y'
+         BE    EOJ
+         BAL   R10,PROCESS
+         B     MAIN
+EOJ      EQU   *
+         BAL   R10,WRAPUP
+         WTO   'TEACH15A ... Normal end of program'
+         RETURN
+****************************************************************
+*        SETUP - Those things which happen one time only,      *
+*                before any records are processed.             *
+****************************************************************
+SETUP    EQU   *
+         ST    R10,SVSETUP
+         OI    TEACHERS+10,X'08'  PC/370 ONLY - Convert all
+*                                 input from ASCII to EBCDIC
+         OPEN  TEACHERS         
+         BAL   R10,READTCH
+         L     R10,SVSETUP
+         BR    R10
+****************************************************************
+*        PROCESS - Those things which happen once per record.  *
+****************************************************************
+PROCESS  EQU   * 
+         ST    R10,SVPROC
+         MVC   ONAME,=CL25' '
+         CLC   TTDEG,=CL4'PHD'    Is highest degree PHD?
+         BNE   PROFESS            No, then title is 'PROF.'
+         MVC   ONAME(3),=CL3'DR.' else title is 'DR.'
+         LA    R3,ONAME+4         Will move name starting at
+         B     PROC2              the fifth byte.
+PROFESS  EQU   *
+         MVC   ONAME(5),=CL5'PROF.'
+         LA    R3,ONAME+6         Will move name starting at
+PROC2    EQU   *                  the seventh byte.
+         LA    R4,TTNAME          Point R4 to 1st byte of input
+         LA    R5,L'TTNAME        R5 is max nbr characters
+PROC3    EQU   *
+         CLI   0(R4),C','         Find comma separating name
+         BE    PROC4              from initials? Yes, done.
+         MVC   0(1,R3),0(R4)      Else move this letter.
+         LA    R3,1(R3)           Point to next letter output
+         LA    R4,1(R4)           Point to next letter input
+         BCT   R5,PROC3           Repeat till done
+PROC4    EQU   *
+         MVC   WTOINAME,TTNAME    Show input name
+         MVC   WTOIDEG,TTDEG      Show input degree
+         WTO   WTOMSG1
+         MVC   WTOONAME,ONAME     Show output name
+         WTO   WTOMSG2
+         BAL   R10,READTCH
+PROCESSX EQU   *
+         L     R10,SVPROC
+         BR    R10
+****************************************************************
+*        READTCH - Read a teacher record.                      *
+****************************************************************
+READTCH  EQU   *
+         ST    R10,SVREADT
+         GET   TEACHERS,TREC      Read a single teacher record
+         B     READTX
+ATENDTCH EQU   *
+         MVI   EOFTEACH,C'Y'
+READTX   EQU   *
+         L     R10,SVREADT
+         BR    R10
+****************************************************************
+*        WRAPUP - Those things which happen one time only,     *
+*                 after all records have been processed.       *
+****************************************************************
+WRAPUP   EQU   *
+         ST    R10,SVWRAP
+         CLOSE TEACHERS
+         L     R10,SVWRAP
+         BR    R10
+****************************************************************
+*        Literals, if any, will go here                        *
+****************************************************************
+         LTORG
+****************************************************************
+*        File definitions                                      *
+****************************************************************
+TEACHERS DCB   LRECL=29,RECFM=F,MACRF=G,EODAD=ATENDTCH,
+               DDNAME='TEACHER.DAT'  
+****************************************************************
+*        RETURN ADDRESSES                                      *
+****************************************************************
+SVSETUP  DC    F'0'               SETUP
+SVPROC   DC    F'0'               PROCESS
+SVREADT  DC    F'0'               READTCH
+SVWRAP   DC    F'0'               WRAPUP
+****************************************************************
+*        Miscellaneous field definitions                       *
+****************************************************************
+EOFTEACH DC    CL1'N'             End of teacher file? (Y/N)
+ONAME    DC    CL25' '            Name with 'DR.' or 'PROF.'
+WTOMSG1  DS    0CL41
+         DC    CL21'TEACH15A ... Input  <'
+WTOINAME DS    CL15
+WTOIDEG  DS    CL4
+         DC    CL1'>'
+WTOMSG2  DS    0CL47
+         DC    CL21'TEACH15A ... Output <'
+WTOONAME DS    CL25
+         DC    CL1'>'
+****************************************************************
+*        Input record definition - Teacher                     *
+****************************************************************
+TREC     DS    0CL29      1-29    Teacher record
+TTID     DS    CL3        1- 3    Teacher ID nbr
+TTNAME   DS    CL15       4-18    Teacher name
+TTDEG    DS    CL4       19-22    Highest degree
+TTTEN    DS    CL1       23-23    Tenured?
+TTPHONE  DS    CL4       24-27    Phone nbr
+TTCRLF   DS    CL2       28-29    PC/370 only - CR/LF
+         END   BEGIN                                                   
+

@@ -1,0 +1,34 @@
+WTORPC	 MACRO ?,?
+	 AIF   &1=?.READ
+	 AIF   &1='.LIT
+&LABEL$$ SVC   31
+	 IC    0,&1+L'&1
+	 MVI   &1+L'&1,C'$'
+	 LA    2,&1
+	 SVC   209
+	 STC   0,&1+L'&1
+	 AGO   .READ
+.LIT	 ANOP
+&LABEL$$ SVC   31
+TEXT	 SETC  &1
+	 LA    2,=C'&TEXT.$'
+	 SVC   209
+.READ	 SVC   30
+	 MVC   &2,=16C' '
+	 LA    2,WTOR$&N$
+	 SVC   210
+	 LA    2,=C'$'
+	 SVC   209
+	 XR    2,2
+	 IC    2,WTOR$&N$+1
+	 LTR   2,2
+	 BZ    *+26
+	 BCTR  2,0
+	 STC   2,*+5
+	 MVC   &2,WTOR$&N$+2
+	 LA    1,&2
+	 LA    2,1(2)
+	 SVC   12
+	 B     *+22
+WTOR$&N$ DC    AL1(L'&2+1,0),16X'20'
+

@@ -1,0 +1,41 @@
+         PRINT NOGEN                                                   
+****************************************************************
+*        FILENAME:  OFFER2A.MLC                                *
+*        AUTHOR  :                                             *
+*        SYSTEM  :  Compaq 286LTE, PC/370 R4.2                 *
+*        REMARKS :  A quick-and-dirty list of offerings.       *
+****************************************************************
+         START 0                                                       
+         REGS
+BEGIN    BEGIN
+         OI    OFFER+10,X'08'
+         OI    REPORT+10,X'08'    
+         OPEN  OFFER
+         OPEN  REPORT
+LOOP     GET   OFFER,IREC     
+         MVC   OREC(2),IREC+3
+         MVI   OREC+2,C'-'
+         MVC   OREC+3(3),IREC+5
+         MVI   OREC+6,C'-'
+         MVC   OREC+7(1),IREC+8
+         MVC   OREC+11(1),IREC
+         MVC   OREC+12(3),=C'*19'
+         MVC   OREC+15(2),IREC+1
+         MVC   OREC+20(4),IREC+12
+         MVC   OREC+27(3),IREC+9
+         MVC   OREC+31(2),=C'**'
+         MVC   OREC+33(2),=X'0D25'
+         PUT   REPORT,OREC      
+         B     LOOP
+ATEND    CLOSE OFFER
+         CLOSE REPORT
+         RETURN
+         LTORG
+OFFER    DCB   LRECL=18,RECFM=F,MACRF=G,EODAD=ATEND,
+               DDNAME='OFFER.DAT'  
+REPORT   DCB   LRECL=35,RECFM=F,MACRF=P,
+               DDNAME='OFFER.TXT'      
+IREC     DS    CL18
+OREC     DC    CL35' '
+         END   BEGIN                                                   
+

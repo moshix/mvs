@@ -1,0 +1,352 @@
+ 
+UTILITY.DOC PC/370 utility documentation
+
+A.  Summary
+
+    1.  SEE.ALC - this utility will support full screen editing of an
+        ASCII text file.  The size of the file is only limited by the
+        amount of MS-DOS memory available (up to 640K less MS-DOS and
+        PC/370).  The program is modeled after the TURBO PASCAL full
+        screen editor with compatible commands.  In addition to the
+        expanded memory support,  SEE supports full color selection,
+        character graphics, and session emulation.
+
+    2.  PRINTDOC.ALC - this utility will read an ASCII text file and
+        print it on the standard printer device with headings and page
+        numbers set by standard ALC TITLE, EJECT, and SPACE commands.
+
+    3.  T370.ALC - this utility reads A370 relocatable object files
+        which are in compressed bit stream format and creates standard
+        IBM 370 linkage editor input in standard 80 byte fixed record
+        format with ESD, TXT, RLD, and END type records.  This utility
+        also has option to generate ascii hex listing file if desired.
+        The 370 object files have a suffix of .370 and the listing
+        file has a suffix for .HEX.
+
+To run demo of utility programs, execute BAT\RUNUTIL.BAT.  To rebuild
+executable utility modules from source run BAT\BLDUTIL.BAT.
+
+B. SEE - Screen Editor and Emulator Documentation
+
+SEE.ALC is a full screen ASCII text editor for PC's with MS-DOS 2.0+
+and at least 256k.  SEE is designed to be keystroke compatible with
+both PFS:WRITE and the TURBO PASCAL (ie WORDSTAR like) editors.  SEE
+supports text files up to 512k on a 640k system.  Note SEE.ALC itself
+is about 90k which some editors can't handle.  To conserve space SEE
+strips trailing blanks from each line of text, and replaces 9 leading
+blanks with a single tab character. Each line is terminated with a
+carriage return and line feed.
+
+SEE also supports session emulation by optionally creating a file
+(.KSF) with all of the session's keystrokes which can be replayed to
+emulate the session with full color control.  SEE also supports line
+and block drawing with graphic characters in full color.
+
+The distribution diskettes or ARC file contains SEE.COM which can be
+used to edit the source code UTIL\SEE.ALC.  TO edit an existing ASCII
+text file:
+
+  A>SEE file1
+
+E370R42.EXE is dynamically loaded by SEE.COM to execute the 370 code
+so it must be accessible on the current path as SEE.COM.  If you wish
+to run SEE using the emulator on a separate directory, you can use
+DEBUG to insert path in front of emulator name at X'140' in SEE.COM,
+or you can make the emulator resident by directly executing it.
+The default file type is ALC.  (Note with PC/370 you can change the
+default in SEE.ALC and reassemble and link it in about 90 seconds on a
+standard PC.)  If the file doesn't exist, it will create an empty file
+ready for editing.  If the file does exist, it will be renamed
+file1.BAK before saving the new file if it is changed.  Be sure there
+is room on the same disk for both the new file and the backup file
+before spending a lot of time editing a file.  Note SEE.ALC itself
+requires at least 110k free space before you can save it.
+
+To capture all the keystrokes in a session for replay later, type:
+
+  A>SEE file1 file2
+
+The default file type for file2 is KSF.  If file2 does not exist, it
+will be created with all the keystrokes entered during the session
+which edits file1.  If file2 already exists, SEE will use it as the
+keyboard input to emulate the original session.  Note two special keys
+act different in live editing versus emulation.  ALT-F1 key causes
+emulation to stop until a real key is entered.  ALT-F2 key causes a 1
+second wait in emulation mode to slow it down for visual effects.
+Additional controls could be easily added to SEE.
+
+SEE is designed to be fast and easy to use.  To change a drive
+specification in an autoexec.bat file a sequence of less than 25
+characters including the filename may be required.  For example,
+assuming autoexec.bat contains:
+
+RECORD/COLUMN  1...5...10...15...20
+  1            ver
+  2            astclock
+  3            c:
+  4            123
+
+The following keystrokes would change drive c to drive a:
+
+keystrokes  ascii characters            comments
+
+  1-19      see autoexec.bat[enter]   start up SEE and display text
+ 20-21      [arrow down][arrow down]    move down to third line
+  22        a                           replace c with a
+  23        [esc]                       rename old file and save new
+  file
+
+To learn the keystrokes available with SEE, use F1 and F2 to display
+help screens.  After reading help screens type any character to return
+to text display.
+
+To see the capability of SEE and to verify that the version you have
+is working correctly on your system, run the batch file RUNUTIL.BAT.
+This file executes the following emulation sessions:
+
+  1.  DEMOSEE1.KSF - test both native and alternate keys as defined on
+                     F2.
+  2.  DEMOSEE2.KSF - test full color character graphics by drawing
+                     colored organizational chart boxes and a full
+                     color U.S.  flag with blinking stars. Press enter
+                     to end session.
+
+One of the unique features of SEE is that the entire 370 assembler
+source code is being distributed along with the object code.  Because
+of this, the SEE editor can be customized as required.  The SEE.ALC
+source program is about 3000 lines and requires no external
+subroutines.  On a RAM disk, it assembles in about 60 seconds via the
+command A370 SEE.  The link edit takes another 10 seconds via the
+command L370 SEE.  A listing of the source can be generated via the
+command A370 SEE/L if you have a hard disk.  The listing is too big to
+fit on a 360k floppy disk.
+
+SEE has several special keys which may need additional explanation.
+The ALT-F3 key enters PC/370 debug mode where you can display the 370
+registers via the R command, dump memory via the D command, trace
+instructions, etc.  To return to the SEE editor, type Q.  Since the
+default is to kill all trace ids and disable the PC/370 interactive
+debug interrupt, you must either link SEE with the debug option D, or
+press a key during loading of the SEE program to get into PC/370 debug
+at the beginning of SEE where you can select ids to save and trace.
+
+The ALT-F4 key toggles an internal audit mode which was very useful
+during debugging and may be useful to others making changes to SEE.
+In audit mode the critical pointers and control blocks are verified
+for consistency after each operation that modifies them.  For large
+text files, these audits may take several seconds so be patient.  Via
+the audit mode, data corruption can be detected immediately after it
+occurs rather than later such as when a save is attempted.  The
+following block diagram shows the critical blocks and their
+relationships:
+
+ ******************************************************************
+ * MS-DOS   64k segment                                           *
+ ******************************************************************
+ * SEE.COM  512k segment (code and data in 370 address space)     *
+ *                                                                *
+ *       SCB screen control block                                 *
+ *      ************************* <<<<< ASCB pointer to screen    *
+ *   X>>*SCBADDR DS A addr LB   *       control block with 25     *
+ *   ^  *SCBPREV DS A prev LB   *       lines of text             *
+ *   ^  *SCBNEXT DS A next LB   *                                 *
+ *   ^  *SCBLINE DS CL80 text   *                                 *
+ *   ^  ************************* <<<<< R5 relative index to      *
+ *   ^  *SCBADDR DS A addr LB   *       current row in ASCB       *
+ *   ^  *SCBPREV DS A prev LB   *       times X'100'              *
+ *   ^  *SCBNEXT DS A next LB   *       (X'0000' to X'1700')      *
+ *   ^  *SCBLINE DS CL80 text   *                                 *
+ *   ^  *************************       R6 relative column (0-79) *
+ *   ^                                  R7 address of SCB for row *
+ *   ^                                                            *
+ *   ^                         GLBLAST  DS A last    LB >>>>>>>X  *
+ *   X<<<<<<<<<<<<<<<<<<<<<<<< GLBCUR   DS A current LB >>>>>X v  *
+ *    (matches SCBADDR for     GLBFIRST DS A first   LB >>>> v v  *
+ *     row 0 at all times)                                 v v v  *
+ *                                                         v v v  *
+ *                                                         v v v  *
+ *  (Dynamic memory allocated via SVC 10)                  v v v  *
+ *                                                         v v v  *
+ *    LB line control block                                v v v  *
+ *    ***************************                          v v v  *
+ * 0  * LBPREV DS A prev LB     *<<<<<<<<<<<<<<<<<<<<<<<<<<X v v  *
+ * X<<* LBNEXT DS A next LB     *                            v v  *
+ * v  * LBLINE DS CL80 text     *                            v v  *
+ * v  ***************************                            v v  *
+ * v      ^                                                  v v  *
+ * v      ^                                                  v v  *
+ * X>>***************************                            v v  *
+ *    * LBPREV DS A prev LB     *<<<<<<<<<<<<<<<<<<<<<<<<<<<<X v  *
+ * X<X* LBNEXT DS A next LB     *                              v  *
+ * v  * LBLINE DS CL80 text     *                              v  *
+ * v  ***************************                              v  *
+ * v      ^                                                    v  *
+ * v      ^                                                    v  *
+ * X>>***************************                              v  *
+ *    * LBPREV DS A prev LB     *<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<X  *
+ * 0  * LBNEXT DS A next LB     *                                 *
+ *    * LBLINE DS CL80 text     *                                 *
+ *    ***************************                                 *
+ *                                                                *
+ *    (note lower right number on status line is ratio of         *
+ *     active LB's to maximum LB's which will fit in extended     *
+ *     memory. AFREELB pointer maintains queue of unused LB's.)   *
+ *                                                                *
+ ******************************************************************
+ * E370R40.EXE PC/370 emulator loaded in high 64k segment         *
+ ******************************************************************
+
+The key things that are verified by the audit mode routines are as
+follows:
+
+  1.  The row (R5) and column (R6) relative pointers are within valid
+      range.
+  2.  The SCB address (R7) corresponds to current relative row (R5).
+  3.  The SCBADDR in row zero matches GLBCUR.
+  4.  The SCBPREV in each SCB matches SCBNEXT in previous SCB etc.
+  5.  Starting with LB at GLBFIRST, verify forward and backward chains
+      for all LB's in extended memory.  The total LB count is also
+      verified.
+
+Do not leave audit mode on for normal editing since it significantly
+slows down the editor.
+
+The label (F5), duplicate (F6), and delete key (del) all work
+together.  When ever a block is active, the BLK indicator is on.  Be
+sure to turn the block indicator off via F5, F6, or delete key.  If
+the block indicator is not off and  the (del) key is hit to delete a
+character, it will delete the block instead.  Note since the box
+graphics mode indicator shares the same space on the status line,
+turning on graphics will turn off the block indicator.
+
+The search (F7) key will search for up to a 15 character key.  Use F8
+to repeat search.  If a replacement key is specified, it will only be
+replaced if it fits on current line.  Search can be interrupted by any
+key.  The current line number is updated every 100 lines during
+search.
+
+The color selection key (F9) is tricky but powerful.  The attribute
+byte shown on the message line consists of four fields; the blink bit,
+the background color bits (RGB), the intensity bit, and the foreground
+color bits (RGB).  The default attribute is set to B'00010111' or
+X'17' which can be interpreted as no blink, no red background, no
+green background, blue background, no intensity, and red, green, and
+blue foreground (ie white foreground).  This is the PFS:WRITE default.
+The TURBO PASCAL editor default is yellow on black B'00001110' or
+X'0E'.  The attribute can be entered as a two digit hex number or the
+arrows can be used to step through all the possible color and blink
+combinations (all 256 of them).  Once the desired attribute is
+selected, press enter to return to the screen with the new attribute.
+Note that unfortunately the attributes of each character are not
+stored in the file and when the screen is erased and updated again,
+individual character attributes used on the screen are lost.  However,
+the emulator option allows recreation of any screen with all the
+colors used during the original session.  This capability can be used
+to generate full color screen dialogs.
+
+In addition to color, the box graphics or line graphics capability
+allows creation of screens with organization charts and line diagrams
+such as the one above.  I did not use color and I selected printable
+characters via SHFT-F10 in order for this file to be printable on any
+ASCII printer.  The default box graphic characters when F10 is turned
+on is double line graphic characters which look neat on the screen but
+can't be printed on many printers.  When F10 is pressed, the BOX
+indicator comes on and the insert mode is turned off.  In BOX mode,
+the arrows allow drawing of boxes and lines with correct corners based
+on the current and next direction of arrows.  With a little practice,
+it is easy to draw things and to add color to highlight different
+parts.  However, the color is lost unless the keystroke file is being
+created during the session.  Note in BOX mode, keystrokes are not
+queued up as they are in normal text mode.  This is to prevent
+overshooting the end of a line when holding down one of the arrow
+keys.
+
+The status line contains the following fields:
+
+  1.  STATMSG  - 20 character message field used to display the
+                 current function and to echo requested input.
+  2.  STATFILE - name of the file being edited with path (15 char.
+                 shown).
+  3.  STATREC  - current line number.
+  4.  STATCOL  - current cursor column
+  5.  STATCAP  - caps key indicator
+  6.  STATINS  - insert mode indicator (SEE always starts with INS
+                 off)
+  7.  STATNUM  - numeric mode indicator
+  8.  STATBLK  - labeled block mode indicator / box graphics mode
+                 indicator
+  9.  STATPCT  - percent utilization of available memory
+
+As a starting point for anyone who wishes to add a new key function,
+the following minimum steps are required:
+
+  1.  Overlay byte in KEYTAB which corresponds to the value of the new
+      key with an index to the corresponding address in KRTAB.
+      (All ASCII keys are in the range 0-127, and all extended keys
+      are mapped into 128-255 by forcing the high order bit on.)
+      Since the index values are multiples of 4, up to 63 keys can be
+      handled with this scheme.
+
+  2.  Insert address constant in KRTAB which points to the actual key
+      routine.
+
+  3.  Code the key routine with the following assumptions:
+
+      a.  R14 has return address (You can use KRSV14 to save it.)
+      b.  R5  has relative row times X'100'.
+      c.  R6  has relative column.
+      d.  R7  has address of SCB corresponding to current row.
+      e.  GLBCUR    has extended memory address of LB for row 0 on
+          screen.
+      f.  GLBLAST   has extended memory address of last LB.
+      g.  Useful routines include:
+          1.)  SETCUR - reset cursor based on (R5,R6) and update
+               status
+               line if position has changed since last call.
+          2.)  PUTMSG - display 20 character message passed via R1.
+      h.  If the function you add, modifies any data in the SCB's, be
+          sure to turn on the SCBMOD and SCRMOD flags to insure that
+          the update and save routines recognize a file change
+          occurred.
+      i.  Assume nothing works and keep a backup copy of the editor
+          and any test files you are using.
+
+  4.  Add key definition to F2 screen without exceeding 24 lines.
+
+  5.  Test all changes very carefully since this program should be
+      considered complex.  The interaction between key routines and
+      the maintenance of the screen and memory control blocks during
+      scrolling, block operations, etc. is tricky to say the least.
+      Use the audit mode to verify that the new routine does not
+      destroy currency of the screen and extended memory data bases.
+
+For release 2.0 of PC/370, the SEE editor was modified to use dynamic
+memory in the 370 address space instead of MS-DOS allocated extended
+memory accessed via the cross memory MVCS and MVCP moves.  The only
+other change was to start up editor in insert mode for new files.
+
+C.  PRINTDOC print utility
+
+The PRINTDOC.COM program requires path\filename as single parm and
+proceeds to print the specified file either on console or the standard
+print device with page control and optional headings controlled with
+embedded TITLE and EJECT commands.  For more information see the
+source code UTIL\PRINTDOC.ALC.
+
+D.  T370 translate object code utility
+
+The T370.COM program requires path\filename as single parm with
+optional trailing slash and one or more of the following parms:
+
+  L - create listing file of the generated 370 OS/VS object file
+      (suffix is HEX).  Default is none.
+
+  P - punch 370 object code file (suffix 370).  Default is on.
+
+The input file specified must be an object file created by A370.EXE.
+For more information see the source UTIL\T370.ALC.
+
+
+
+
+ 

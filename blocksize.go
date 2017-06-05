@@ -3,7 +3,7 @@ package main
 /*
    blocksize
    block size calculator for most IBM DASDs
-   invoke with: 
+   invoke with:
    blocksize DASD LRECL parameters
 
 
@@ -20,37 +20,40 @@ func main() {
 	var lrecl int = 0 // initialize lrecl
 	var dasd = ""     //  initialize DASD type
 
-	dasdPtr := flag.String("dasd", "", "DASD model")          // default to no DASD
-	lreclPtr := flag.Int("lrecl", 0, "logical record length") //default to zero lrecl
-	helpPtr := flag.Bool("help", false, "help flag")          // default  to no help
-	flag.Parse()
+	dasdPtr := flag.String("dasd", "", "DASD model")
+	// default to no DASD
+	lreclPtr := flag.Int("lrecl", 0, "logical record length")
+	//default to zero lrecl
+	helpPtr := flag.Bool("help", false, "help flag")
+	// default  to no help
+	flag.Parse() //  this parses the command line arguments
 
 	lrecl = *lreclPtr // assign argument to main variable lrecl
 	dasd = *dasdPtr   // assign dasd type to main variable dasd
 
-	if dasd == "" {
+	if dasd == "" { // no dasd type was input
 		fmt.Println("\nBLK205R No DASD type entered. ")
 		fmt.Println("BLK206R pls enter DASD type or restart with -h for list of DASD types")
 		fmt.Scan(&dasd)
 	}
-	if lrecl == 0 {
+	if lrecl == 0 { // no lrecl was input
 
 		fmt.Printf("\nBLK201R lrecl command line argument is not included.\n")
 		fmt.Println("BLK202R Please enter lrecl length: ")
 		fmt.Scan(&lrecl)
 	}
-	if *helpPtr {
+	if *helpPtr { // user asked for help
 		fmt.Println("BLK080I Usage example:   ")
 		fmt.Println("BLK080I blockfactor -h -dasd=3380K -lrecl=80")
 		fmt.Println(" ")
-		fmt.Println("-h         show this help         ")
-		fmt.Println("-dasd      IBM DASD type (see table below)")
-		fmt.Println("-lrecl=80  logical record length")
+		fmt.Println("-h          show this help         ")
+		fmt.Println("-dasd=3380  IBM DASD type (see table below)")
+		fmt.Println("-lrecl=80   logical record length")
 		fmt.Println("Possible IBM DASD types:")
 		fmt.Println("2311 2314 3330 3340 3350 3375 3380 3390 9345")
 		return
 	}
-	// build table with full track size (not half!)
+	// build table with full track size
 	table := make(map[string]int)
 	table["2311"] = 3625
 	table["2314"] = 7294
@@ -62,17 +65,18 @@ func main() {
 	table["3390"] = 56664
 	table["9345"] = 46456
 	/*  this is just an exampmle on how to print out table
-	    p.s. prints out in random order.... not sure why
-    	for model, size := range table {
-	         fmt.Println("Model",model, "size",size)
-	    } */
+		    p.s. prints out in random order.... not sure why
+	    	for model, size := range table {
+		         fmt.Println("Model",model, "size",size)
+		    } */
 
 	/* formula:  BLOCKIZE = INT(half of TRKSZIE/LRECL) * LRECL */
 
-	halftracks := table[dasd] / 2    // half track size
+	halftracks := table[dasd] / 2 // half track size
 	blocksize := int((halftracks / lrecl) * lrecl)
 
-	fmt.Println("BLK100I Ideal blocksize for DASD type", dasd, ", LRECL: ", lrecl, " is: ", blocksize)
+	fmt.Println("\nBLK100I Ideal blocksize for DASD type", dasd, ", LRECL: ", lrecl, " is: ", blocksize)
+	fmt.Println("BLK900I END OF PROCESSING")
 
 	return
 }

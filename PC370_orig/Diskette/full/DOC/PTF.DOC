@@ -1,0 +1,110 @@
+PTF.DOC private temporary fixes for PC/370
+
+It is a violation of copyright to duplicate and distribute modified
+versions of PC/370.  However, users are free to apply PTF's for their
+own use on their own systems.  The following PTF's may be useful:
+
+  1.  Change R1.2 A370.COM lines per page from 50 to some other value.
+
+      a.  Backup A370.COM to separate disk.
+      b.  Rename A370.COM TO A370.TMP
+      c.  VER 0A39 C606F80332  MOV BYTE PTR [03F8],32H
+      d.  VER 0A3D 32
+      e.  REP 0A3D xx
+      f.  Save modified file and rename.
+
+  2.  Change R2.0A A370.EXE lines per page from 50 to some other
+      value.
+
+      a.  Backup A370.EXE to separate disk.
+      b.  Rename A370.EXE TO A370.TMP
+      c.  VER 0920 C6064E0532  MOV BYTE PTR [054E],32H
+      d.  VER 0924 32
+      e.  REP 0924 xx
+      f.  Save modified file and rename.
+
+  3.  Change R3.0 path and/or filename of E370R20.EXE generated in
+      each 370 COM module by L370.EXE.  For example changing name to
+      C:\E370R20.EXE allows one copy of emulator to be stored in
+      root directory of hard drive.
+
+      a.  Backup L370.EXE to separate disk.
+      b.  Rename L370.EXE to L370.TMP to make debug process it as data
+          file.
+      c.  Start DEBUG L370.TMP
+      d.  Use ENTER debug command to change 64 byte path/filename at
+          offset X'342'.  Name must be followed with zero byte.
+      e.  Enter W command to output modified file.
+      f.  Rename L370.TMP to L370.EXE.
+
+      Note name can also be changed in individual 370 COM module at
+      X'140' if for wish to have only selected COM programs use a
+      different emulator.
+
+  4.  Note ASCII translation table has been expanded to 256 bytes in
+      release 3.0 to allow special characters to be added for ASCII to
+      EBCDIC and EBCDIC to ASCII translation.   This facility has been
+      requested by both French and German users who have extended
+      character sets.
+
+      MODULE  TABLE   ADDRESS  EXAMPLES
+
+      A370    EBCDIC   85D0    +X'40'=X'20' FOR EBCDIC SPACE TO ASCII
+                               SPACE
+      A370    ASCII    86F0    +X'20'=X'40' FOR ASCII SPACE TO EBCDIC
+                               SPACE
+      E370R30 EBCDIC   7AB0
+      E370R30 ASCII    7C50
+
+  5.  PTF for release 2.0A to fix blank errors in L370 due to module
+      in concatenated library ending on 128 block boundary.  Low
+      frequency bug in PC/370 since 1985 identified thanks to Jim Gray
+      of CONVAL Software. Erroneous call was added in 1983 CP/M
+      version to skip CTL-Z added to each concatenated module.
+
+      RENAME L370.EXE L370.TMP
+      DEBUG  L370.TMP
+      -S 0000 FFFF 4C 54 46 E8 B9 00   (VER 2CD1 'LTF', CALL GBYTE)
+      -E 2CD4 90 90 90                 (REP 2CD4 NOP,NOP,NOP - NOP
+      CALL)
+      -W
+      RENAME L370.TMP L370.EXE
+
+  6.  PTF for release 4.0 to prevent erroneous FQE from overlaying 8
+      bytes beyond end of BIN subroutine module.  Result is
+      unpredictable errors after exiting PC/370 BIN subroutine back to
+      COBOL run time system.
+
+      RENAME E370R40.EXE E370R40.TMP
+      DEBUG  E370R40.TMP
+      -E 55D 26.EB 89.05
+      -E 56B 26.EB 88.0E
+      -W
+      -Q
+      RENAME E370R40.TMP E370R40.EXE
+
+  7.  PTF for release 4.2 to change resident emulator interrupt # in
+      case it conflicts with interrupts installed.  Note Micro Focus
+      extended memory facility XM requires that PC/370 interrupt be
+      within the range hex 60-6F.  The installation default in rel.
+      4.2 is hex 60 (in rel. 4.1 without XM support is was hex DC).
+      To change the interrupt to 61 for example:
+
+      a.  RENAME E370R42.EXE E370R42.TXT   change emulator
+          DEBUG  E370R42.TXT
+          -E 46F 60.61
+          -W
+          -Q
+          RENAME E370R42.TXT E370R42.EXE
+
+      b.  RENAME L370.EXE L370.TXT         change linker for COM
+          DEBUG  L370.TXT                  output
+          -E 307 60.61
+          -W
+          -Q
+          RENAME L370.TXT L370.EXE
+
+      c.  RENAME SEE.COM                   change existing COM module
+          -E 107 60.61                     (after fixing L370, you can
+          -W                                run BAT\BLDUTIL to fix all
+          -Q                                utilities)

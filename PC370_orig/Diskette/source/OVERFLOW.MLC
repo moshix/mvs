@@ -1,0 +1,13 @@
+OVERFLOW BEGIN
+         AP    A,B
+         BO    OVER
+         WTO   'There was NOT an overflow'
+         B     DONE
+OVER     EQU   *
+         WTO   'There WAS an overflow'
+DONE     EQU   *
+         RETURN
+A        DC    PL2'998'
+B        DC    PL2'2'
+         END   OVERFLOW
+

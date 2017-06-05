@@ -1,0 +1,40 @@
+GETMAIN  MACRO RU,LV=(1),A=?
+	 AIF   /&LABEL$$=/ .GO
+&LABEL$$ EQU   *
+.GO	 AIF   &1=V.TYPEV
+	 AIF   &LV=(.REG
+	 AIF   &LV>4095.L
+	 LA    1,&LV
+	 AGO   .SVC
+.L	 L     1,=F'&LV'
+	 AGO   .SVC
+.REG	 AIF   &LV=(1).SVC
+	 LR    1,&LV
+.SVC	 SVC   10
+	 LTR   0,0
+	 BZ    *+16
+	 LA    2,=C'ABEND 80A$'
+	 SVC   209
+	 SVC   9
+	 DC    C'BUG '
+	 AIF   &1=R.STORE
+	 AIF   &A=?.STORE
+	 ST    2,&A
+	 AGO   .END
+.STORE	 LR    1,2
+	 AGO   .END
+.TYPEV	 L     1,&LA+4
+	 SVC   10
+	 LTR   0,0
+	 BZ    *+26
+	 C     1,&LA
+	 BNL   *+16
+	 LA    2,=C'ABEND 80A$'
+	 SVC   209
+	 SVC   9
+	 DC    C'BUG '
+	 SVC   10
+	 ST    1,&A+4
+	 ST    2,&A
+.END	 ANOP
+

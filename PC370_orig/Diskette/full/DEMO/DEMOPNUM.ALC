@@ -1,0 +1,119 @@
+         TITLE 'DEMOPNUM - FIXED POINT PRIME NUMBER BENCHMARK'
+DEMOPNUM CSECT
+*
+*  AUTHOR.  DON HIGGINS.
+*  DATE.    04/27/85.
+*  REMAKRS.
+*
+*  THIS PROGRAM USES PREVIOUSLY FOUND PRIMES AS TRIAL DIVISORS
+*  TO FIND THE FIRST 100 PRIME NUMBERS AND PRINT THEM.
+*
+*  THE FOLLOWING BASIC PROGRAM WAS RUN USING INTERPRETATIVE
+*  BASIC AND IT TOOK 60 SECONDS ON 4MHZ Z80 SYSTEM:
+*
+*       DEFINT A-Z
+*       MT=100
+*       DIM T(MT)
+*       NT=1
+*       T(NT)=1
+*       PRINT NT,T(NT)
+*       NT=2
+*       T(NT)=2
+*       PRINT NT,T(NT)
+*       NT=3
+*       T(NT)=3
+*       PRINT NT,T(NT)
+*       N=3
+* 150   N=N+2
+*       FOR I=3 TO NT
+*         J=N/T(I)
+*         IF J*T(I)=N GOTO 150
+*       NEXT I
+*       NT=NT+1
+*       T(NT)=N
+*       PRINT NT,N
+*       IF NT<MT GOTO 150
+*       STOP
+*       END
+*
+*
+*       THE 370 ASSEMBLER BENCHMARK RESULTS ARE AS FOLLOWS:
+*
+*       1.  ON A 4 MHZ Z80 CP/M VERSION OF PC/370, THIS PROGRAM RAN
+*           IN 25 SECONDS.
+*
+*       2.  ON A 4.77 MHZ 8086 MSDOS VERSION OF PC/370, THIS PROGRAM
+*           RNA IN 35 SECONDS.
+*
+*
+*
+         LR    R12,R15
+         USING DEMOPNUM,R12
+         L     R15,=V(PET)
+         BALR  R14,R15
+         LA    R2,=C'   1   1$'
+         SVC   209
+         LA    R2,=C'   2   2$'
+         SVC   209
+         LA    R2,=C'   3   3$'
+         SVC   209
+         LA    MT,100
+         LA    NT,3
+         LA    N,3
+L150     EQU   *
+         LA    N,2(N)
+         LA    I,3
+L160     EQU   *
+         LA    I4,0(I,I)
+         LA    I4,0(I4,I4)
+         L     TI,T-4(I4)   TI=T(I)
+         LR    J,N
+         SR    J-1,J-1
+         DR    J-1,TI
+         MR    J-1,TI
+         CLR   J,N
+         BE    L150
+         LA    I,1(I)
+         CLR   I,NT
+         BNH   L160
+         LA    NT,1(NT)
+         LA    I4,0(NT,NT)
+         LA    I4,0(I4,I4)
+         ST    N,T-4(I4) T(NT)=N
+         CVD   N,PN
+         CVD   NT,PNT
+         MVC   DNT,=X'40202020'
+         ED    DNT,PNT+6
+         MVC   DN,=X'40202020'
+         ED    DN,PN+6
+         LA    R2,PLINE
+         SVC   209
+         CLR   NT,MT
+         BL    L150
+         L     R15,=V(PET)
+         BALR  R14,R15
+         SVC   0
+R0       EQU   0
+R1       EQU   1
+J        EQU   1  0-1 USED FOR D AND M WORK
+R2       EQU   2  CP/M ARG. REG.
+N        EQU   3  CURRENT TRIAL PRIME
+NT       EQU   4  SEQ. NUMBER OF PRIMES
+MT       EQU   5  MAX  PRIMES IN TABLE
+I        EQU   6  TABLE SUBSCRIPT
+I4       EQU   7  I * 4 TO INDEX FULL WORD ENTRIES
+TI       EQU   8  DIVISOR HOLD
+R12      EQU   12  BASE
+R14      EQU   14  LINK
+R15      EQU   15  ENTRY
+PWORK    DC    D'0'
+PLINE    EQU   *
+DNT      DC    CL4' '
+DN       DC    CL4' '
+         DC    C'$'
+PNT      DC    PL8'0'
+PN       DC    PL8'0'
+T        DC    F'1,2,3'
+         DS    97F
+         END   DEMOPNUM
+

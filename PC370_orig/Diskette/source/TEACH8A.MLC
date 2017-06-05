@@ -1,0 +1,202 @@
+         PRINT NOGEN                                                   
+****************************************************************
+*        FILENAME:  TEACH8A.MLC                                *
+*        AUTHOR  :  Bill Qualls                                *
+*        SYSTEM  :  Compaq 286LTE, PC/370 R4.2                 *
+*        REMARKS :  This is a revision of TEACH2C.MLC.         *
+*                   Produce list of teachers, with headings.   *
+*                   Introduce page break logic.                *
+****************************************************************
+         START 0                                                       
+         REGS
+BEGIN    BEGIN
+         WTO   'TEACH8A ... Begin execution'
+         BAL   R10,SETUP
+MAIN     EQU   *
+         CLI   EOFSW,C'Y'
+         BE    EOJ
+         BAL   R10,PROCESS
+         B     MAIN
+EOJ      EQU   *
+         BAL   R10,WRAPUP
+         WTO   'TEACH8A ... Normal end of program'
+         RETURN
+****************************************************************
+*        SETUP - Those things which happen one time only,      *
+*                before any records are processed.             *
+****************************************************************
+SETUP    EQU   *
+         ST    R10,SVSETUP
+         OI    TEACHERS+10,X'08'  PC/370 ONLY - Convert all
+*                                 input from ASCII to EBCDIC
+         OI    REPORT+10,X'08'    PC/370 ONLY - Convert all
+*                                 output from EBCDIC to ASCII
+         OPEN  TEACHERS                                                    
+         OPEN  REPORT
+         BAL   R10,READ
+         L     R10,SVSETUP
+         BR    R10
+****************************************************************
+*        HDGS - Print headings.                                *
+****************************************************************
+HDGS     EQU   *
+         ST    R10,SVHDGS
+         AP    PGS,=P'1'          Add 1 to page count
+         UNPK  HDPGS,PGS          Move page count to headings
+         MVZ   HDPGS+L'HDPGS-1(1),=X'F0'    Remove sign
+         PUT   REPORT,FORMFEED    PC/370 ONLY
+         PUT   REPORT,HD1
+         PUT   REPORT,HD2
+         PUT   REPORT,HD3
+         PUT   REPORT,HD4
+         ZAP   LNS,=P'0'          Reset line count to zero
+         L     R10,SVHDGS
+         BR    R10
+****************************************************************
+*        PROCESS - Those things which happen once per record.  *
+****************************************************************
+PROCESS  EQU   * 
+         ST    R10,SVPROC
+         BAL   R10,FORMAT
+         BAL   R10,CHKLNS
+         BAL   R10,WRITE
+         BAL   R10,READ
+         L     R10,SVPROC
+         BR    R10
+****************************************************************
+*        READ - Read a record.                                 *
+****************************************************************
+READ     EQU   *
+         ST    R10,SVREAD
+         GET   TEACHERS,IREC      Read a single teacher record
+         B     READX
+ATEND    EQU   *
+         MVI   EOFSW,C'Y'
+READX    EQU   *
+         L     R10,SVREAD
+         BR    R10
+****************************************************************
+*        FORMAT - Format a single detail line.                 *
+****************************************************************
+FORMAT   EQU   *
+         ST    R10,SVFORM
+         MVC   OTID,ITID          Move teacher ID Nbr to output     
+         MVC   OTNAME,ITNAME      Move teacher Name to output
+         MVC   OTDEG,ITDEG        Move highest degree to output
+         MVC   OTTEN,ITTEN        Move tenure to output
+         MVC   OTPHONE,ITPHONE    Move phone nbr to output
+         MVC   OCRLF,WCRLF        PC/370 ONLY - end line w/ CR/LF
+         L     R10,SVFORM
+         BR    R10
+****************************************************************
+*        CHKLNS - Check lines printed. Full page?              *
+****************************************************************
+CHKLNS   EQU   *
+         ST    R10,SVCHKLNS
+         CP    LNS,MAXLNS
+         BL    CHKLNSX
+         BAL   R10,HDGS
+CHKLNSX  EQU   *
+         L     R10,SVCHKLNS
+         BR    R10
+****************************************************************
+*        WRITE - Write a single detail line.                   *
+****************************************************************
+WRITE    EQU   *
+         ST    R10,SVWRITE
+         PUT   REPORT,OREC        Write report line
+         AP    LNS,=P'1'
+         L     R10,SVWRITE
+         BR    R10
+****************************************************************
+*        WRAPUP - Those things which happen one time only,     *
+*                 after all records have been processed.       *
+****************************************************************
+WRAPUP   EQU   *
+         ST    R10,SVWRAP
+         CLOSE TEACHERS
+         CLOSE REPORT
+         WTO   'TEACH8A ... Teacher list on REPORT.TXT'
+         L     R10,SVWRAP
+         BR    R10
+****************************************************************
+*        Literals, if any, will go here                        *
+****************************************************************
+         LTORG
+****************************************************************
+*        File definitions                                      *
+****************************************************************
+TEACHERS DCB   LRECL=29,RECFM=F,MACRF=G,EODAD=ATEND,
+               DDNAME='TEACHER.DAT'  
+REPORT   DCB   LRECL=62,RECFM=F,MACRF=P,
+               DDNAME='REPORT.TXT'      
+****************************************************************
+*        RETURN ADDRESSES                                      *
+****************************************************************
+SVSETUP  DC    F'0'               SETUP
+SVHDGS   DC    F'0'               HDGS
+SVPROC   DC    F'0'               PROCESS
+SVREAD   DC    F'0'               READ
+SVFORM   DC    F'0'               FORMAT
+SVWRITE  DC    F'0'               WRITE
+SVWRAP   DC    F'0'               WRAPUP
+SVCHKLNS DC    F'0'               CHKLNS
+****************************************************************
+*        Miscellaneous field definitions                       *
+****************************************************************
+WCRLF    DC    X'0D25'            PC/370 ONLY - EBCDIC CR/LF
+EOFSW    DC    CL1'N'             End of file? (Y/N)
+PGS      DC    PL2'0'             Nbr of pages printed.
+LNS      DC    PL2'3'             Lines printed on this page.
+MAXLNS   DC    PL2'3'             Max nbr lines per page.
+*                                 My line counts exclude hdgs.
+****************************************************************
+*        Input record definition                               *
+****************************************************************
+IREC     DS    0CL29              Teacher record
+ITID     DS    CL3                Teacher ID nbr
+ITNAME   DS    CL15               Teacher name
+ITDEG    DS    CL4                Highest degree
+ITTEN    DS    CL1                Tenured?
+ITPHONE  DS    CL4                Phone nbr
+ITCRLF   DS    CL2                PC/370 only - CR/LF
+****************************************************************
+*        Output (line) definition                              *
+****************************************************************
+OREC     DS    0CL62              
+OTID     DS    CL3                Teacher ID nbr
+         DC    CL3' '
+OTNAME   DS    CL15               Teacher name
+         DC    CL3' '
+OTDEG    DS    CL4                Highest degree
+         DC    CL3' '
+OTTEN    DS    CL1                Tenured?
+         DC    CL3' '
+OTPHONE  DS    CL4                Phone nbr
+         DC    CL21' ' 
+OCRLF    DS    CL2                PC/370 only - CR/LF
+*
+*        Headings definitions
+*
+FORMFEED DS    0CL62              PC/370 only
+         DC    X'0C'              EBCDIC formfeed
+         DC    CL59' '
+         DC    X'0D25'            EBCDIC CR/LF
+HD1      DS    0CL62
+         DC    CL40'            LIST OF TEACHERS       Page '
+HDPGS    DC    CL3' '
+         DC    CL17' '
+         DC    XL2'0D25'
+HD2      DS    0CL62
+         DC    CL60' '
+         DC    XL2'0D25'
+HD3      DS    0CL62
+         DC    CL40'ID#        Name         Degr  Ten  Phone'
+         DC    CL20' '
+         DC    XL2'0D25'
+HD4      DS    0CL62
+         DC    CL40'---   ---------------   ----  ---  -----'
+         DC    CL20' '
+         DC    XL2'0D25'
+         END   BEGIN                                                   
+

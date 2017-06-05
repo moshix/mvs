@@ -1,0 +1,98 @@
+         PRINT NOGEN                                                   
+****************************************************************
+*        FILENAME:  TEACH2C.MLC                                *
+*        AUTHOR  :  Bill Qualls                                *
+*        SYSTEM  :  Compaq 286LTE, PC/370 R4.2                 *
+*        REMARKS :  List of teachers, with headings.           *
+****************************************************************
+         START 0                                                       
+         REGS
+BEGIN    BEGIN
+         WTO   'TEACH2C ... Begin execution'
+         OI    TEACHERS+10,X'08'  PC/370 ONLY - Convert all
+*                                 input from ASCII to EBCDIC
+         OI    REPORT+10,X'08'    PC/370 ONLY - Convert all
+*                                 output from EBCDIC to ASCII
+         OPEN  TEACHERS                                                    
+         OPEN  REPORT
+         PUT   REPORT,HD1
+         PUT   REPORT,HD2
+         PUT   REPORT,HD3
+         PUT   REPORT,HD4
+LOOP     GET   TEACHERS,IREC      Read a single teacher record
+         MVC   OTID,ITID          Move teacher ID Nbr to output     
+         MVC   OTNAME,ITNAME      Move teacher Name to output
+         MVC   OTDEG,ITDEG        Move highest degree to output
+         MVC   OTTEN,ITTEN        Move tenure to output
+         MVC   OTPHONE,ITPHONE    Move phone nbr to output
+         MVC   OCRLF,WCRLF        PC/370 ONLY - end line w/ CR/LF         
+         PUT   REPORT,OREC        Write report line
+         B     LOOP
+*
+*        EOJ processing
+*
+ATEND    CLOSE TEACHERS
+         CLOSE REPORT
+         WTO   'TEACH2C ... Teacher list on REPORT.TXT'
+         WTO   'TEACH2C ... Normal end of program'
+         RETURN
+*
+*        Literals, if any, will go here
+*
+         LTORG
+*
+*        File definitions
+*
+TEACHERS DCB   LRECL=29,RECFM=F,MACRF=G,EODAD=ATEND,
+               DDNAME='TEACHER.DAT'  
+REPORT   DCB   LRECL=62,RECFM=F,MACRF=P,
+               DDNAME='REPORT.TXT'      
+*
+*        Miscellaneous field definitions
+*
+WCRLF    DC    X'0D25'            PC/370 ONLY - EBCDIC CR/LF
+*
+*        Input record definition
+*
+IREC     DS    0CL29              Teacher record
+ITID     DS    CL3                Teacher ID nbr
+ITNAME   DS    CL15               Teacher name
+ITDEG    DS    CL4                Highest degree
+ITTEN    DS    CL1                Tenured?
+ITPHONE  DS    CL4                Phone nbr
+ITCRLF   DS    CL2                PC/370 only - CR/LF
+*
+*        Output (line) definition
+*
+OREC     DS    0CL62              
+OTID     DS    CL3                Teacher ID nbr
+         DC    CL3' '
+OTNAME   DS    CL15               Teacher name
+         DC    CL3' '
+OTDEG    DS    CL4                Highest degree
+         DC    CL3' '
+OTTEN    DS    CL1                Tenured?
+         DC    CL3' '
+OTPHONE  DS    CL4                Phone nbr
+         DC    CL21' ' 
+OCRLF    DS    CL2                PC/370 only - CR/LF
+*
+*        Headings definitions
+*
+HD1      DS    0CL62
+         DC    CL40'            LIST OF TEACHERS            '
+         DC    CL20' '
+         DC    XL2'0D25'
+HD2      DS    0CL62
+         DC    CL60' '
+         DC    XL2'0D25'
+HD3      DS    0CL62
+         DC    CL40'ID#        Name         Degr  Ten  Phone'
+         DC    CL20' '
+         DC    XL2'0D25'
+HD4      DS    0CL62
+         DC    CL40'---   ---------------   ----  ---  -----'
+         DC    CL20' '
+         DC    XL2'0D25'
+         END   BEGIN                                                   
+

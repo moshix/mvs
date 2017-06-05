@@ -1,0 +1,7 @@
+DP2      BEGIN
+         DP    X,Y
+         RETURN
+X        DC    PL5'5006'
+Y        DC    PL3'5'
+         END
+

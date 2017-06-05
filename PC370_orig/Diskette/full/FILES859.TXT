@@ -1,0 +1,33 @@
+Disk No:  859
+Program Title: CROSS ASSEMBLER for the IBM 370 version 4.2 (Disk 2 of 3)
+PC-SIG version: 3.3
+
+PC/370 VIRTUAL MACHINE is a cross assembler that runs on the IBM-PC, AT,
+or XT and lets you compile and run IBM 370 assembly language programs.
+Please note that this is the second disk of a three disk set.  The other
+two disks are #402 and 1352.
+
+Usage:  For beginning through advanced S/370 assembly language
+programmers.
+
+Special Requirements:  None.
+
+How to Start:  Type GO and press (press enter).
+
+Suggested Registration:  $45.00
+
+File Descriptions:
+
+DEMO    <DIR> Contains demo program ALC source code.
+DOC     <DIR> Contains machine readable PC/370 documentation.  Read
+              DOC\INTRO.DOC for PC/370 overview and more information on
+              the other component of the package.
+MAC     <DIR> Contains MAC and MLC source code for macro pre-processor.
+
+PC-SIG
+1030D E Duane Avenue
+Sunnyvale Ca. 94086
+(408) 730-9291
+(c) Copyright 1987,88,89 PC-SIG, Inc.
+
+

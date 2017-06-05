@@ -1,0 +1,28 @@
+FREEMAIN MACRO RU,LV=(1),A=(2)
+	 AIF   /&LABEL$$=/ .GO
+&LABEL$$ EQU   *
+.GO	 AIF   &1=V.TYPEV
+	 AIF   &LV=(.REG
+	 AIF   &LV>4095.L
+	 LA    1,&LV
+	 AGO   .A
+.L	 L     1,=F'&LV'
+	 AGO   .A
+.REG	 AIF   &LV=(1).A
+	 LR    1,&LV
+.A	 AIF   &A=(.AREG
+	 L     2,&A
+	 AGO   .SVC
+.AREG	 AIF   &A=(2).SVC
+	 LR    2,&A
+	 AGO   .SVC
+.TYPEV	 L     1,&A+4
+	 L     2,&A
+.SVC	 SVC   11
+	 LTR   0,0
+	 BZ    *+16
+	 LA    2,=C'ABEND 90A$'
+	 SVC   209
+	 SVC   9
+	 DC    C'BUG '
+

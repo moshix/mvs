@@ -1,0 +1,88 @@
+         PRINT NOGEN                                                   
+****************************************************************
+*        FILENAME:  DATE370.MLC                                *
+*        AUTHOR  :  Bill Qualls                                *
+*        SYSTEM  :  Compaq 286LTE, PC/370 R4.2                 *
+*        REMARKS :  Demonstrate date/time functions in PC/370. *
+****************************************************************
+         START 0                                                       
+         REGS
+BEGIN    BEGIN
+         WTO   MESSAGE            (Before)    
+*
+         SVC   18
+*                                 Supervisor call 18 returns
+*                                 time in R0; year with century
+*                                 in R1; day, month, and day of
+*                                 week in R2.
+*
+         LR    R3,R0              Put time in R3
+         SRL   R3,24              hhmmssxx becomes 000000hh
+         CVD   R3,DBL             Hours only
+         UNPK  TIME(2),DBL        Move to output
+         OI    TIME+1,X'F0'       Remove sign
+*
+         LR    R3,R0              Put time in R3
+         SLL   R3,8               hhmmssxx becomes mmssxx00
+         SRL   R3,24              mmssxx00 becomes 000000mm
+         CVD   R3,DBL             Minutes only
+         UNPK  TIME+3(2),DBL      Move to output
+         OI    TIME+4,X'F0'       Remove sign
+*
+         LR    R3,R0              Put time in R3
+         SLL   R3,16              hhmmssxx becomes ssxx0000
+         SRL   R3,24              ssxx0000 becomes 000000ss
+         CVD   R3,DBL             Seconds only
+         UNPK  TIME+6(2),DBL      Move to output
+         OI    TIME+7,X'F0'       Remove sign
+*
+         LR    R3,R0              Put time in R3
+         SLL   R3,24              hhmmssxx becomes xx000000
+         SRL   R3,24              xx000000 becomes 000000xx
+         CVD   R3,DBL             Hundredths of seconds only
+         UNPK  TIME+9(2),DBL      Move to output
+         OI    TIME+10,X'F0'      Remove sign
+*
+         CVD   R1,DBL             Year with century
+         UNPK  DATE+6(4),DBL      Move to output
+         OI    DATE+9,X'F0'       Remove sign
+*
+         LR    R3,R2              Put date in R3
+         SRL   R3,24              mmddww00 becomes 000000mm
+         CVD   R3,DBL             Month only
+         UNPK  DATE(2),DBL        Move to output
+         OI    DATE+1,X'F0'       Remove sign
+*
+         LR    R3,R2              Put date in R3
+         SLL   R3,8               mmddww00 becomes ddww0000
+         SRL   R3,24              ddww0000 becomes 000000dd
+         CVD   R3,DBL             Day of month only
+         UNPK  DATE+3(2),DBL      Move to output
+         OI    DATE+4,X'F0'       Remove sign
+*
+         LR    R3,R2              Put date in R3
+         SLL   R3,16              mmddww00 becomes ww000000
+         SRL   R3,24              ww000000 becomes 000000ww
+         MH    R3,=H'3'           Each day of week is 3 long
+         A     R3,=A(DOWTBL)      Displacement into table
+         MVC   DOW,0(R3)          Move to output 
+*
+         WTO   MESSAGE            (After)     
+*
+         RETURN
+*
+         LTORG
+*
+MESSAGE  DS    0CL71
+         DC    CL18'DATE370...Time is '
+TIME     DC    CL11'hh:mm:ss.xx'
+         DC    CL11'...Date is '
+DATE     DC    CL10'mm/dd/yyyy'
+         DC    CL18'...Day of week is '
+DOW      DC    CL3'ddd'
+*
+DBL      DS    D
+DOWTBL   DC    C'SunMonTueWedThuFriSat'
+*
+         END
+

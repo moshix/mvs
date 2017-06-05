@@ -1,0 +1,14 @@
+         START 0
+         REGS
+BINARY   BEGIN
+         LH    R7,FIVE
+         SH    R7,THREE
+         CVD   R7,DBL
+         ED    RESULT,DBL+6
+         WTO   RESULT
+         RETURN
+DBL      DC    D'0'
+FIVE     DC    H'5'
+THREE    DC    H'3'
+RESULT   DC    X'40202120'
+         END   BINARY

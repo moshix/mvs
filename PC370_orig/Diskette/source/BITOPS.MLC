@@ -1,0 +1,109 @@
+         PRINT NOGEN                                                   
+****************************************************************
+*        FILENAME:  BITOPS.MLC                                 *
+*        AUTHOR  :  Bill Qualls                                *
+*        SYSTEM  :  Compaq 286LTE, PC/370 R4.2                 *
+*        REMARKS :  Demonstrate bit-level operations.          *
+****************************************************************
+         START 0                                                       
+         REGS
+BEGIN    BEGIN
+*
+         WTO   'EXAMPLE #2 - Demonstrate use of OI to change'
+         WTO   'lower case letter to upper case'
+         WTO   LOWER
+         OI    LOWER,X'40'
+         WTO   LOWER
+*
+         WTO   'EXAMPLE #3 - Demonstrate use of OI to remove'
+         WTO   'the sign from a number following an UNPK'
+         UNPK  UNPACKED,=P'-12345'
+         WTO   UNPACKED
+         OI    UNPACKED+L'UNPACKED-1,X'F0'
+         WTO   UNPACKED
+*
+         WTO   'EXAMPLE #6 - Demonstrate use of NI to change'
+         WTO   'upper case letter to lower case'
+         WTO   UPPER
+         NI    UPPER,ALLBITS-X'40'
+         WTO   UPPER
+*
+         WTO   'EXAMPLE #7 - Demonstrate use of XI to ''toggle'''
+         WTO   'the sign of a packed number'
+         MVC   EDITED,MASK
+         ED    EDITED,POSITIVE
+         WTO   EDITED
+         XI    POSITIVE+L'POSITIVE-1,X'01'
+         MVC   EDITED,MASK
+         ED    EDITED,POSITIVE
+         WTO   EDITED
+         XI    POSITIVE+L'POSITIVE-1,X'01'
+         MVC   EDITED,MASK
+         ED    EDITED,POSITIVE
+         WTO   EDITED
+*
+         WTO   'EXAMPLE #8 - Demonstrate use of XI for'
+         WTO   'encryption: once to encrypt, once to decrypt.'
+         WTO   CRYPT1
+         XI    CRYPT1,C'+'    encrypt
+         WTO   CRYPT1    
+         XI    CRYPT1,C'+'    decrypt
+         WTO   CRYPT1
+*
+         WTO   'EXAMPLE #9 - Demonstrate use of XC for'
+         WTO   'encryption: once to encrypt, once to decrypt.'
+         WTO   CRYPT2
+         XC    CRYPT2,=C'+;'  encrypt
+         WTO   CRYPT2    
+         XC    CRYPT2,=C'+;'  decrypt
+         WTO   CRYPT2
+*
+         WTO   'EXAMPLE #10 - Demonstrate use of XC to swap'
+         WTO   'two values'
+         WTO   BOTH
+         XC    FLDA,FLDB
+         XC    FLDB,FLDA
+         XC    FLDA,FLDB
+         WTO   BOTH
+*
+         WTO   'EXAMPLE #11 - Demonstrate that SLL is same as'
+         WTO   'multiplying a register by a power of two, and'
+         WTO   'that SLR is same as dividing by a power of two.'
+         LA    R3,4           We begin with 4
+         CVD   R3,DBLWORD
+         MVC   EDITED,MASK
+         ED    EDITED,DBLWORD+5
+         WTO   EDITED
+         SLL   R3,3           Multiply 4 by 2^3, or 8, giving 32
+         CVD   R3,DBLWORD
+         MVC   EDITED,MASK
+         ED    EDITED,DBLWORD+5
+         WTO   EDITED
+         SRL   R3,2           Divide 32 by 2^2, or 4, giving 8
+         CVD   R3,DBLWORD
+         MVC   EDITED,MASK
+         ED    EDITED,DBLWORD+5
+         WTO   EDITED
+*
+         RETURN
+*
+         LTORG
+*
+DBLWORD  DC    D'0'
+MASK     DC    XL7'40202020212060'
+EDITED   DC    CL7' '
+POSITIVE DC    PL3'+6789'
+UNPACKED DC    CL5' '
+LOWER    DC    CL1'r'   Lower case letter 'r'
+UPPER    DC    CL1'T'   Upper case letter 'T'
+ALLBITS  EQU   X'FF'
+CRYPT1   DC    CL1'R'
+CRYPT2   DC    CL2'PR'
+*
+BOTH     DS    0CL9
+FLDA     DC    CL3'123'
+         DC    CL3' ' 
+FLDB     DC    CL3'AbC'         
+*
+         END
+

@@ -1,0 +1,434 @@
+         PRINT NOGEN                                                   
+****************************************************************
+*        FILENAME:  TRANSCR2.MLC                               *
+*        AUTHOR  :  Bill Qualls                                *
+*        SYSTEM  :  Compaq 286LTE, PC/370 R4.2                 *
+*        REMARKS :  Produce transcipts.                        *
+*                   This program illustrates table logic.      *
+****************************************************************
+         START 0                                                       
+         REGS
+BEGIN    BEGIN
+         WTO   'TRANSCR2 ... Begin execution'
+         BAL   R10,SETUP
+MAIN     EQU   *
+         CLI   EOFSTUD,C'Y'
+         BE    EOJ
+         BAL   R10,PROCESS
+         B     MAIN
+EOJ      EQU   *
+         BAL   R10,WRAPUP
+         WTO   'TRANSCR2 ... Normal end of program'
+RETURN   EQU   *
+         RETURN
+****************************************************************
+*        SETUP - Those things which happen one time only,      *
+*                before any records are processed.             *
+****************************************************************
+SETUP    EQU   *
+         ST    R10,SVSETUP
+         BAL   R10,LOADTBL
+         OI    STUDENT+10,X'08'   PC/370 ONLY - Convert all
+*                                 input from ASCII to EBCDIC
+         OI    GRADE+10,X'08'     PC/370 ONLY - Convert all
+*                                 input from ASCII to EBCDIC
+         OI    REPORT+10,X'08'    PC/370 ONLY - Convert all
+*                                 output from EBCDIC to ASCII
+         OPEN  STUDENT  
+         OPEN  GRADE                                         
+         OPEN  REPORT
+         BAL   R10,READSTUD       Priming read - STUDENT
+         BAL   R10,READGRAD       Priming read - GRADE
+         L     R10,SVSETUP
+         BR    R10
+****************************************************************
+*        LOADTBL - Load all courses into table. Verify:        *
+*           (1) courses are in course nbr sequence, and        *
+*           (2) there is enough room in table for all.         *
+****************************************************************
+LOADTBL  EQU   *
+         ST    R10,SVLOAD
+         OI    COURSE+10,X'08'    PC/370 ONLY - Convert all
+*                                 input from ASCII to EBCDIC
+         OPEN  COURSE
+         LA    R3,TABLE           Point to start of table
+         SR    R4,R4              Initialize row count to zero
+LOADTBL2 EQU   *
+         BAL   R10,READCOUR       Read single course record    
+         CLI   EOFCOURS,C'Y'      At end?
+         BE    LOADTBLX           Yes - Load complete.
+         CLC   PREVCID,CCID       Sequence check
+         BNL   LOADTBL3           Fatal error...
+         MVC   PREVCID,CCID       Save course ID for seq check
+         CH    R4,MAXROWS         Table full already?
+         BNL   LOADTBL4           Yes - Fatal error...
+         MVC   0(5,R3),CCID       Move course ID nbr,
+         MVC   5(15,R3),CCDESC     course description, and
+         PACK  20(1,R3),CCHRS       course hours to row.
+         LA    R3,L'TABLE(R3)     Point to next row
+         LA    R4,1(R4)           Increment row count
+         B     LOADTBL2           Repeat
+LOADTBL3 EQU   *
+         WTO   'TRANSCR2 ... Course file not sequenced by CID'
+         B     RETURN             
+LOADTBL4 EQU   *
+         WTO   'TRANSCR2 ... Nbr of courses exceeds table size'
+         B     RETURN
+LOADTBLX EQU   *
+         STH   R4,ROWS
+         CLOSE COURSE
+         L     R10,SVLOAD
+         BR    R10
+****************************************************************
+*        HDGS - Print headings.                                *
+****************************************************************
+HDGS     EQU   *
+         ST    R10,SVHDGS
+         MVC   HDSID,SSID         Move student ID to first hdg
+         MVC   HDSNAME,SSNAME     Move student name to first hdg
+         PUT   REPORT,FORMFEED    PC/370 ONLY
+         PUT   REPORT,HD1
+         PUT   REPORT,HD2
+         PUT   REPORT,HD3
+         PUT   REPORT,HD4
+         L     R10,SVHDGS
+         BR    R10
+****************************************************************
+*        PROCESS - Those things which happen once per record.  *
+****************************************************************
+PROCESS  EQU   * 
+         ST    R10,SVPROC
+         BAL   R10,HDGS           Start student on a new page
+         ZAP   ATTEMPT,=P'0'      Init hrs attempted to zero
+         ZAP   QUALITY,=P'0'      Init quality pts to zero
+PROC2    EQU   *                  Check for student ID found
+         CLI   EOFGRADE,C'Y'      on GRADE but not on STUDENT.
+         BE    PROC3              This is a serious error,
+         CLC   GSID,SSID          but for this program we will
+         BNL   PROC3              just skip all such records.
+         BAL   R10,READGRAD  
+         B     PROC2
+PROC3    EQU   *                  Process all grades records
+         CLI   EOFGRADE,C'Y'      for the current student.
+         BE    PROC4
+         CLC   GSID,SSID
+         BNE   PROC4
+         BAL   R10,FORMAT
+         BAL   R10,READGRAD
+         B     PROC3              
+PROC4    EQU   *                  Having processed any and all
+         BAL   R10,DOGPA          grades records for the current
+         BAL   R10,READSTUD       student, do GPA line and read
+PROCESSX EQU   *                  the next student.
+         L     R10,SVPROC
+         BR    R10
+****************************************************************
+*        FORMAT - Format a single transcript line.             *
+****************************************************************
+FORMAT   EQU   *
+         ST    R10,SVFORMAT
+         MVC   OSEM,GSEM          Move semester,
+         MVC   OCID,GCID           course ID nbr, and
+         MVC   OGRADE,GGRADE        grade earned to output
+         BAL   R10,CRSDATA        Find course data in table
+         MVC   OCDESC,5(R3)       Course desc comes from table
+         ZAP   PK2,20(1,R3)
+         MVC   OCHRS,=X'40202120'
+         ED    OCHRS,PK2          Course hours comes from table
+         AP    ATTEMPT,PK2        Accumulate hours attempted
+         BAL   R10,GRADEVAL
+         ZAP   PK4,PK2
+         MP    PK4,VALUE
+         MVC   OPOINTS,=X'40202120'
+         ED    OPOINTS,PK4+2
+         AP    QUALITY,PK4
+         MVC   OCRLF,WCRLF
+         BAL   R10,WRITE
+FORMATX  EQU   *
+         L     R10,SVFORMAT
+         BR    R10
+****************************************************************
+*        CRSDATA - Find course data in table                   *
+****************************************************************
+CRSDATA  EQU   *
+         ST    R10,SVCRSDAT
+         LA    R3,TABLE
+         LH    R4,ROWS
+CRSDATA2 EQU   *
+         CLC   GCID,0(R3)
+         BE    CRSDATAX
+         LA    R3,L'TABLE(R3)
+         BCT   R4,CRSDATA2
+         WTO   'TRANSCR2 ... Bad course ID in Grade file'
+         B     RETURN
+CRSDATAX EQU   *
+         L     R10,SVCRSDAT
+         BR    R10
+****************************************************************
+*        GRADEVAL - Find point value for grade                 *
+****************************************************************
+GRADEVAL EQU   *
+         ST    R10,SVGRDVAL
+         LA    R7,GRADETBL          Point to start of table
+GRADEVA2 EQU   *
+         CLC   0(1,R7),GGRADE       Compare grade to the grade
+         BE    GRADEVAX             in table. If equal, done.
+         LA    R7,L'GRADETBL(R7)    Else point to next row
+         CLI   0(R7),X'FF'          See if at end of table.
+         BNE   GRADEVA2             No, repeat.
+         WTO   'TRANSCR2 ... Invalid grade in grade file'
+         B     RETURN               Fatal error...
+GRADEVAX EQU   *
+         ZAP   VALUE,1(1,R7)        Save grade value
+         L     R10,SVGRDVAL
+         BR    R10
+****************************************************************
+*        DOGPA - Calculate and format GPA                      *
+****************************************************************
+DOGPA    EQU   *
+         ST    R10,SVDOGPA
+         CP    ATTEMPT,=P'0'
+         BE    DOGPA2
+         PUT   REPORT,HD4
+DOGPA2   EQU   *
+         MVC   TATTEMPT,=X'40202120'
+         ED    TATTEMPT,ATTEMPT
+         MVC   TQUALITY,=X'40202120'
+         ED    TQUALITY,QUALITY
+         PUT   REPORT,TREC
+         ZAP   DIVIDEND,QUALITY
+         SRP   DIVIDEND,3,0
+         ZAP   DIVISOR,ATTEMPT
+         BZ    DOGPA3
+         DP    DIVIDEND,DIVISOR
+         SRP   QUOTIENT,64-1,5
+         ZAP   PK3,QUOTIENT
+         B     DOGPA4
+DOGPA3   EQU   *
+         ZAP   PK3,=P'0'
+DOGPA4   EQU   *
+         MVC   WK7,=X'402021204B2020'
+         ED    WK7,PK3
+         MVC   AGPA,WK7+2
+         PUT   REPORT,AREC
+DOGPAX   EQU   *
+         L     R10,SVDOGPA
+         BR    R10
+****************************************************************
+*        READSTU - Read a student record.                      *
+****************************************************************
+READSTUD EQU   *
+         ST    R10,SVREADS
+         GET   STUDENT,SREC  
+         B     READSX
+ATENDSTU EQU   *
+         MVI   EOFSTUD,C'Y'
+READSX   EQU   *
+         L     R10,SVREADS
+         BR    R10
+****************************************************************
+*        READCRS - Read a course record.                       *
+****************************************************************
+READCOUR EQU   *
+         ST    R10,SVREADC
+         GET   COURSE,CREC
+         B     READCX
+ATENDCRS EQU   *
+         MVI   EOFCOURS,C'Y'
+READCX   EQU   *
+         L     R10,SVREADC
+         BR    R10
+****************************************************************
+*        READGRAD - Read a Grade record.                       *
+****************************************************************
+READGRAD EQU   *
+         ST    R10,SVREADG
+         GET   GRADE,GREC
+         B     READGX
+ATENDGRA EQU   *
+         MVI   EOFGRADE,C'Y'
+READGX   EQU   *
+         L     R10,SVREADG
+         BR    R10
+****************************************************************
+*        WRITE - Write a single detail line.                   *
+****************************************************************
+WRITE    EQU   *
+         ST    R10,SVWRITE
+         PUT   REPORT,OREC        Write report line
+         L     R10,SVWRITE
+         BR    R10
+****************************************************************
+*        WRAPUP - Those things which happen one time only,     *
+*                 after all records have been processed.       *
+****************************************************************
+WRAPUP   EQU   *
+         ST    R10,SVWRAP
+         CLOSE STUDENT
+         CLOSE GRADE
+         CLOSE REPORT
+         WTO   'TRANSCR2 ... Transcripts on REPORT.TXT'
+         L     R10,SVWRAP
+         BR    R10
+****************************************************************
+*        Literals, if any, will go here                        *
+****************************************************************
+         LTORG
+****************************************************************
+*        File definitions                                      *
+****************************************************************
+STUDENT  DCB   LRECL=22,RECFM=F,MACRF=G,EODAD=ATENDSTU,
+               DDNAME='STUDENT.SRT'  
+COURSE   DCB   LRECL=23,RECFM=F,MACRF=G,EODAD=ATENDCRS,
+               DDNAME='COURSE.SRT'  
+GRADE    DCB   LRECL=26,RECFM=F,MACRF=G,EODAD=ATENDGRA,
+               DDNAME='GRADE.SRT'  
+REPORT   DCB   LRECL=62,RECFM=F,MACRF=P,
+               DDNAME='REPORT.TXT'      
+****************************************************************
+*        RETURN ADDRESSES                                      *
+****************************************************************
+SVSETUP  DC    F'0'               SETUP
+SVHDGS   DC    F'0'               HDGS
+SVPROC   DC    F'0'               PROCESS
+SVREADS  DC    F'0'               READSTUD
+SVREADC  DC    F'0'               READGRAD
+SVREADG  DC    F'0'               READCOUR
+SVLOAD   DC    F'0'               LOADTBL
+SVWRITE  DC    F'0'               WRITE
+SVWRAP   DC    F'0'               WRAPUP
+SVFORMAT DC    F'0'               FORMAT
+SVCRSDAT DC    F'0'               CRSDATA
+SVGRDVAL DC    F'0'               GRADEVAL
+SVDOGPA  DC    F'0'               DOGPA
+****************************************************************
+*        Miscellaneous field definitions                       *
+****************************************************************
+WCRLF    DC    X'0D25'            PC/370 ONLY - EBCDIC CR/LF
+EOFSTUD  DC    CL1'N'             End of students file? (Y/N)
+EOFCOURS DC    CL1'N'             End of course file? (Y/N)
+EOFGRADE DC    CL1'N'             End of grades file? (Y/N)
+POINTS   DC    PL2'0'             Points for this course 
+QUALITY  DC    PL2'0'             Total points
+ATTEMPT  DC    PL2'0'             Hours attempted
+ACCUM    DC    PL2'0'             Accumulated points
+PREVCID  DC    XL5'00'            Sequence check on course ID
+WK7      DC    CL7' '
+PK2      DC    PL2'0'
+PK3      DC    PL3'0'
+PK4      DC    PL4'0'
+         COPY  DIVISION
+****************************************************************
+*        Table to determine value of a letter grade.           *
+****************************************************************
+VALUE    DC    PL1'0'             How much this grade is worth
+GRADETBL DS    0CL2
+         DC    CL1'A',PL1'4'
+         DC    CL1'B',PL1'3'
+         DC    CL1'C',PL1'2'
+         DC    CL1'D',PL1'1'
+         DC    CL1'F',PL1'0'
+         DC    X'FF'
+****************************************************************
+*        Input record definition - Student                     *
+****************************************************************
+SREC     DS    0CL22      1-22    Student record
+SSID     DS    CL3        1- 3    Student ID nbr
+SSNAME   DS    CL15       4-18    Student name
+SSSEX    DS    CL1       19-19    Gender 
+SSMAR    DS    CL1       20-20    Marital status
+SSCRLF   DS    CL2       21-22    PC/370 only - CR/LF
+****************************************************************
+*        Input record definition - Course                      *
+****************************************************************
+CREC     DS    0CL23      1-23    Course record
+CCID     DS    CL5        1- 5    Course ID nbr
+CCDESC   DS    CL15       5-20    Course description
+CCHRS    DS    CL1       21-21    Hours               
+CCCRLF   DS    CL2       22-23    PC/370 only - CR/LF
+****************************************************************
+*        Input record definition - Grade                       *
+****************************************************************
+GREC     DS    0CL26      1-26    Grade record
+GSID     DS    CL3        1- 3    Student ID nbr
+GSEM     DS    CL3        4- 6    Semester    
+GCID     DS    CL5        7-11    Course ID nbr  
+GSECT    DS    CL1       12-12    Section number
+GGRADE   DS    CL1       13-13    Grade earned 
+GKEY     DS    CL11      14-24    Sort key (see TRANS1.MLC)
+GGCRLF   DS    CL2       25-26    PC/370 only - CR/LF
+****************************************************************
+*        Course table                                          *
+****************************************************************
+ROWS     DC    H'0'               Entries in course table
+MAXROWS  DC    H'10'              Max entries in course table
+TABLE    DS    10CL21             Each row consists of:
+*                         1- 5    Course ID   
+*                         6-20    Course description 
+*                        21-21    Hours (packed)
+****************************************************************
+*        Output (line) definition                              *
+****************************************************************
+OREC     DS    0CL62      1-62    Report record
+         DC    CL2' '     1- 2
+OSEM     DS    CL3        3- 5    Semester
+         DC    CL5' '     6-10
+OCID     DS    CL5       11-15    Course ID   
+         DC    CL3' '    16-18
+OCDESC   DS    CL15      19-33    Course Description
+         DC    CL4' '    34-37
+OGRADE   DS    CL1       38-38    Grade              
+         DC    CL4' '    39-42
+OCHRS    DS    CL4       43-46    Course Hours (BZZ9)
+         DC    CL3' '    47-49
+OPOINTS  DS    CL4       50-53    Quality Points (BZZ9)
+         DC    CL7' '    54-60
+OCRLF    DS    CL2       61-62    PC/370 only - CR/LF
+****************************************************************
+*        Totals line definition                                *
+****************************************************************
+TREC     DS    0CL62      1-62
+         DC    CL35' '    1-35
+         DC    CL7'TOTAL' 
+TATTEMPT DS    CL4       43-46    Course Hours (BZZ9)
+         DC    CL3' '    47-49
+TQUALITY DS    CL4       50-53    Quality Points (BZZ9)
+         DC    CL7' '    54-60
+         DC    X'0D25'   61-62    PC/370 only - CR/LF
+****************************************************************
+*        Totals line definition                                *
+****************************************************************
+AREC     DS    0CL62      1-62
+         DC    CL35' '    1-35
+         DC    CL6'GPA' 
+AGPA     DS    CL5       42-46    GPA (B9.99)         
+         DC    CL14' '   54-60
+         DC    X'0D25'   61-62    PC/370 only - CR/LF
+****************************************************************
+*        Headings definitions                                  *
+****************************************************************
+FORMFEED DS    0CL62              PC/370 only
+*        DC    X'0C'              EBCDIC formfeed
+*        DC    CL59' '
+         DC    60C'_'             For testing...
+         DC    X'0D25'            EBCDIC CR/LF
+HD1      DS    0CL62
+         DC    CL24'        TRANSCRIPT FOR ('
+HDSID    DS    CL3   
+         DC    CL2') '
+HDSNAME  DS    CL15
+         DC    CL16' '
+         DC    XL2'0D25'
+HD2      DS    0CL62
+         DC    CL60' '
+         DC    XL2'0D25'
+HD3      DS    0CL62
+         DC    CL40'Semester  Course    Description    Grade'
+         DC    CL20'  Hours  Points     '
+         DC    XL2'0D25'
+HD4      DS    0CL62
+         DC    CL40'--------  ------  ---------------  -----'
+         DC    CL20'  -----  ------     '
+         DC    XL2'0D25'
+         END   BEGIN                                                   
+

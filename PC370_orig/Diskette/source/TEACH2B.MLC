@@ -1,0 +1,52 @@
+         PRINT NOGEN                                                   
+****************************************************************
+*        FILENAME:  TEACH2B.MLC                                *
+*        AUTHOR  :  Bill Qualls                                *
+*        SYSTEM  :  Compaq 286LTE, PC/370 R4.2                 *
+*        REMARKS :  Don't do it this way!!!                    *
+****************************************************************
+         START 0                                                       
+         REGS
+BEGIN    BEGIN
+         WTO   'TEACH2B ... Begin execution'
+         OI    TEACHERS+10,X'08'  PC/370 ONLY - Convert all
+*                                 input from ASCII to EBCDIC
+         OI    REPORT+10,X'08'    PC/370 ONLY - Convert all
+*                                 output from EBCDIC to ASCII
+         OPEN  TEACHERS                                                    
+         OPEN  REPORT
+LOOP     GET   TEACHERS,IREC 
+         MVC   OREC(3),IREC   
+         MVC   OREC+6(15),IREC+3  
+         MVC   OREC+24(4),IREC+18 
+         MVC   OREC+31(1),IREC+22
+         MVC   OREC+35(4),IREC+23
+         MVC   OREC+60(2),=X'0D25'
+         PUT   REPORT,OREC        Write report line
+         B     LOOP
+*
+*        EOJ processing
+*
+ATEND    CLOSE TEACHERS
+         CLOSE REPORT
+         WTO   'TEACH2B ... Teacher list on REPORT.TXT'
+         WTO   'TEACH2B ... Normal end of program'
+         RETURN
+*
+*        Literals, if any, will go here
+*
+         LTORG
+*
+*        File definitions
+*
+TEACHERS DCB   LRECL=29,RECFM=F,MACRF=G,EODAD=ATEND,
+               DDNAME='TEACHER.DAT'  
+REPORT   DCB   LRECL=62,RECFM=F,MACRF=P,
+               DDNAME='REPORT.TXT'      
+*
+*        Field definitions
+*
+IREC     DS    CL29               Teacher record
+OREC     DC    CL62' '            Report line
+         END   BEGIN                                                   
+

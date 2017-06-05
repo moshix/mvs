@@ -1,0 +1,10 @@
+MP       BEGIN
+         MP    FLDA,FLDB
+         RETURN
+FLDA     DC    PL3'5'
+FLDB     DC    PL3'20'
+FLDC     DC    PL3'1000'
+FLDD     DC    PL5'5'
+FLDE     DC    PL5'20'
+FLDF     DC    PL5'1000'
+         END

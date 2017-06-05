@@ -1,0 +1,219 @@
+         PRINT NOGEN                                                   
+****************************************************************
+*        FILENAME:  COGS9A.MLC                                 *
+*        AUTHOR  :  Bill Qualls                                *
+*        SYSTEM  :  Compaq 286LTE, PC/370 R4.2                 *
+*        REMARKS :  Produce report for COGSWORTH INDUSTRIES    *
+*                   showing sales by state.                    *
+*                   Modify COGS7A.MLC to use ED instruction.   *
+****************************************************************
+         START 0                                                       
+         REGS
+BEGIN    BEGIN
+         WTO   'COGS9A ... Begin execution'
+         BAL   R10,SETUP
+MAIN     EQU   *
+         CLI   EOFSW,C'Y'
+         BE    EOJ
+         BAL   R10,PROCESS
+         B     MAIN
+EOJ      EQU   *
+         BAL   R10,WRAPUP
+         WTO   'COGS9A ... Normal end of program'
+         RETURN
+****************************************************************
+*        SETUP - Those things which happen one time only,      *
+*                before any records are processed.             *
+****************************************************************
+SETUP    EQU   *
+         ST    R10,SVSETUP
+         OI    INVENTRY+10,X'08'  PC/370 ONLY - Convert all
+*                                 input from ASCII to EBCDIC
+         OI    REPORT+10,X'08'    PC/370 ONLY - Convert all
+*                                 output from EBCDIC to ASCII
+         OPEN  INVENTRY
+         OPEN  REPORT
+         BAL   R10,HDGS
+         BAL   R10,READ
+         L     R10,SVSETUP
+         BR    R10
+****************************************************************
+*        HDGS - Print headings.                                *
+****************************************************************
+HDGS     EQU   *
+         ST    R10,SVHDGS
+         PUT   REPORT,HD1
+         PUT   REPORT,HD2
+         PUT   REPORT,HD3
+         PUT   REPORT,HD4
+         PUT   REPORT,HD5
+         L     R10,SVHDGS
+         BR    R10
+****************************************************************
+*        PROCESS - Those things which happen once per record.  *
+****************************************************************
+PROCESS  EQU   * 
+         ST    R10,SVPROC
+         BAL   R10,FORMAT
+         BAL   R10,WRITE
+         BAL   R10,READ
+         L     R10,SVPROC
+         BR    R10
+****************************************************************
+*        READ - Read a record.                                 *
+****************************************************************
+READ     EQU   *
+         ST    R10,SVREAD
+         GET   INVENTRY,IREC      Read a single product record
+         AP    #IN,=P'1'          Increment record count
+         B     READX
+ATEND    EQU   *
+         MVI   EOFSW,C'Y'
+READX    EQU   *
+         L     R10,SVREAD
+         BR    R10
+****************************************************************
+*        FORMAT - Format a single detail line.                 *
+****************************************************************
+FORMAT   EQU   *
+         ST    R10,SVFORM
+         MVC   OREC,BLANKS
+         MVC   ODESC,IDESC
+         PACK  WCALIF,ICALIF      Each product's sales must
+         PACK  WILL,IILL           be packed so they can be 
+         PACK  WUTAH,IUTAH          added to total for this
+         PACK  WWISC,IWISC           product...
+         MVC   OCALIF,WMASK
+         ED    OCALIF,WCALIF
+         MVC   OILL,WMASK
+         ED    OILL,WILL
+         MVC   OUTAH,WMASK
+         ED    OUTAH,WUTAH
+         MVC   OWISC,WMASK
+         ED    OWISC,WWISC
+         ZAP   WTOTAL,=P'0'       Initialize the total to zero
+         AP    WTOTAL,WCALIF       and start adding...
+         AP    WTOTAL,WILL
+         AP    WTOTAL,WUTAH
+         AP    WTOTAL,WWISC
+         MVC   OTOTAL,WMASK
+         ED    OTOTAL,WTOTAL
+         MVC   OCRLF,WCRLF        PC/370 only.
+         L     R10,SVFORM
+         BR    R10
+****************************************************************
+*        WRITE - Write a single detail line.                   *
+****************************************************************
+WRITE    EQU   *
+         ST    R10,SVWRITE
+         PUT   REPORT,OREC        Write report line
+         L     R10,SVWRITE
+         BR    R10
+****************************************************************
+*        WRAPUP - Those things which happen one time only,     *
+*                 after all records have been processed.       *
+****************************************************************
+WRAPUP   EQU   *
+         ST    R10,SVWRAP
+         MVC   OREC,BLANKS
+         MVC   OCRLF,WCRLF        PC/370 only.
+         BAL   R10,WRITE          Skip a line.
+         MVC   OREC(23),=CL23'BZZ9 records processed.'
+         MVC   OREC(4),WMASK
+         ED    OREC(4),#IN        Count
+         BAL   R10,WRITE
+         CLOSE INVENTRY
+         CLOSE REPORT
+         WTO   'COGS9A ... Sales recap on REPORT.TXT'
+         L     R10,SVWRAP
+         BR    R10
+****************************************************************
+*        Literals, if any, will go here                        *
+****************************************************************
+         LTORG
+****************************************************************
+*        File definitions                                      *
+****************************************************************
+INVENTRY DCB   LRECL=41,RECFM=F,MACRF=G,EODAD=ATEND,
+               DDNAME='COGS.DAT'  
+REPORT   DCB   LRECL=62,RECFM=F,MACRF=P,
+               DDNAME='REPORT.TXT'      
+****************************************************************
+*        RETURN ADDRESSES                                      *
+****************************************************************
+SVSETUP  DC    F'0'               SETUP
+SVHDGS   DC    F'0'               HDGS
+SVPROC   DC    F'0'               PROCESS
+SVREAD   DC    F'0'               READ
+SVFORM   DC    F'0'               FORMAT
+SVWRITE  DC    F'0'               WRITE
+SVWRAP   DC    F'0'               WRAPUP
+****************************************************************
+*        Miscellaneous field definitions                       *
+****************************************************************
+WCRLF    DC    X'0D25'            PC/370 ONLY - EBCDIC CR/LF
+EOFSW    DC    CL1'N'             End of file? (Y/N)
+BLANKS   DC    CL62' '
+WCALIF   DC    PL2'0'             Units sold in Calif
+WILL     DC    PL2'0'             Units sold in Illinois
+WUTAH    DC    PL2'0'             Units sold in Utah
+WWISC    DC    PL2'0'             Units sold in Wisconsin
+WTOTAL   DC    PL2'0'             Units sold in all states
+#IN      DC    PL2'0'             Input record count
+WMASK    DC    X'40202120'        BZZ9
+****************************************************************
+*        Input record definition                               *
+****************************************************************
+IREC     DS    0CL41        1-41  Inventory record
+IDESC    DS    CL10         1-10  Product description
+ICALIF   DS    CL3         11-13  Units sold in Calif
+IILL     DS    CL3         14-16  Units sold in Illinois
+IUTAH    DS    CL3         17-19  Units sold in Utah
+IWISC    DS    CL3         20-22  Units sold in Wisconsin
+IBEGIN   DS    CL3         23-25  Beginning inventory
+IPURCH   DS    CL3         26-28  Purchases throughout year
+IQOH     DS    CL3         29-31  Actual quantity on hand
+ICOST    DS    CL4         32-35  Cost (each) 99V99
+ISELL    DS    CL4         36-39  Sell for (each) 99V99
+ICRLF    DS    CL2         40-41  PC/370 only - CR/LF
+****************************************************************
+*        Output (line) definition                              *
+****************************************************************
+OREC     DS    0CL62        1-62      
+ODESC    DS    CL10         1-10  Product description
+         DS    CL4         11-14
+OCALIF   DS    CL4         15-18  Units sold in Calif
+         DS    CL5         19-23
+OILL     DS    CL4         24-27  Units sold in Illinois
+         DS    CL5         28-32
+OUTAH    DS    CL4         33-36  Units sold in Utah
+         DS    CL5         37-41
+OWISC    DS    CL4         42-45  Units sold in Wisconsin
+         DS    CL5         46-50
+OTOTAL   DS    CL4         51-54  Units sold in all states
+         DS    CL6         55-60
+OCRLF    DS    CL2         61-62  PC/370 only - CR/LF
+****************************************************************
+*        Headings definitions                                  *
+****************************************************************
+HD1      DS    0CL62
+         DC    CL40'                 COGSWORTH INDUSTRIES   '
+         DC    CL20' '
+         DC    XL2'0D25'
+HD2      DS    0CL62
+         DC    CL40'                      Sales Recap       '
+         DC    CL20' '
+         DC    XL2'0D25'
+HD3      DS    0CL62
+         DC    CL60' '
+         DC    XL2'0D25'
+HD4      DS    0CL62
+         DC    CL40'Product       Calif     Ill      Utah   '
+         DC    CL20'  Wisc    TOTAL'
+         DC    XL2'0D25'
+HD5      DS    0CL62
+         DC    CL40'----------    -----    -----    -----   '
+         DC    CL20' -----    -----'
+         DC    XL2'0D25'
+         END   BEGIN                                                   
+

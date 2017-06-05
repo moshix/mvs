@@ -35,6 +35,8 @@ this repository includes some very useful utilities for people working with MVS,
 
 9. a calculator for ideal blocksize given a DASD type and a logical record length, written by me in Go language. It's called blocksize.go and I also inlude a Linux 64bit binary
 
+10. the PC370 source code for the simply amazing S370 assembler which runs in MS-DOS. 
+
 Enjoy!
 
 moshix

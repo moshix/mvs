@@ -1,0 +1,29 @@
+         TITLE 'TIMER - TIME OF DAY SUBROUTINE'
+*
+*  THIS SUBROUTINE RETURNS THE TIME OF DAY IN 100TH OF A SECOND
+*  IN R0 FOLLOWING CALL TO TIMER.
+*
+TIMER    CSECT
+         USING *,R15
+         SVC   18      R0 = HOURS, MINUTES, SECONDS, 100TH SEC
+         ST    R0,WORK
+         SR    R0,R0
+         IC    R0,WORK   R0=HOURS
+         MH    R0,=H'60'
+         SR    R1,R1
+         IC    R1,WORK+1
+         AR    R0,R1     R0=60*HOURS+MINUTES
+         MH    R0,=H'60'
+         IC    R1,WORK+2
+         AR    R0,R1     R0=60*(60*HOURS+MINUTES)+SECONDS
+         MH    R0,=H'100'
+         IC    R1,WORK+3
+         AR    R0,R1     R0=100*(60*(60*HOURS+MINUTES)+SECONDS)+100TH SEC
+         BR    R14
+R15      EQU   15
+R14      EQU   14
+R1       EQU   1
+R0       EQU   0
+WORK     DC    F'0'
+         END
+

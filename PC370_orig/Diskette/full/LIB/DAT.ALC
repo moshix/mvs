@@ -1,0 +1,85 @@
+	TITLE 'DAT - DATE AND TIME SUBROUTINE'
+*
+*  AUTHOR.    DON HIGGINS.
+*  DATE.      04/01/85.
+*  REMARKS.
+*
+*  THIS SUBROUTINE PRINTS DATE AND TIME ON STD. OUTPUT DEVICE.
+*  THE DATE AND TIME IS OBTAINED FROM MSDOS.
+*
+*  REGISTER USAGE.
+*
+*    0 - WORK
+*    1 - WORK
+*    2 - WORK
+*   14 - RETURN ADDRESS (USUALLY SET BY BALR 14,15)
+*   15 - ENTRY POINT
+*
+DAT      CSECT
+	USING *,R15
+	SVC   TIMER
+	CVD   R1,PWORK                 YEAR
+	MVC   DYEAR,=X'402020202020'
+	ED    DYEAR,PWORK+5
+	ST    R0,WORK
+	SR    R0,R0
+	IC    R0,WORK                  HOURS
+	BAL   R1,CVT
+	MVC   DHH,DWORK+2
+	IC    R0,WORK+1                MINUTES
+	BAL   R1,CVT
+	MVC   DMM,DWORK+2
+	IC    R0,WORK+2                SECONDS
+	BAL   R1,CVT
+	MVC   DSS,DWORK+2
+	IC    R0,WORK+3                100TH SECONDS
+	BAL   R1,CVT
+	MVC   DTH,DWORK+2
+	ST    R2,WORK
+	IC    R0,WORK                  MONTH
+	LR    R1,R0
+	MH    R1,=H'3'
+	LA    R1,MMTAB-3(R1)
+	MVC   MONTH,0(R1)
+	IC    R0,WORK+1                DAY
+	MVI   MASK+1,X'20'                   SET ZERO SURPRESS
+	BAL   R1,CVT
+	MVI   MASK+1,X'21'                   RESET
+	MVC   DDD,DWORK+2
+	IC    R0,WORK+2                DAY OF WEEK
+	LR    R1,R0
+	MH    R1,=H'3'
+	LA    R1,DOWTAB(R1)
+	MVC   DAY,0(R1)
+	LA    R2,TODMSG
+	SVC   WTO                     PRINT DATE AND TIME
+	BR    R14
+CVT      EQU   *                       CONVERT BINARY TO DECIMAL
+	CVD   R0,PWORK
+	MVC   DWORK,MASK
+	ED    DWORK,PWORK+6
+	BR    R1
+TIMER    EQU   18    SVC FOR TIME AND DATE
+WTO      EQU   209   SVC FOR WRITE TO OPERATOR
+R15      EQU   15
+R14      EQU   14
+R0       EQU   0
+R1       EQU   1
+R2       EQU   2
+TODMSG   DC    C' DATE = '
+DAY      DC    C'XXX',C' '
+MONTH    DC    C'XXX',C' '
+DDD      DC    C'ZZ',C','
+DYEAR    DC    C' ZZZZZ',C'  TIME = '
+DHH      DC    C'ZZ',C':'
+DMM      DC    C'ZZ',C':'
+DSS      DC    C'ZZ',C':'
+DTH      DC    C'ZZ',C'$'
+DOWTAB   DC    C'SUNMONTUEWEDTHUFRISAT'
+MMTAB    DC    C'JANFEBMARAPRMAYJUNJULAUGSEPOCTNOVDEC'
+WORK     DC    F'0'
+PWORK    DC    D'0'
+DWORK    DC    C' Z99'
+MASK     DC    X'40212020'
+	END
+

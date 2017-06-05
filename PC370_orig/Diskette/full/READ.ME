@@ -1,0 +1,170 @@
+ 
+READ.ME PC/370 Release 4.2 Installation Guide
+
+Copyright 1988 Donald S. Higgins
+
+                                  Don Higgins
+                                  6365 - 32 Avenue North
+                                  St. Petersburg, Florida 33710
+                                  January 5, 1988
+
+PC/370 users:
+
+Welcome to release 4.2 of the PC/370 cross assembler and emulator
+package!  You are encouraged to copy and share this package with other
+users on the condition that the package is not distributed in modified
+form, and that no fee is charged.  If you find the PC/370 product
+useful, send 45 dollars to the address above to register as a user and
+to support continued shareware maintenance and enhancements.
+Registered users will receive notices of future releases.  The product
+is distributed on an as is basis with no implied warranties.  However,
+requests for fixes and enhancements from registered users are given
+priority for inclusion in future releases.  Currently planned future
+enhancements are as follows:
+
+  1.  Assembler H support with integrated macros.
+
+  2.  Expanded memory support using protected mode on 80286/80386
+      running under native OS/2.
+
+  3.  Improved 370 emulation performance using additional math co-
+      processor assists for packed decimal and native 80386 32 bit
+      instructions.  (Note the current speed of the PC/370 emulator on
+      a 16 MHZ 80386 is in the range of 25,000 IBM 370 instructions
+      per second or 0.025 MIP's.)
+
+The major features included since PC/370 release 3.2 are as follows:
+
+  1.  Micro Focus COBOL/2 Extended Memory (XM) protected mode calls to
+      PC/370 assembler subroutines are supported on 80286 and 80386
+      systems.  XM supports up to 16MB of real memory usable by COBOL
+      and PC/370 assembler subroutines.  See USER.DOC for more
+      information.  This facility requires use of new resident option
+      of emulator, and option B of linker to create BIN type module.
+
+  2.  The following PC/370 supervisor calls have been added:
+
+      a.  Svc 36 reloads program into specified area of memory.
+      b.  Svc 37 defines user exits for supervisor calls.
+
+  3.  The SPIE svc 14 has been enhanced to create program
+      interruption element control block and to pass sufficient
+      information to support transparent program check recovery.
+
+  4.  At entry to main programs, register 1 now points to standard
+      MVS parameter list address, which in turn points to half
+      word parm length followed by EBCDIC parameters passed from
+      MS-DOS command line.
+
+  5.  An optional hardware assist for the CVB and CVD instructions
+      is included which requires the 80x87 math co-processor and
+      can speed up the instructions by up to a factor of 4 for
+      large numbers.  The floating point option P controls whether
+      the assist is activated when 80x87 is installed.
+
+  6.  The L370 linkage editor now supports option U to allow
+      unresolved references.
+
+  7.  The emulator debug facility now has option to restore all
+      trace points at any point during execution by repeated use
+      of K command.  An optional version of emulator is also included
+      with the name E370P42.EXE which does not include interactive
+      debug or ASSIST facilities.  This version saves space, but
+      should only be used with fully tested production programs.
+      To use this version, make it resident by executing it.
+
+  8.  The PC/370 emulator E370R42.EXE can now be made resident by
+      simply executing it directly.  This eliminates the time required
+      to load the emulator for each execution of a PC/370 assembler
+      program.  In addition, a common system queue area (SQA) memory
+      can be allocated in the resident emulator address space to be
+      shared by assembler subroutines called from COBOL.  The size of
+      the SQA is specified in hex paragraphs as the only parm.  The
+      default is 10 hex or 256 byte SQA.  Assembler subroutines called
+      from COBOL can now perform file I/O and dynamic memory
+      management using the common SQA memory.
+
+  9.  The 370 cross assembler A370.EXE now supports the COPY statement
+      to include commonly used DSECT's, EQU's, or code.  Common copy
+      files such as IHADCB.CPY for a DSECT of a DCB, EQUREGS.CPY for
+      R0-R15, and EQUSVCS.CPY for equates for all of the PC/370
+      supervisor calls are included.
+
+ 10.  The following fixes have been included:
+
+      a.  CVB error when input field contained negative 0.
+      b.  SRP error when second field contained more than 6 bit #.
+      c.  Program check on executed instruction did not store
+          correct address of next instruction following execute.
+      d.  EBCDIC to ASCII translate table did not correctly handle > {
+          and [ characters.
+      e.  Text file with LRECL=1 caused incorrect record move.
+      f.  Operand of ORG statement can now be CSECT or DSECT as
+          well as relative symbol within CSECT or DSECT.
+      g.  File open svc 1 now takes error exit for file not found and
+          reg 0 and 1 now contain error code at entry to error exit
+          (See LIB\SYNERROR.ALC for subroutine to decode errors).
+
+For brief description of changes in previous releases since 1981,
+see DOC\HISTORY.DOC.  Thanks to Jacques Roy, a macro preprocessor
+M370.COM (written in 370 assembler) has been included since PC/370
+release 3.2 along with a set of MVS compatible macros including DCB,
+OPEN, CLOSE, GET, PUT, READ, WRITE, WTO, WTOR, LINK, LOAD, GETMAIN,
+etc.  If you use the macro preprocessor, register as a macro user and
+support future enhancements, by sending a registration fee of $20. to:
+
+        Jacques Roy
+        XL Software Inc.
+        1000 St-Jean Baptiste #120
+        Quebec, Canada G2E-5G5
+
+To install the PC/370 system on a hard disk and run the demo programs,
+copy the file BAT\INSTALL.BAT to separate hard disk directory and
+execute it.  INSTALL requires two parameters, the first is the drive
+containing the distributed floppy disk and the second is the hard disk
+drive.  Command C>INSTALL B C will install the system on hard disk C
+reading files from drive B with prompts for each volume if more than
+one.  The install file defines a root directory \R42 which contains
+all of the executable programs and system files required by the PC/370
+facilities.  The following sub-directories are also created:
+
+  1.  \BAT  - contains batch files which can be executed without
+              any parameters after setting current directory to
+              R42.
+
+  2.  \LIB  - contains ALC source code for PC/370 system
+              subroutines.
+
+  3.  \CPY  - contains CPY source code for ALC source COPY
+              includes.
+
+  4.  \MAC  - contains MAC and MLC source code for macro pre-
+              processor.
+
+  5.  \CBL  - contains CBL Micro Focus VS COBOL demo program source
+              code along with demo PC/370 assembler subroutine
+              source code.
+
+  6.  \DOC  - contains machine readable PC/370 documentation.  Read
+              DOC\INTRO.DOC for PC/370 overview and more
+              information on the other component of the package.
+
+  7.  \DEMO - contains demo program ALC source code.
+
+  8.  \UTIL - contains utility program ALC source code.
+
+
+Hope you enjoy PC/370!  Feedback on your usage and/or
+evaluation of the product is highly encouraged.
+
+Sincerely,
+
+
+
+Don Higgins, CCP, CDP
+
+___________
+
+IBM          - trademark of International Business Machines
+COBOL/2, XM  - trademarks of Micro Focus Inc.
+MS-DOS       - trademark of Microsoft

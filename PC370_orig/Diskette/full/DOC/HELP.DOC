@@ -1,0 +1,183 @@
+ 
+PC/370 help documentation
+
+So you've successfully installed PC/370 using the BAT\INSTALL.BAT
+command, have run the demo programs, and have read the documentation
+files, but you still have some questions.  Well, here are some of the
+most frequently asked questions and some answers which may help:
+
+  1.  Where can I get more help?
+
+      Send letter and/or diskette with problem to me at the address
+      listed below and I will reply.  Subscribe to Compu-Serve
+      electronic mail survice adn send me EASY mail message
+      using ID# 73047,1113.
+
+  2.  The A370.EXE cross assembler gets I/O error reading my source
+      ALC program file?
+
+      The file must be in ASCII text form with line feed (X'0A')
+      character ending each line of text.  This is standard PC format
+      used by most text editors including EDLIN and SEE.  If the ALC
+      file was downloaded from an IBM mainframe, it may need to be
+      translated from EBCDIC to ASCII.  Most mainframe to PC link
+      facilities have this translation option as a default.
+
+  3.  The A370.EXE cross assembler did not recognize some statements?
+
+      See USER.DOC for OS/VS assembler features not supported by
+      A370.EXE such as macros, and see the reference section for
+      additional texts on OS/VS assembler and ASSIST.  If the program
+      has macros, you must use the M370.COM macro preprocessor to
+      expand macros into basic assembler first.  If the program has
+      floating point E, D, or L type DC constants, an 80x87 math co-
+      processor must be installed for the assembler to correctly
+      assemble the floating point constants.
+
+  4.  The L370.EXE linkage editor keeps getting unresolved external
+      references even though I've checked that all subroutines have
+      been added to system or program LIB file with correct /B option
+      of MS-DOS copy command as shown in BAT\BLDLIB.BAT?
+
+      The linkage editor scans the program LIB file first and then the
+      system LIB file in sequential order attempting to resolve all
+      external references in one pass.  If any module selected for
+      inclusion calls a module previously scanned and not selected,
+      then the link will fail as a result of the backward reference.
+      You must sequence the libraries to eliminate backward references
+      or force loading of required modules with explicit external
+      address constants.  To allow unresolved references use option U.
+
+  5.  My first program will not run.  How do I debug it?
+
+      Specify an upper case T as only parameter when executing program
+      to start in debug mode or link it with option D specified.  At
+      the interactive debug prompt, type T to trace instructions up to
+      point of failure.  You can stop trace at any point by hitting
+      any key and then typing T again to restart.  If no entry point
+      name was specified on END statement, the program will start at
+      first byte of code.  If there are too many instructions before
+      failure to trace, enter Q for quiet mode execution up to point
+      of failure and then enter N for list of last 20 instructions
+      executed.  See debug chapter of USER.DOC for more information.
+
+  6.  My write to operator message printed garbage after message?.
+
+      Add $ character to tell MS-DOS where end of text is.
+
+  7.  My first file I/O operation caused an I/O error?
+
+      Make sure that file is in current directory or that complete
+      MS-DOS file path was specified in DCBDSN field of DCB with a
+      trailing null character (X'00').  Make sure that record length
+      (LRECL) includes room for carriage return and line feed
+      characters in each text record.  Text record processing on the
+      PC is quite different from the normal fixed length text record
+      processing on an IBM mainframe.  Text records on the PC created
+      by the SEE.COM full screen editor or most other PC editors such
+      as EDLIN store text records in variable length ASCII form with a
+      carriage return (X'0D') and line feed (X'0A') character
+      indicating the end of each record and an end of file (X'1F')
+      character after the last line feed.  If the file being read or
+      written has 80 data characters, then the record length needs to
+      be 82 bytes for text type files.  See SYSTEM.DOC for more
+      information on file DCB options including translation between
+      EBCDIC and ASCII.  The ASSIST extended instructions XREAD and
+      XPRNT make the translation between ASCII text file format and
+      EBCDIC fixed length record format automatically.  See the ASSIST
+      demo programs DEMOAST1.ALC through DEMOAST4.ALC and the ASSIST
+      section of USER.DOC for more information.
+
+  8.  The records read from my input file appear to be in ASCII
+      instead of EBCDIC as expected by the 370 program?
+
+      The default for DCB text file processing is not to translate
+      between ASCII and EBCDIC.  There is an option bit in the DCBFLG
+      byte named DBTRAN which can be set prior to open to request that
+      each record be translated such that file is in ASCII and record
+      processed by program is in EBCDIC.  The ASSIST extended
+      instructions XREAD and XPRNT automatically make this
+      translation.
+
+  9.  Why don't you have an option to let all character strings
+      default to ASCII instead of EBCDIC code in an assembler program?
+
+      Release 1 did have option E to specify either ASCII or EBCDIC
+      for DC character strings and self defining character strings
+      such as immediate data in CLI instruction.   This created non-
+      standard 370 code by default when the ASCII mode was selected
+      and was very confusing when mixing subprograms with different
+      options.  Release 2 removed the E option and added option to
+      define ASCII character strings using double quotes.   This
+      solution also allows both types of character strings to be
+      easily used in a single program.
+
+ 10.  Can I download and use the MVS, VM, or VSE macro's?
+
+      No.  First they are copyright by IBM and licensed only on the
+      mainframe they reside on.  Second, they would not work without
+      changing them to use PC/370 supervisor calls and the limited
+      syntax of the macro pre-processor.  The common MVS macros
+      included such as DCB, OPEN, CLOSE, GET, and PUT have been coded
+      from scratch for the PC environment.  Several different users
+      are developing additional macros to provide compatible unit test
+      environments for each of the above operating systems.
+
+ 11.  Can I download load modules from an IBM mainframe and run
+      them using PC/370?
+
+      Yes, but only if you also complete a PC/370 shell such as the
+      MVS demo shell to intercept all SVC's and supervisor state
+      instructions used.  The demo shell will support a native 370
+      mainframe MVS load module that only uses problem state
+      instructions and the WTO and WTOR svc's.  The actual load module
+      file would have to be processed to remove all the extraneous
+      fetch control records leaving just the 370 object code in a MOD
+      type file which could be loaded and executed by the shell
+      program.  The object code would have to be self relocating (i.e.
+      no relocation records in the load module file).
+
+ 12.  Can I download fixed blocked files and read them directly with a
+      PC/370 program?
+
+      Yes, one of the DCB file processing options is fixed blocked.
+      This mode assumes that the file contains fixed length binary
+      and/or EBCDIC data records with no carriage returns or line
+      feeds.  Text files are not normally stored in this format on
+      PC's because it wastes so much space compared to the variable
+      length ASCII text format.
+
+ 13.  Can I upload source, object, or load modules to the mainframe
+      and execute them?
+
+      Yes, with the following restrictions:
+
+        a. Source code must be translated back to EBCDIC and any SVC's
+           or macros used must be compatible with the mainframe
+           operating system and macro assembler.
+
+        b. Object code can be uploaded after it is converted from
+           compressed bit stream format (OBJ) to OS/VS linkage editor
+           80 byte fixed blocked format (370) using the utility
+           T370.COM which is included in both object and source form.
+           This is being used by some software developers who unit
+           test code on a PC and then upload tested object code to
+           mainframe.
+
+        c. Load module code can be uploaded but with the following
+           restrictions.  Only MOD format code would make sense to
+           upload since the loader code in COM format files is unique
+           to PC MS-DOS environments.  An application interface on
+           the mainframe would have to be written to read the MOD
+           file code into memory and link to it.  Of course, the
+           supervisor instructions would have to be compatible with
+           the mainframe operating environment.
+
+Please send additional questions and answers you think would be
+helpful to other users.  I will add them with appropriate credits.
+This file was first added in release 4.2 at the suggestion of BIll
+Earle.
+
+Don Higgins
+6365 - 32 Avenue North
+St. Petersburg, Florida 33710
