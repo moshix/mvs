@@ -17,7 +17,7 @@ func ta(tamsec int) {
 func tb(tbmsec int) {
 
 	for i := 0; i < 9999999; i++ {
-		fmt.Println("Thread B counter: ", i)
+		fmt.Println("                               Thread B counter: ", i)
 		time.Sleep(time.Duration(tbmsec) * time.Millisecond)
 	}
 }
@@ -40,13 +40,12 @@ func main() {
 
 	if *helpPtr { //user asked for help...
 		fmt.Println("\nconcurrency is a Golang concurrency testing tool by moshix")
-		fmt.Println("Two parameters are needed, and a flag is optional:")
+		fmt.Println("Three parameters are needed, and a flag is optional:")
 		fmt.Println("-tamsec=nnn  hundreds of milliseconds for thread A to wait")
 		fmt.Println("-tbmsec=nnn hundreds of milliseconds for thread B to wait")
 		fmt.Println("-tout=nn  tens of seconds for time-out of all threads.")
 		fmt.Println("-help for this help dialog")
 		fmt.Println("\nconcurrency will in any case time out after 15 seconds")
-		fmt.Println("you can determine the relative and absolute veleocity of each thread by assigning sensible values in tamsec and tbmsec. Have fun!")
 
 		return
 	}
