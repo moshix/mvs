@@ -9,27 +9,27 @@ import (
 )
 
 func ta(tamsec int) {
-    n := 0;
+	n := 0
 	for i := 0; i < 9999999; i++ {
-        n++;
-        if n == 23 {
-            n  = 0;
-         fmt.Println("\n\nThread A                       Thread B                   ");
-         fmt.Println("--------------                 ---------------");
-        }
+		n++
+		if n == 23 { //prime number so the two header loops don't meet too often
+			n = 0
+			fmt.Println("\n\nThread A                       Thread B                   ")
+			fmt.Println("--------------                 ---------------")
+		}
 		fmt.Println("A Counter: ", i)
 		time.Sleep(time.Duration(tamsec) * time.Millisecond)
 	}
 }
 func tb(tbmsec int) {
-    n := 0;
+	n := 0
 	for i := 0; i < 9999999; i++ {
-        n++;
-        if n == 19 {
-            n  = 0;
-         fmt.Println("\n\nThread A                       Thread B                   ");
-         fmt.Println("--------------                 ---------------");
-        }
+		n++
+		if n == 19 { //prime number to avoid too many headers collisions
+			n = 0
+			fmt.Println("\n\nThread A                       Thread B                   ")
+			fmt.Println("--------------                 ---------------")
+		}
 		fmt.Println("                               B Counter: ", i)
 		time.Sleep(time.Duration(tbmsec) * time.Millisecond)
 	}
@@ -41,8 +41,8 @@ func timeoutfunc(t chan bool, toutsec int) {
 
 func main() {
 
-         fmt.Println("Thread A                       Thread B                   ");
-         fmt.Println("--------------                 ---------------");
+	fmt.Println("Thread A                       Thread B                   ")
+	fmt.Println("--------------                 ---------------")
 	var tamsec int = 300
 	var tbmsec int = 100
 	var toutsec int = 15
