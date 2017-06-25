@@ -33,13 +33,13 @@ func main() {
 
 	if dasd == "" { // no dasd type was input
 		fmt.Println("\nBLK205R No DASD type entered. ")
-		fmt.Println("BLK206R pls enter DASD type or restart with -h for list of DASD types")
+		fmt.Println("\nBLK206R pls enter DASD type or restart with -h for list of DASD types")
 		fmt.Scan(&dasd)
 	}
 	if lrecl == 0 { // no lrecl was input
 
 		fmt.Printf("\nBLK201R lrecl command line argument is not included.\n")
-		fmt.Println("BLK202R Please enter lrecl length: ")
+		fmt.Println("\nBLK202R Please enter lrecl length: ")
 		fmt.Scan(&lrecl)
 	}
 	if *helpPtr { // user asked for help
