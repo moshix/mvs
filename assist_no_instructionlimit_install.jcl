@@ -27137,17 +27137,17 @@ EIFIN    EQU   *                                                        83706000
          L     RIA,EIRIA           RESTORE INSTR @ REG                  83708000
 EIFINRR  EQU   EIFIN              RR NOW MERGES WITH OTHER      CEH     83710000
          L     R0,ECILIMT          GET INSTRUCTION COUNTER              83712000
-*        BCT   R0,EIGO             DECREMENT COUNTER                    83714000
+*        B     EIGO       DO NOT DECREMENT COUNTER MOSHE                83714000
 *              COUNTER LIMIT EXCEEDED -- BR TO INTERRUPT ROUTINE        83716000
 EICNTINT EQU   *                                                        83718000
          ST    R0,ECILIMT          RESTORE INSTR LIMIT FOR STATS        83720000
          MVI   ECFLAG1,$ECTIMEX    SHOW INSTR LIMIT EXCEEDED            83722000
          LA    R1,EICCTIME         GET @ OF TIME MESSAGE                83724000
          NI    ECPRFLG3,ECNOSPI    MAKE SURE SPIE IS OFF FOR SAFETY     83725000
-         B     EIITIA              BR TO EXIT ROUTINE                 M 83726000
+         B     EIITIA              BR TO EXIT ROUTINE                   83726000
 EIGO     EQU   *                                                        83728000
          C     R0,ECPRCMPR         CMPR CLOCK AGAINST USER LIMIT        83730000
-         BNE   EICLKOK             CONTINUE ON IF NO COUNT LIMIT EXCEED 83732000
+*        BNE   EICLKOK             CONTINUE ON IF NO COUNT LIMIT EXCEED 83732000
          TM    ECPRFLG4,ECLKADR    TEST TO SEE IF CLOCK EXIT ADDR GIVEN 83732100
          BNO   EICNTINT            IF NO ADDR GIVEN - DO TIMER EXIT     83732200
          L     RIA,ECPRCLEA        PREPARE BRANCH TO GIVEN EXIT ADDR    83732300
