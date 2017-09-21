@@ -3,8 +3,7 @@
 //             CLASS=A,
 //             MSGCLASS=H,
 //             TIME=1440,
-//             MSGLEVEL=(1,1),
-// USER=HERC01,PASSWORD=BARR
+//             MSGLEVEL=(1,1)
 //SYSLIB      DD DSN=SYS2.MACLIB,DSN=SHR
 /
 //********************************************************************
