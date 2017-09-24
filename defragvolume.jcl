@@ -5,7 +5,7 @@
 //SYSPRINT DD  SYSOUT=*                                                        
 //INVOL1   DD  VOL=SER=Z9DIS6,UNIT=3390,DISP=OLD                              
 //SYSIN    DD    *     
-DEFRAG DDNAME(INVOL1) -                                              
+  DEFRAG DDNAME(INVOL1) -                                              
      MAXMOVE(9999,2) PASSDELAY(10) -                              
      FASTREP(PREF) -                                              
      WAIT(2,3)  
