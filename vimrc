@@ -41,7 +41,7 @@ endfunction
 syn case ignore
 syn keyword jclKwd pgm proc class dsn[ame] msgclass space disp contained
 syn keyword jclKwd parm member cond msglevel order lrecl recfm unit contained
-syn keyword jclKwd sysout outlim blksize region dcb amp contained 
+syn keyword jclKwd sysout outlim blksize region dcb amp notify contained
 syn keyword jclKwd then shr old new mod catlg rlse delete pass keep contained 
 syn keyword jclKwd cyl trk vol retain ser label recorg sysda contained 
 syn keyword jclKwd dummy  contained 
