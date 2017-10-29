@@ -5,6 +5,11 @@
 //             TIME=1440,REGION=6M,
 //             MSGLEVEL=(1,1),
 // USER=HERC01,PASSWORD=CUL8TR
+//** **************************************************************
+//**  THIS IS AN IBM 1401 EMULATOR 
+//**  IT DOES NOT PRESENTLY ASSEMBLE PROPERLY, BUT WORKING ON IT
+//*   IT'S HERE ONLY FOR HISTORICAL VALUE, NOT FOR PRACTICAL VALUE
+//** **************************************************************
 //A1401    EXEC ASMFCG,PARM.ASM=(OBJ,NODECK),MAC1='SYS2.MACLIB',
 //             REGION.GO=1228K,PARM.GO='/2000'
 //**DDX       DD DSN=HERC01.SIM1401,
