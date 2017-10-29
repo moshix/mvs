@@ -1,4 +1,9 @@
 //HERC01A JOB CLASS=A,MSGCLASS=H,MSGLEVEL=(1,),TIME=1440,REGION=0M
+//** **************************************************************
+//** THIS IS A DROP-IN REPLACMENET FOR THE Z/OS ADRDSSU BACKUP AND
+//** RESTORE UTILITY
+//** USE DSSDUMP TO BACKUP YOUR VOLUMES FROM WITHIN MVS 
+//** **************************************************************
 //DUMP    EXEC PGM=DSSDUMP
 //SYSPRINT  DD SYSOUT=*
 //SYSIN  DD *
