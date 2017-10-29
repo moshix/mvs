@@ -4,7 +4,7 @@ set number
 set shiftwidth=4
 set expandtab
 highlight ColoColumn ctermbg=lightgrey guibg=lightgrey
-set cc=80
+set cc=72
 set showcmd
 set cursorline
 set wildmenu
@@ -13,7 +13,11 @@ set showmatch
 set incsearch
 set hlsearch
 set smartcase
-"set title
+set path+=** 
+set nocompatible
+syntax enable
+filetype plugin on
+set title
 "set background=dark
 "colorscheme solarized
 "highlight OverLength ctermbg=red ctermfg=white guibg=#592929 
