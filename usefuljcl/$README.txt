@@ -1,7 +1,7 @@
 ****************************************************************        00001002
 *                                                              *        00002002
 * THE FOLLOWING IS A LIST OF EXAMPLE JOBS                      *        00003002
-*  THAT COMPANY XYZ MIGHT USE ON A NEW ADCD V2R9 SYSTEM        *        00004007
+*  THAT COMPANY XYZ MIGHT FOR DAILY STUFF                      *        00004007
 *                                                              *        00005002
 ****************************************************************        00007002
 J       - SAMPLE JOB CARD                                               00010000
