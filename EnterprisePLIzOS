@@ -1,0 +1,8 @@
+//MOSHIXPI JOB (PLICLG),'PI',CLASS=A,MSGCLASS=A,MSGLEVEL=(1,1),       
+//         NOTIFY=&SYSUID,REGION=80M                               
+//PLICLG   EXEC IBMZCPG,PARM='MAP,STMT,NEST,LIST,XREF'             
+//STEPLIB  DD DSN=IBMZ.V3R6M0.SIBMZCMP,DISP=SHR                    
+//SYSIN    DD DSN=MOSHE.WORK.PROG(PI),DISP=SHR                     
+//SYSPRINT DD SYSOUT=*                                             
+//SYSUDUMP DD SYSOUT=*                                             
+//                                                                 
