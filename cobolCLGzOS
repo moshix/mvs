@@ -1,0 +1,11 @@
+//MOSHIXZ  JOB 'COBOL PRIMES ',                                   
+//       MSGCLASS=H,MSGLEVEL=(1,1),REGION=250M,                   
+//       CLASS=A,NOTIFY=&SYSUID                                   
+//CLG EXEC IGYWCLG,REGION=250M,                                   
+// PARM.COBOL='LIB,APOST,XREF,MAP,OFFSET'                         
+//STEPLIB  DD  DSN=IGY340.SIGYCOMP,DISP=SHR                       
+//COBOL.SYSIN DD DSN=MOSHIX.WORK.PROG(COBPRIME),DISP=SHR          
+//GO.SYSOUT   DD SYSOUT=*,DCB=(RECFM=FBA,LRECL=161,BLKSIZE=16100) 
+//GO.SYSIN    DD *                                                
+    0100                                                          
+/*                                                                
