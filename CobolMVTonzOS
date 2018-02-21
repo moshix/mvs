@@ -1,0 +1,42 @@
+//MOSHIXT  JOB 'COBOL PRIMES ',                                      
+//       MSGCLASS=H,MSGLEVEL=(1,1),REGION=5M,                        
+//       CLASS=A,NOTIFY=&SYSUID                                      
+//****************************************************************** 
+//**   COBOL COMPILER JOB       COMPILE LINK-EDIT AND GO             
+//**   SYSIN ASSUME IN MOSHIX.WORK.PLI(PL1)                          
+//**   SYSLMOD MODULE IN &&LOADSET                                   
+//**   GO MODULE FORM &&LOADSET                                      
+//**   SYSUDMP IN SYSOUT=*                                           
+//**                                                                 
+//**                                                                 
+//*****************************************************8************ 
+//COB  EXEC  PGM=IKFCBL00,REGION=4096K,                              
+//           PARM='FLAGW,LOAD,SUPMAP,SIZE=2048K,BUF=1024K'           
+//SYSIN   DD DISP=SHR,DSN=MOSHIX.WORK.PROG(COBPRIME)                 
+//STEPLIB  DD DSN=SYSC.LINKLIB,DISP=SHR                              
+//SYSLIB  DD DISP=SHR,DSN=SYSC.COBLIB,VOL=SER=SYSCPK,UNIT=3390       
+//SYSPRINT  DD SYSOUT=*                                              
+//SYSUT1 DD UNIT=SYSDA,SPACE=(460,(700,100))                         
+//SYSUT2 DD UNIT=SYSDA,SPACE=(460,(700,100))                         
+//SYSUT3 DD UNIT=SYSDA,SPACE=(460,(700,100))                         
+//SYSUT4 DD UNIT=SYSDA,SPACE=(460,(700,100))                         
+//SYSLIN   DD DSN=&&LOADSET,UNIT=SYSDA,                              
+//         DISP=(NEW,PASS,DELETE),                                   
+//         SPACE=(CYL,(1,1))                                         
+//*****************************************************8************ 
+//LKED EXEC PGM=IEWL,PARM='LIST,XREF,LET',COND=(5,LT,COB),REGION=96K 
+//STEPLIB  DD DSN=SYSC.LINKLIB,DISP=SHR                              
+//SYSLIN   DD DSNAME=&&LOADSET,DISP=(OLD,DELETE)                     
+//SYSLMOD  DD DISP=SHR,DSN=MOSHIX.WORK.OBJ(GO)                       
+//SYSLIB DD   DSN=SYSC.COBLIB,DISP=SHR,VOL=SER=SYSCPK,UNIT=3390      
+//SYSUT1 DD UNIT=SYSDA,SPACE=(1024,(50,20))                          
+//SYSPRINT DD SYSOUT=*                                               
+//*****************************************************8************ 
+//*****************************************************8************
+//GO  EXEC PGM=GO                                                   
+//STEPLIB DD DISP=SHR,DSN=MOSHIX.WORK.OBJ                           
+//SYSOUT   DD SYSOUT=*,DCB=(RECFM=FBA,LRECL=161,BLKSIZE=16100)      
+//SYSIN    DD *                                                     
+    9999                                                            
+/*                                                                  
+//                                                                  
