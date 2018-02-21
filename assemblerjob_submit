@@ -1,65 +1,54 @@
-         PRINT NOGEN                                               
-ASMSUB   CSECT                                                     
-         USING *,R15              INITIAL BASE REGISTER            
-BEGIN    B     START                                               
-         DC    AL1(8)                                              
-         DC    CL8'ASMSUB'        PROGRAM NAME FOR DEBUGGING       
-*--------M-Y----S-A-V-E----A-R-E-A------------------------------*  
-SAVEAREA DS    F                  RESERVED FOR PLI              *  
-PRESAVE  DC    XL8'0'             ADDR OF PREVIOUS SAVE AREA    *  
-NEXTSAVE DC    XL8'0'             ADDR OF NEXT SAVE AREA        *  
-SREG14   DC    XL8'0'             GENERAL                       *  
-SREG15   DC    XL8'0'                     PURPOSE               *  
-SREG0    DC    13XL8'0'                           REGISTER SAVE *  
-SAVEEND  DS    0H                                               *  
-*--------E-N-D----O-F----S-A-V-E----A-R-E-A---------------------*  
-         DROP  R15                DUMP INITIAL BASE REGISTER       
-START    BAKR  R14,0                                               
-         LR    R12,R15            SET UP MY                        
-         USING BEGIN,R12                    BASE REGISTER          
-         ST    R13,PRESAVE        PERFORM SAVE                     
-         LA    R15,SAVEAREA                    AREA                
-         ST    R15,8(R13)                           CHAINING       
-         LR    R13,R15            R13 = ADDR OF MY SAVE AREA.      
-         OPEN  (OUTDCB,OUTPUT)    OPEN OUTPUT FILE FOR INTRDR      
-PRTJCL   EQU   *                  START OF PRINTING                
-         MVC   OUTAREA,LINE1                                       
-         PUT   OUTDCB,OUTAREA                                      
-         MVC   OUTAREA,LINE2                                       
-         PUT   OUTDCB,OUTAREA     GET ADDR OF NEXT O/P AREA.       
-         MVC   OUTAREA,LINE3                                       
-         PUT   OUTDCB,OUTAREA     GET ADDR OF NEXT O/P AREA.       
-         MVC   OUTAREA,LINE4                                       
-         PUT   OUTDCB,OUTAREA     GET ADDR OF NEXT O/P AREA.       
-         MVC   OUTAREA,LINE5                                       
-         PUT   OUTDCB,OUTAREA     GET ADDR OF NEXT O/P AREA.       
-PRNTDONE CLOSE (OUTDCB)           CLOSE THE INPUT FILE.            
-         L     R13,PRESAVE        R13 = PREVIOUS SAVE AREA ADDR.  
-         RETURN (14,12),RC=0      RESTORE REGISTERS                   
-         LTORG                                                        
-OUTDCB   DCB   MACRF=PM,RECFM=FB,LRECL=80,DDNAME=OUTDD,DSORG=PS       
-*--------M-Y----O-U-T-P-U-T----A-R-E-A------------*                   
-OUTAREA  DC    CL80' '                             *                  
-LINE1    DC    CL80'//MOSHIXI JOB (ASM),MSGCLASS=H,CLASS=A'           
-LINE2    DC    CL80'//STEP1 EXEC PGM=IEFBR14'      *                  
-LINE3    DC    CL80'//SYSPRINT SYSOUT=*'           *                  
-LINE4    DC    CL80'//SYSABEND SYSOUT=*'           *                  
-LINE5    DC    CL80'//'                            *                  
-*-------------------------------------------------*                   
-R0       EQU   0                                                      
-R1       EQU   1                                                      
-R2       EQU   2                                                      
-R3       EQU   3                                                      
-R4       EQU   4                                                      
-R5       EQU   5                                                      
-R6       EQU   6                                                      
-R7       EQU   7                                                      
-R8       EQU   8                                                      
-R9       EQU   9                                                      
-R10      EQU   10                                                     
-R11      EQU   11                                                     
-R12      EQU   12                                                     
-R13      EQU   13                                                     
-R14      EQU   14                                                     
-R15      EQU   15                                                     
-         END   ,                  PHYSICAL END OF THE PROGRAM                  
+         PRINT NOGEN
+ASMSUB   CSECT
+         SAVE  (14,12)           SAVE REGISTERS ON ENTRY
+         BASR  R12,0             SET UP MY
+         USING *,R12                       BASE REGISTER
+         ST    R13,SAVEA+4                   ENSURE SAVE AREA
+         LA    R13,SAVEA                        CHAIN BUILT CORRECTLY.
+*---------------------------------------------------------------------*
+*        INSERT THE OPEN STATEMENT AFTER THIS COMMENT BOX             *
+*---------------------------------------------------------------------*
+         OPEN  (OUTDCB,OUTPUT)   OPEN OUTPUT FILE FOR INTRDR
+PRTJCL   EQU   *                 START OF PRINTING
+         MVC   OUTAREA,LINE1
+         PUT   OUTDCB,OUTAREA    MOVE EACH JCL LINE INTO BUFFER AND
+         MVC   OUTAREA,LINE2      "PRINT" TO INTERNAL READER
+         PUT   OUTDCB,OUTAREA
+         MVC   OUTAREA,LINE3
+         PUT   OUTDCB,OUTAREA
+         MVC   OUTAREA,LINE4
+         PUT   OUTDCB,OUTAREA
+         MVC   OUTAREA,LINE5
+         PUT   OUTDCB,OUTAREA
+PRNTDONE CLOSE (OUTDCB)          CLOSE THE INPUT FILE.
+         L     R13,SAVEA+4       R13 = PREVIOUS SAVE AREA ADDR.
+         RETURN (14,12),RC=0     RETURN TO CALLER (Z/OS)
+SAVEA    DS    18F               FOR REGISTER SAVE AREA
+         LTORG
+OUTDCB   DCB   MACRF=PM,RECFM=FB,LRECL=80,DDNAME=OUTDD,DSORG=PS
+*--------M-Y----O-U-T-P-U-T----A-R-E-A------------*
+OUTAREA  DC    CL80' '                             *  BUFFER
+LINE1    DC    CL80'//MOSHIXI JOB (ASM),MSGCLASS=H,CLASS=A'
+LINE2    DC    CL80'//STEP1 EXEC PGM=IEFBR14'      *  ANY JCL
+LINE3    DC    CL80'//SYSPRINT DD SYSOUT=*'        *   YOU WANT TO
+LINE4    DC    CL80'//SYSABEND DD SYSOUT=*'        *     SUBMIT HERE..
+LINE5    DC    CL80'//'                            *
+*-------------------------------------------------*
+R0       EQU   0
+R1       EQU   1
+R2       EQU   2
+R3       EQU   3
+R4       EQU   4
+R5       EQU   5
+R6       EQU   6
+R7       EQU   7
+R8       EQU   8
+R9       EQU   9
+R10      EQU   10
+R11      EQU   11
+R12      EQU   12
+R13      EQU   13
+R14      EQU   14
+R15      EQU   15
+         END   ,                  PHYSICAL END OF THE PROGRAM
+
