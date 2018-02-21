@@ -1,0 +1,52 @@
+//MOSHIXQ  JOB 'N QUEENS ',                                          
+//       MSGCLASS=H,MSGLEVEL=(1,1),REGION=8M,                        
+//       CLASS=A,NOTIFY=&SYSUID                                      
+//****************************************************************** 
+//**   PLI F COMPILER PROCEDURE COMPILE LINK-EDIT AND GO             
+//**   SYSIN ASSUME IN MOSHIX.WORK.PLI(PL1)                          
+//**   SYSLMOD MODULE IN &&LOADSET                                   
+//**   GO MODULE FORM &&LOADSET                                      
+//**   SYSUDMP IN SYSOUT=*                                           
+//**                                                                 
+//**                                                                 
+//*****************************************************8************ 
+//PL1L   EXEC  PGM=IEMAA,REGION=9000K,                               
+// PARM='LIST,SOURCE,NEST,XREF,OPT(2)'                               
+//SYSPRINT DD SYSOUT=*                                               
+//STEPLIB  DD DSN=SYSC.LINKLIB,DISP=SHR                              
+//SYSLIB   DD DSN=SYSC.PLILIB,DISP=SHR                               
+//SYSIN   DD DSN=MOSHIX.WORK.PROG(NQPLIF),DISP=SHR                   
+//SYSUT1   DD UNIT=SYSDA,SPACE=(CYL,(1,1))                           
+//SYSUT3   DD UNIT=SYSDA,SPACE=(CYL,(1,1))                           
+//SYSUDUMP DD SYSOUT=*                                               
+//SYSLIN   DD DSN=&&LOADSET,UNIT=SYSDA,                              
+//         DISP=(NEW,PASS,DELETE),                                   
+//         SPACE=(CYL,(50,20))                                       
+//******************************************************             
+//**   LINKAGE EDITOR, OR BINDER                                     
+//****************************************************** 
+//LKED EXEC PGM=IEWL,PARM='XREF,LIST,LET',                         
+//           REGION=4M                                             
+//SYSLIB   DD DSN=SYSC.PLILIB,DISP=SHR                             
+//STEPLIB  DD DSN=SYSC.LINKLIB,DISP=SHR                            
+//SYSLMOD  DD DSN=&&GOSET(GO),UNIT=SYSDA,                          
+//             SPACE=(CYL,(1,1,9),RLSE),DISP=(NEW,PASS,DELETE),    
+//             DSORG=PO                                            
+//SYSUT1   DD UNIT=SYSDA,SPACE=(CYL,(1,1))                         
+//SYSPRINT DD SYSOUT=*                                             
+//SYSUDUMP DD SYSOUT=*                                             
+//SYSLIN   DD DSNAME=&&LOADSET,DISP=(OLD,DELETE)                   
+//******************************************************           
+//**   EXECUTE NEW PROGRAM                                         
+//******************************************************           
+//GO  EXEC PGM=GO,REGION=90M                                       
+//STEPLIB  DD  DSN=&&GOSET,DISP=(OLD,DELETE)                       
+//         DD  DSN=SYSC.PLILIB,DISP=SHR                            
+//SYSLIB   DD  DSN=SYSC.PLILIB,DISP=SHR                            
+//SYSOUT   DD  SYSOUT=*                                            
+//SYSUDUMP DD SYSOUT=*                                             
+//GO.SYSIN DD *                                                    
+12                                                                 
+/*                                                                 
+//GO.SYSPRINT DD SYSOUT=*,DCB=(RECFM=FBA,LRECL=133,BLKSIZE=13300)  
+//                                                                 
