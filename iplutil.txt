@@ -1,0 +1,95 @@
+//MOSHIXIN  JOB CLASS=A,MSGCLASS=H,MSGLEVEL=(1,1),NOTIFY=&SYSUID,
+//          REGION=50M
+//CLG       EXEC PROC=ASMACL
+//C.SYSLIB   DD DISP=SHR,DSN=SYS1.MACLIB
+//           DD DISP=SHR,DSN=SYS1.MODGEN
+//C.SYSPRINT DD SYSOUT=*,RECFM=FBA,LRECL=133
+//L.SYSLMOD  DD DISP=SHR,DSN=MOSHIX.WORK.LOAD(IPLUTIL)
+//C.SYSIN   DD *
+***************************************************************
+*          PROGRAM TO READ DATA FROM ZOS NUCLEUS BASED ON
+*          VARIOUS EXAMPLES ON WEB AND IBM REFERENCE WEBSITE
+*          MARCH 26, 2018
+***************************************************************
+         PRINT ON,GEN
+MAIN     CSECT ,
+MAIN     AMODE 31
+MAIN     RMODE 24
+***********ENTRY TO PROGRAM************************************
+         SAVE    (14,12)                   SAVE REGS ON ENTRY
+         BASR    R12,0                     SET UP BASE REGS LIKE BAL
+         USING   *,R12                     S/360 STYLE ENTRY, I KNOW
+         ST      R13,SAVEA+4               ENSURE SAVEA CHAIN BUILT
+         LA      R13,SAVEA                 CORRECTLY
+***********OPEN DATA SETS   ***********************************
+         TPUT   TITLINE3,L'TITLINE3        A FEW BLANK LINES
+         TPUT   TITLINE3,L'TITLINE3
+         TPUT   TITLINE1,L'TITLINE1        FIRST TITLE LINE
+         TPUT   TITLINE2,L'TITLINE2        LINE UNDER TITLE
+         TPUT   TITLINE3,L'TITLINE3        BLANK LINE
+***********ACCESS IPA       ***********************************
+ACCIPA   EQU    *
+         L      R1,CVTPTR                  LOAD CVT
+         L      R1,CVTECVT-CVT(,R1)        ADR OF ECVT OFF R1
+         L      R2,ECVTIPA-ECVT(,R1)       ADR OF IPA FROM ECVT FLD
+         USING  IPA,R2                     CVT OR IHAIPA??
+*********PREPARE REPORT ***************************************
+         MVC    DEV,IPALPDDV               IPL DEV TO OUTPUTLINE
+         MVC    CAT,IPASCVOL               MASTCAT VOL SER TO OUTPUT
+         LA     R8,OUTLINE2+15             LOAD ADDRESS OF 15 DOWN
+         MVC    0(44,R8),IPASCDSN          MOVE CAT NAEM TO BUFFER
+         MVC    SYSPLEX,IPASXNAM           SYSPLEX NAME 8 CHAR
+         MVC    IPLPARM,IPALPARM           IPLPARM 8 CHAR
+         TPUT   OUTLINE1,L'OUTLINE1        TPUT WITH LENGTH OUTLINE1
+         TPUT   OUTLINE2,L'OUTLINE2        TPUT WITH LENGTH OUTLINE1
+         TPUT   OUTLINE3,L'OUTLINE3        TPUT WITH LENGTH OUTLINE1
+         TPUT   TITLINE4,L'TITLINE4        CLOSING LINE
+*********START TO TIDY UP AND CLOSE ***************************
+RETURN   EQU    *
+GOBACK   L      R13,SAVEA+4                 FIND REGS
+         RETURN (14,12),RC=0               RELOAD REGS AND RETURN CD 0
+*
+         LTORG
+***********DATA DEF  ******************************************
+IDENTIFY DC     CL25'IPLUTIL MOSHIX'       FOR DUMP ANALYSIS
+DATEPRO  DC     CL25'MAR26 2018'           FOR DUMP ANALYSIS
+SAVEA    DS      18F                       SAVE AREA
+*********DCBS FOR FILES ***************************************
+TITLINE1 DC     CL80'IPL PARAMETERS FOR MOSHIX CHANNEL'
+TITLINE2 DC     CL80'================================='
+TITLINE3 DC     CL80'                            '
+TITLINE4 DC     CL80'---------------------------------'
+OUTLINE1 DC     CL80'IPL DEVICE=XXXX  MAST CAT VOLSER=XXXXXX'
+DEV      EQU    OUTLINE1+11,4              DEV NUMBER IS 4 BYTES
+CAT      EQU    OUTLINE1+33,6              VOLUMES ARE 6 BYTES
+OUTLINE2 DC     CL80'MASTER CATNAME= '     DECLATORY STRING IS 15
+CATNAME  EQU    OUTLINE2+16,6              VOLUMES ARE 6 BYTES
+OUTLINE3 DC     CL80'IPL PARAM=XXXXXXXX  SYSPLEX=XXXXXXXX'
+IPLPARM  EQU    OUTLINE3+10,8              VOLUMES ARE 6 BYTES
+SYSPLEX  EQU    OUTLINE3+28,8              VOLUMES ARE 6 BYTES
+***********CVT ACCESS MACROS***********************************
+         CVT    DSECT=YES,LIST=YES         CVT MAPPING
+         IHAECVT DSECT=YES,LIST=YES        EXTENDED CVT
+         IHAIPA ,                          IPL PARAMETERS
+*
+*********REG EQUATES AND PROGRAM END***************************
+R0       EQU     0
+R1       EQU     1
+R2       EQU     2
+R3       EQU     3
+R4       EQU     4
+R5       EQU     5
+R6       EQU     6
+R7       EQU     7
+R8       EQU     8
+R9       EQU     9
+R10      EQU     10
+R11      EQU     11
+R12      EQU     12
+R13      EQU     13
+R14      EQU     14
+R15      EQU     15
+         END ,                             PROGRAM END. DEBUGGIN NOW
+/*
+//
+
