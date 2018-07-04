@@ -7,7 +7,7 @@
 //**   SYSLMOD MODULE IN &&LOADSET                                   
 //**   GO MODULE FORM &&LOADSET                                      
 //**   SYSUDMP IN SYSOUT=*                                           
-//**                                                                 
+//**       bob test                                                          
 //**                                                                 
 //*****************************************************8************ 
 //COB  EXEC  PGM=IKFCBL00,REGION=4096K,                              
