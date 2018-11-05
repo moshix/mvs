@@ -1,0 +1,7 @@
+
+
+***@ubuntu:~$ sudo apt install zlib1g-dev
+
+***@ubuntu:~$ sudo apt install libbz2-dev
+
+***@ubuntu:~$ sudo apt install libregina3-dev (for regina rexx)
