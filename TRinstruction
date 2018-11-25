@@ -1,0 +1,30 @@
+          your edit profile using the command RECOVERY ON.            
+         PRINT DATA,ON,GEN              PRINT OUT EVERYTHING          
+QUIZ     CSECT                          START OF CODE SECTION         
+         SAVE  (14,12)                  SAVE REGS ON ENTRY            
+         BASR  R12,0                    AND SET UP MY                 
+         USING *,R12                    BASE REGISTER                 
+         ST    R13,SAVEA+4              ENSURE SAVE AREA CHAIN        
+         LA    R13,SAVEA                IS BUILT CORRECTLY            
+*                                                                     
+         OPEN  (OUTDCB,OUTPUT)          OPEN OUTPUT FILE DD OUTDD     
+         UNPK  PM100,M100(6)            M100 IS 6 BYTES,PM100 IS 12   
+         TR    PM100,TRTAB              TRANLATE  IT NOW              
+         PUT   OUTDCB,OUTAREA           WRITE CONTENT FROM PM100      
+*                                       TO OUTPUT FILE (OR PRINTER)   
+EXIT     CLOSE (OUTDCB)                 CLOSE OUTPUT                  
+         L     R13,SAVEA+4              PREVIOUS SAVE AREA ADRS       
+         RETURN (14,12),RC=0            RETURN TO CALLER WITH RC=0    
+         LTORG                                                        
+SAVEA    DS   18F                          SAVE AREA                  
+OUTDCB   DCB  DSORG=PS,MACRF=PM,DDNAME=OUTDD   DD NEESD TO BE OUTDCB  
+*---OUTPUT STRUCTURE    -----------------------------------------     
+OUTAREA  DS   0CL121                    OUTPUT BUFFER                 
+         DC   CL1' '                                                  
+PM100    DS   CL12                      M100 TRANSLATION HOLDER       
+         DC   CL108' '                  CAN YOU GUESS IT?             
+*---END OF OUTPUT STRUCTURE  ------------------------------------     
+M100     DC   X'C6FFEE0394EC'           STRING TO BE TRANSLATED       
+*                                                                     
+* TRANSLATE TABLE BELOW                                               
+                  
