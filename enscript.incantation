@@ -1,0 +1,1 @@
+enscript "$f"  --font=Courier-Bold@8/8 --margins=25:25:40:40 --truncate-lines --no-header --landscape -o - | ps2pdf - "$f.pdf"
