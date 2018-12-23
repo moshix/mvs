@@ -1,0 +1,139 @@
+#*********************************************************************
+##*
+##* Name: HercPrtMail.ps1
+##*
+##* Desc: Mail print files created by HercPrt
+##*       to predefined mail addresses which are
+##*       determined by a four character room
+##*       or an eight character name found on
+##*       the print file's separator page.
+##*
+##* Prerequisites:
+##*       - Fish's HercPrt utility from 
+##*         http://www.softdevlabs.com/Hercules/hercprt.html
+##*       - Powershell 2.0 or higher
+##*       - .NET Framework 2.0 or higher
+##*
+##* Version History:
+##*       0.9   initial version             2010/10/07
+##*       0.9.1 new parsing of output type  2011/01/06
+##*             for z/OS compatibility
+##*
+##*********************************************************************
+##
+##----------------- configuration parameters --------------------------
+##
+## HercPrt spooler as defined in HercPrt's Program Options menu
+##
+$spooler = "c:\Users\moshix\Desktop\PrintMailMoshe\"
+##
+## HercPrtMail Rooms_to_Email and Names_to_Rooms configuration files
+##
+$Rooms_to_Email = "c:\Users\moshix\Desktop\PrintMailMoshe\room2mails.ini"
+$Names_to_Rooms = "c:\Users\moshix\Desktop\PrintMailMoshe\name2rooms.ini"
+##
+## SMTP client parameters
+##
+$smtp_server = "smtp.comcast.net"        ## SMTP server
+$smtp_from   = "@comcast.net"      ## sender's e-mail address
+$starttls    = $true                   ## use SSL encryption through STARTTLS?
+$authlogin   = $true                   ## use basic authentication?
+$smtp_user   = "@comcast.net"                ## username for basic authentication
+$smtp_pass   = ""            ## password for basic authentication
+##
+##----------------- end of configuration parameters ----------------------
+##
+## read configuration files
+##
+$Rooms_to_Email = Get-Content $Rooms_to_Email
+$Names_to_Rooms = Get-Content $Names_to_Rooms
+##
+## initialize SMTP client
+##
+$SmtpClient = New-Object system.net.mail.smtpClient
+$SmtpClient.Host = $smtp_server
+$SmtpClient.EnableSsl = $starttls
+$SmtpClient.UseDefaultCredentials = -not $authlogin
+if ($authlogin) {$SmtpClient.Credentials = New-Object System.Net.NetworkCredential($smtp_user, $smtp_pass)}
+##
+## HercPrt receives jobs to .tmp and renames output to .pdf after completion,
+## so watch for .tmp files being renamed in HercPrt's spooler
+##
+$HercPrt = New-Object -TypeName System.IO.FileSystemWatcher -ArgumentList $spooler, "*.tmp"
+$HercPrt.IncludeSubDirectories = $false
+Register-ObjectEvent -InputObject $HercPrt -EventName "Renamed" -SourceIdentifier "Job arrived"
+##
+## do forever...
+##
+while ($true) {
+ ##
+ ## wait for job output
+ ##
+ $xxx = Wait-Event -SourceIdentifier "Job arrived"
+ ##
+ ## process job output(s)
+ ##
+ Get-Event -SourceIdentifier "Job arrived" | foreach {
+  ##
+  ## parse filename for room, type and name information
+  ##
+  $HercPrtName = $_.SourceEventArgs.Name
+  if ($HercPrtName.substring(0,1) -eq "-") {$dlm = " "} else {$dlm = " - "}
+  $room, $job = $HercPrtName -split $dlm, 2
+  $room = "{0,-4}" -f $room
+  $name, $type = $job -split " - " | Select-Object -Index 1,2
+  $job_short = "$name ($type)"
+  ##
+  ## new parsing of output type because the z/OS separator
+  ## doesn't have a blank between type and number
+  ##
+  ## old parsing was: $type = $type -split " ", 2 | Select-Object -First 1
+  ##
+  $type = $type.substring(0,3)
+  "{0} {1} received" -f (Get-Date -Format g), $job_short
+  ##
+  ## remove room value from filename
+  ##
+  Rename-Item -Path "$spooler\$HercPrtName" -NewName "$job"
+  ##
+  ## if e-mail address cannot be resolved directly from
+  ## Rooms_to_Email, try Names_to_Rooms
+  ##
+  if (-not ($Rooms_to_Email | Select-String -Pattern "^$room" -Quiet)) {
+   ##
+   ## if it is a JOB, remove last character from name
+   ##
+   if ($type -eq "JOB") {$name = $name.substring(0,($name.length - 1))}
+   $name = "{0,-8}" -f $name
+   ##
+   ## resolve room from Names_to_Rooms
+   ## if room cannot be resolved, room will be four blanks, which
+   ## can be used in Rooms_to_Email to provide an e-mail address for
+   ## output that would otherwise be undeliverable
+   ##
+   $room = "{0,-4}" -f (($Names_to_Rooms | Select-String -Pattern "^$name") -split " " | Select-Object -Last 1)
+  }
+  ##
+  ## resolve destination e-mail address from Rooms_to_Email, mail the output and purge it from spooler
+  ## if the e-mail address cannot be resolved, the output will just be purged
+  ##
+  $mail_address = ($Rooms_to_Email | Select-String -Pattern "^$room") -split " " | Select-Object -Last 1
+  if ($mail_address -eq "") {"{0} {1} no mail address found" -f (Get-Date -Format g), $job_short}
+   else {
+    $MailMessage = New-Object system.net.mail.mailmessage
+    $MailMessage.from = $smtp_from
+    $MailMessage.To.add($mail_address)
+    $MailMessage.Subject = $job
+    $MailMessage.Attachments.Add((New-Object Net.Mail.Attachment("$spooler\$job")))
+   $SmtpClient.Send($MailMessage)
+    "{0} {1} sent to {2}" -f (Get-Date -Format g), $job_short, $mail_address
+    $MailMessage.Dispose()
+   }
+  Remove-Item -path "$spooler\$job"
+  "{0} {1} purged" -f (Get-Date -Format g), $job_short
+  ##
+  ## remove notification from queue
+  ##
+  Remove-Event $_.EventIdentifier
+ }
+}
