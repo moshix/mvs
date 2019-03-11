@@ -37,6 +37,12 @@ this repository includes some very useful utilities for people working with MVS,
 
 10. the PC370 source code for the simply amazing S370 assembler which runs in MS-DOS. 
 
+11. Lots of JCL and source code files which I use in my moshix mainframe channel vidoes
+
+12. Some JCL for Cobol and VSAM on z/OS
+
+13. My REXX programs for both z/OS and MVS 3.8 to get information from the operating system, such as online users, IPL time etc. 
+
 Enjoy!
 
 moshix
