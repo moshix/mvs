@@ -1,0 +1,48 @@
+/* REXX */
+  SQL="SELECT * FROM AIRLINES WHERE NAME LIKE 'Lu%'"
+
+
+  "SUBCOM DSNREXX"
+  s_rc=RXSUBCOM('ADD','DSNREXX','DSNREXX')
+  address dsnrexx
+/* Connect to Db2 Subsystem */
+  "CONNECT" D121
+/* Execute SQL and save cursor data in variable */
+  "EXECSQL SET CURRENT PACKAGESET='DSNREXCS'"
+  "EXECSQL DECLARE C1 CURSOR FOR S1"
+  "EXECSQL PREPARE S1 INTO :SQLDA_C1 FROM :SQL"
+/* Save column names and number of colums in 2d-array */
+  do I = 1 to SQLDA_C1.SQLD
+     output.0.I = SQLDA_C1.I.SqlName
+     output.0.0=SQLDA_C1.SQLD
+/* Print out column names */
+     Say 'Column 'I' is 'SQLDA_C1.I.SqlName
+  end
+/* open c1 and start getting the data of the sql response */
+  "EXECSQL OPEN C1"
+     z=0
+  do forever
+     z = z+1
+/* fetching data per row */
+     "EXECSQL FETCH C1 USING DESCRIPTOR :SQLDA_C1"
+     select
+        when SqlCode = 0   then
+/* Saving rows in array */
+             do I = 1 to SQLDA_C1.SQLD
+                ColName = SQLDA_C1.I.SqlName
+                ColValue = STRIP(SQLDA_C1.I.SqlData)
+                output.z.I = STRIP(SQLDA_C1.I.SqlData)
+            /*  say z 'Column 'ColName' contains <'ColValue'>' */
+/* Print out rows */
+                say output.z.I
+                output.0=z
+             end
+        when SqlCode = 100 then Leave
+        Otherwise  nop
+     end
+  end
+/*Close everything */
+  "EXECSQL CLOSE C1"
+  "EXECSQL COMMIT"
+  "DISCONNECT";
+  S_RC=RXSUBCOM('DELETE','DSNREXX','DSNREXX')
