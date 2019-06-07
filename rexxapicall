@@ -1,0 +1,114 @@
+/*  Rexx  */                                                            00010000
+                                                                        00030000
+                                                                        00040000
+                                                                        00070000
+/* get the api key you guys don need to see */                          00070157
+apikey = apikey()                                                       00070261
+site   = 'http://aviation-edge.com'                                     00071069
+path   = '/v2/public/flights'                                           00072055
+lim = 2                                                                 00090070
+web_page = site || path || '?key=' || apikey || '&limit=' || lim        00091056
+                                                                        00100000
+httpport = '80'                                                         00110069
+CRLF = '0D25'x                                                          00130018
+                                                                        00140000
+parse var web_page "http://"webserver"/"webfile                         00150069
+                                                                        00160000
+say "Getting file" webfile "from server" webserver                      00170000
+                                                                        00180000
+srv = Socket('Initialize', 'wget')                                      00190000
+                                                                        00220000
+srv = Socket('GetHostId')                                               00230000
+parse var srv src ipaddress                                             00240000
+                                                                        00270000
+srv= Socket('Socket')                                                   00280000
+parse var srv src ssockid                                               00290000
+if src > 0 then signal bye                                              00320000
+                                                                        00330000
+srv = Socket('Gethostbyname',webserver)                                 00340000
+parse var srv src serverip                                              00350000
+                                                                        00380000
+srv = Socket('Setsockopt',ssockid,'SOL_SOCKET','SO_REUSEADDR','ON')     00390000
+parse var srv src                                                       00400000
+                                                                        00430000
+srv = Socket('Setsockopt',ssockid,'SOL_SOCKET','SO_LINGER','OFF')       00440000
+parse var srv src                                                       00450000
+                                                                        00480023
+srv = Socket('Setsockopt',ssockid,'SOL_SOCKET','SO_ASCII','ON')         00490000
+parse var srv src                                                       00500000
+                                                                        00530023
+srv = Socket('Connect',ssockid,'AF_INET' httpport serverip)             00540002
+parse var str src stuff                                                 00541002
+  say 'Connect    ===>' srv                                             00550000
+If src > 0                                                              00560000
+  then do                                                               00570000
+     Say 'Connect to' webserver 'returned' srv                          00580000
+     Say 'Error: Aborting process'                                      00590000
+     Return                                                             00600000
+End                                                                     00610000
+                                                                        00620000
+                                                                        00660000
+httpget = 'GET' '/'webfile 'HTTP/1.1' || CRLF                           00760031
+srv = Socket('Send',ssockid,httpget)                                    00761002
+                                                                        00770000
+hosttxt = 'Host: 'webserver CRLF                                        00790016
+srv = Socket('Send',ssockid,hosttxt)                                    00791003
+parse var srv src len                                                   00792002
+                                                                        00800000
+agnttxt = 'User-Agent: curl/7.58.0'CRLF                                 00802008
+srv = Socket('Send',ssockid,agnttxt)                                    00804008
+parse var srv src len                                                   00805008
+                                                                        00806008
+accttxt = 'Accept: */*'CRLF                                             00808012
+srv = Socket('Send',ssockid,accttxt)                                    00809112
+parse var srv src len                                                   00809212
+                                                                        00809312
+/* Need one extra CRLF... */                                            00810000
+srv = Socket('Send',ssockid,CRLF)                                       00820000
+parse var srv src len                                                   00830000
+                                                                        00840000
+srv = Socket('Recv',ssockid)                                            00850000
+parse var srv src len data                                              00860000
+                                                                        00870000
+i = 0                                                                   00871038
+parse var data headers '0D250D25'x content                              00890038
+                                                                        00893051
+do until (headers == '')                                                00900038
+  i = i + 1                                                             00901038
+  parse var headers h.i '0D25'x headers                                 00902044
+end                                                                     00903038
+h.0 = i                                                                 00903138
+                                                                        00904035
+                                                                        00905038
+do x = 1 to h.0                                                         00906038
+  if wordpos('Content-Length:', h.x) > 0 then                           00907047
+    parse var h.x . length                                              00907147
+end                                                                     00908038
+                                                                        00909038
+                                                                        00909147
+say "Getting "length" bytes from "webfile" at "webserver                00909266
+                                                                        00909347
+                                                                        00909450
+do while length(content) < length                                       00909550
+  srv = Socket('Recv',ssockid)                                          00910050
+  parse var srv src len data                                            00920050
+  if len == 0 then do                                                   00921050
+    say "eeeek! no more data"                                           00922050
+  end                                                                   00923050
+  else do                                                               00924050
+    content = content || data                                           00925050
+  end                                                                   00926050
+end                                                                     00927050
+                                                                        00928050
+say "Document retrieved.....here's the content"                         00929055
+say ""                                                                  00929155
+say content                                                             00930055
+                                                                        00970000
+bye:                                                                    00980000
+                                                                        00990000
+srv = Socket('Close',ssockid)                                           01000000
+Say ' '                                                                 01030000
+say 'Closing Connection to server.'                                     01040000
+Say ' '                                                                 01050000
+                                                                        01060000
+return                                                                  01070000
