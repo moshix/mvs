@@ -15,8 +15,9 @@ Here are some of the programs and tools included in this repo:
 - RPG compiler
 - PL/360 compiler
 - Pascal compiler
-- the amazing aSSIST assembler
+- the amazing ASSIST assembler
 - Simula compiler
+- Basic
 - and many other goodies. 
 
  Simply mount the volume on your system, add it to the VTLST00 member as private, and then extend your JES2 to use the included
