@@ -1,5 +1,8 @@
-# MVS Utilities
-this repository includes some very useful utilities for people working with MVS, z/OS on real mainframes or emulated ones. 
+# MVS and z/VM Utilities
+
+this repository includes some very useful utilities for people working with MVS, z/OS on real mainframes or emulated ones. Most of the topics covered by these programs are covered in my youtube mainframe channel here: https://www.youtube.com/channel/UCR1ajTWGiUtiAv8X-hpBY7w
+
+Here are some of the programs and tools included in this repo:
 
 1. recv390 is a receive command for Linux or Windows. It extracts XMIT files. recv390 is by James Morrison. I made some fixes and 
    somall enhancement to the program. compile simply with gcc -o recv90 recv390.c.
@@ -42,6 +45,15 @@ this repository includes some very useful utilities for people working with MVS,
 12. Some JCL for Cobol and VSAM on z/OS
 
 13. My REXX programs for both z/OS and MVS 3.8 to get information from the operating system, such as online users, IPL time etc. 
+
+14. SMF reporting tools
+
+15. Rexx panel programs for TSO
+
+16. Panel/Rexx programs for TSO
+
+
+
 
 Enjoy!
 
