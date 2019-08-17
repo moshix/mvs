@@ -53,6 +53,10 @@ Here are some of the programs and tools included in this repo:
 
 16. Panel/Rexx programs for TSO
 
+17. LOGREC cleaning JCL
+
+18. Creating users on TSO (Patata approach, which works very nicely)
+
 
 
 
