@@ -57,9 +57,16 @@ Here are some of the programs and tools included in this repo:
 
 18. Creating users on TSO (Patata approach, which works very nicely)
 
+19. Sort jobs example with IBM Sort (Iceman)
+
+21. my .X3270pro file
+
+22. my RSCS config file for HNET
+
 
 
 
 Enjoy!
 
 moshix
+Nov 2019
