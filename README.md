@@ -63,6 +63,12 @@ Here are some of the programs and tools included in this repo:
 
 22. my RSCS config file for HNET
 
+23. ISPF Panel Rexx examples
+
+24. JSON code for interaction between Golang and DB2
+
+25. and so much more!
+
 
 
 
