@@ -1,0 +1,16 @@
+***************************** Top of Data **********************
+//MOSHIXT  JOB (,),REGION=50M,NOTIFY=&SYSUID,CLASS=A,MSGCLASS=H,
+//         MSGLEVEL=(1,1)                                       
+//*******  UNTERSE A PARTITIONED DATA SET (IE UNCOMPRESS)            
+//TERSE    EXEC PGM=TRSMAIN,PARM=PACK                           
+//SYSPRINT DD SYSOUT=*                                          
+//INFILE   DD DSN=MOSHIX.WORK.PROG.TERSED,DISP=SHR              
+//OUTFILE  DD DSN=MOSHIX.WORK.PROG.UNTERSED,DISP=(NEW,CATLG),   
+//         SPACE=(CYL,(5,5,1))                                  
+                                                                
+                                                                
+        UPLOAD TO DESTINATION SYSTEM WITH DCB:                                                     
+        LRECL=1024,                                             
+        RECFM=FB,                                               
+        BLOCKSIZE=1024                                          
+                                                                
