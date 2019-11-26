@@ -1,0 +1,7 @@
+//MOSHIXU  JOB (,),REGION=0M,NOTIFY=&SYSUID,CLASS=A          
+//****************************************************       
+//UNTERSE  EXEC PGM=TRSMAIN,PARM=UNPACK                      
+//SYSPRINT DD SYSOUT=*                                       
+//INFILE   DD DSN=MOSHIX.AIRLINES.TERSE,DISP=SHR             
+//OUTFILE  DD DSN=MOSHIX.AIRLINES.UNTERSED,DISP=(NEW,CATLG), 
+//            SPACE=(CYL,(7,3))                              
