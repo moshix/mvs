@@ -1,0 +1,8 @@
+//MOSHIXT  JOB (,),REGION=50M,NOTIFY=&SYSUID,CLASS=A,MSGCLASS=H, 
+//         MSGLEVEL=(1,1)                                        
+//*******  TERSE A SEQUENTIAL DATA SET (IE COMPRESS)             
+//TERSE    EXEC PGM=TRSMAIN,PARM=PACK                            
+//SYSPRINT DD SYSOUT=*                                           
+//INFILE   DD DSN=MOSHIX.TUTORIAL.SEQ.AIRLINES,DISP=SHR          
+//OUTFILE  DD DSN=MOSHIX.AIRLINES.TERSE,DISP=(NEW,CATLG),        
+//         SPACE=(CYL,(5,5))                                     
