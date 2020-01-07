@@ -1,0 +1,26 @@
+#
+#       Configuration file for FUNET-NJE program
+#
+
+NAME            RELAY
+IPADDRESS       192.168.1.11
+QUEUE           /var/spool/bitnet
+CMDMAILBOX      U 127.0.0.1 175
+LOG             /var/log/bitnet.log
+# this table is DBM/NDBM/GDBM binary file.
+TABLE           /usr/local/funetnje/funetnje.route
+INFORM          MAINT@MOSHIX4
+USEREXITS       /usr/local/funetnje/file-exit.cf
+MSGEXITS        /usr/local/funetnje/msg-exit.cf
+LLEVEL          2
+LLEVELCLIENT    1
+DEFAULT-ROUTE   MOSHIX4
+
+LINE 0          MOSHIX4
+ TYPE           UNIX_TCP
+ BUFSIZE        4096
+ TIMEOUT        10
+ IPPORT         1275
+ TCPNAME        192.168.1.64
+ TCP-SIZE       8192
+ MAX-STREAMS     7
