@@ -1,0 +1,145 @@
+ x3270 profile
+! =============
+! Keyboard config
+! ---------------
+! keypad state  (-keypad)
+x3270.keypadOn: false
+! keymap  (-keymap)
+x3270.keymap: @server
+
+! Use the 'mine' keymap, defined below
+x3270.keymap: mine
+! Definition of the 'mine' keymap
+! More-specific definitions must come before less-specific definitions.
+! The definition for Shift<Key>Backspace must come before the
+! definition for <Key>BackSpace
+x3270.keymap.mine: #override \
+    <Key>Escape           : Attn()\n\
+    <Key>Return           : Newline()\n\
+    <Key>Mode_switch      : Enter()\n\
+    <Key>Control_L        : Reset()\n\
+    <Key>ISO_Level3_Shift : Enter()\n\
+    Ctrl Alt Mod2<Key>d   : Disconnect()\n\
+    Ctrl<Key>F9           : PF(21)\n\
+    <Key>Prior            : PF(7)\n\
+    <Key>Next             : PF(8)\n\
+    Shift<Key>Return      : Up()\n\
+    Shift<Key>`            : Clear()\n\
+    Ctrl<Key>g            : Redraw()\n\
+    Ctrl<Key>h            : Home()\n\
+    Ctrl<Key>i            : ToggleInsert()\n\
+    Ctrl<Key>r            : Reset()\n\
+    <Key>`            : PA(1)\n\
+    Shift<Key>2            : PA(2)\n\
+    Ctrl<Key>3            : PA(3)\n\
+    Meta<Key>w            : set-select(CLIPBOARD)\n\
+    Ctrl<Key>y            : insert-selection(CLIPBOARD)\n\
+    Ctrl<Key>a            : BackTab()\n\
+    Ctrl<Key>e            : FieldEnd()\n\
+    Ctrl<Key>p            : Up()\n\
+    Ctrl<Key>n            : Down()\n\
+    Ctrl<Key>b            : Left()\n\
+    Ctrl<Key>f            : Right()\n\
+    Meta<Key>b            : PreviousWord()\n\
+    Meta<Key>f            : NextWord()\n\
+    Ctrl<Key>v            : PF(8)\n\
+    Meta<Key>v            : PF(7)\n\
+    Ctrl<Key>d            : Delete()\n\
+    Ctrl<Key>k            : EraseEOF()\n\
+    Meta<Key>w            : DeleteWord()
+
+! Color Scheme
+! ------------
+
+!
+! moshe x3270.colorScheme: default
+! Default, for reference
+! x3270.colorScheme.default: \
+!       black deepSkyBlue red pink \
+!       green turquoise yellow white \
+!       black blue3 orange purple \
+!       paleGreen paleTurquoise2 grey white \
+!       white black dimGray \
+!       4 2 1 15
+
+
+! Miscellaneous
+! -------------
+
+! Use block cursor
+x3270.altCursor: true
+
+x3270.scrollBar: false
+
+! Colors of menus
+! moshex3270.background: black
+! moshex3270.foreground: red
+x3270.colorScheme: reverse
+!  VER http://web.mit.edu/source-8.1/third/x3270/X3270.xad
+!  0 X color to use for IBM "neutral/black"  (also used as ANSI color 0)
+!  1 X color to use for IBM "blue"           (also used for ANSI color 4)
+!  2 X color to use for IBM "red"            (also used for ANSI color 1)
+!  3 X color to use for IBM "pink"           (also used for ANSI color 5)
+!  4 X color to use for IBM "green"          (also used for ANSI color 2)
+!  5 X color to use for IBM "turquoise"
+!  6 X color to use for IBM "yellow"         (also used for ANSI color 3)
+!  7 X color to use for IBM "neutral/white"
+!  8 X color to use for IBM "black"
+!  9 X color to use for IBM "deep blue"
+! 10 X color to use for IBM "orange"
+! 11 X color to use for IBM "purple"
+! 12 X color to use for IBM "pale green"
+! 13 X color to use for IBM "pale turquoise" (also used for ANSI color 6)
+! 14 X color to use for IBM "grey"
+! 15 X color to use for IBM "white" (also used for ANSI color 7)
+! 16 X color to use if one of 0..15 cannot be allocated (white or black)
+! 17 X color to use as the default screen background
+! 18 X color to use as the select background
+! 19 IBM color index (0..15) to use for unprotected, unhighlighted fields
+! 20 IBM color index (0..15) to use for unprotected, highlighted fields
+! 21 IBM color index (0..15) to use for protected, unhighlighted fields
+! 22 IBM color index (0..15) to use for protected, highlighted fields
+x3270.colorScheme.reverse: \
+        #000000 #c0c0c0 #00ff00 #008000 #f0f000 \
+        #f0f0f0 #ffff00 #ffffff #000000 #000080 \
+        #ffa500 #f0f0f0 #00ff00 #f0f0f0 \
+        #c0c0c0 #ffffff white   #000070 #FF0000 \
+        4 2 1 15
+
+! Silence the bell
+x3270.bellVolume: -100
+x3270.visualBell: true
+
+! Use a larger font
+x3270.emulatorFont: 3270
+
+! Window size; 160x62 is maximum in PCOMM
+!x3270.oversize: 160x62
+x3270.oversize: 132x43
+!x3270.oversize: 80x43
+
+x3270.model: 3279-4-E
+
+! Demo mode:
+!x3270.emulatorFont: 3270gt32
+!x3270.oversize: 96x26
+!x3270.model: 3279-2-E
+
+! Crosshair
+x3270.crosshair: false
+
+! Pull-down menus: Ctrl and each of the mouse buttons
+x3270.menuBar: true
+
+!  reconnect automatically
+x3270.reconnect: true
+
+! Don't allow windows to be resized
+x3270.allowResize: true
+
+! When pasting text, treat columns to the left of the cursor as a martin to
+! avoid printing into
+x3270.marginedPaste: true
+
+! Complete list of defaults can be found at:
+! http://stuff.mit.edu/afs/athena/astaff/source/src-8.4/third/x3270/x3270.xad
