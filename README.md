@@ -59,7 +59,7 @@ Here are some of the programs and tools included in this repo:
 
 19. Sort jobs example with IBM Sort (Iceman)
 
-21. my .X3270pro file
+21. my .X3270pro file (UPDATE: NOW WITH TURBOPASCAL theme)
 
 22. my RSCS config file for HNET
 
@@ -75,4 +75,4 @@ Here are some of the programs and tools included in this repo:
 Enjoy!
 
 moshix
-Nov 2019
+July 2020
