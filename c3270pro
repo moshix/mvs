@@ -1,0 +1,12 @@
+c3270.keymap.foo: \                                                                                                                 
+ <Key>Escape        : Clear() \n\                                       
+  <Key>`            : PA(1)\n\                                          
+ Ctrl<Key>i         : ToggleInsert()\n\                                 
+ Shift<Key>2        : PA(2)\n\                                          
+ <Key>Prior         : PF(7)\n\                                          
+ <Key>Next          : PF(8)\n\                                          
+ Ctrl<Key>q         : PrintText()\n\                                    
+ Ctrl<Key>w         : NextWord()\n\                                     
+ <Key>Return        : Newline()\n\                                      
+ <Key>Mode_switch   : Enter()\n\                                        
+ Ctrl<Key>x: Disconnect()
