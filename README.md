@@ -18,7 +18,7 @@ Here are some of the programs and tools included in this repo:
 - the amazing ASSIST assembler
 - Simula compiler
 - Basic
-- and many other goodies. 
+- and tons more!
 
  Simply mount the volume on your system, add it to the VTLST00 member as private, and then extend your JES2 to use the included
  SYS2.PROCLIB on SYSCPK. This proclib has procedures for all the included compilers. The run-time libraries, like SYSC.PLILIB are of course included in the volume. 
@@ -67,7 +67,9 @@ Here are some of the programs and tools included in this repo:
 
 24. JSON code for interaction between Golang and DB2
 
-25. and so much more!
+25. my c3270pro file with keybindings for z/VM, VM/370, MVS and z/OS
+
+26. and so much more
 
 
 
@@ -75,4 +77,4 @@ Here are some of the programs and tools included in this repo:
 Enjoy!
 
 moshix
-July 2020
+September 2020
