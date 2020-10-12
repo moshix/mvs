@@ -1,0 +1,36 @@
+    sudo apt update
+    sudo apt list --upgradable
+
+    sudo apt install --yes build-essential
+    sudo apt install --yes cmake git autoconf flex gawk g++ zlib1g-dev libbz2-dev m4
+
+    which gcc
+    gcc --version
+
+    mkdir /home/moshe/hercules
+    cd /home/moshe/hercules
+
+    mkdir sdl42
+    mkdir herc42
+    mkdir extpkgs
+
+    cd extpkgs
+    git clone https://github.com/SDL-Hercules-390/gists.git
+
+    cp gists/extpkgs.sh .
+    cp gists/extpkgs.sh.ini .
+
+    ./extpkgs.sh CLONE c d s t
+
+    cd ../sdl42
+    git clone https://github.com/SDL-Hercules-390/hyperion.git
+
+    cd hyperion/
+
+    util/bldlvlck 
+    ./autogen.sh
+
+    ./configure --prefix=/home/moshe/hercules/herc42 --enable-extpkgs=/home/moshe/hercules/extpkgs
+    ./config.status --config
+
+    make -j
