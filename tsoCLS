@@ -1,0 +1,17 @@
+         PRINT NOGEN                                               
+         TITLE 'CLEAR TSO SCREEN'                                  
+CLS      CSECT                                                     
+         BAKR 14,0                    SAVE REGISTERS               
+         LR   12,15                   LOAD ENTRY POINT             
+         USING CLS,12                 ESTABLISH ADDRESSABILITY     
+         LA   15,SAVEAREA             15 = MY SAVE AREA ADDR       
+         ST   15,8(13)                FORWARD CHAIN SAVE AREA      
+         LR   13,15                   13 = MY SAVE AREA ADDR       
+         TCLEARQ INPUT                CLEAR INPUT BUFFER           
+         LA   2,CLSCR                 SETUP TPUT                   
+         LA   3,L'CLSCR                          PARAMETERS        
+         TPUT (2),(3),FULLSCR,,HOLD ISSUE TPUT MACRO               
+         PR                           RESTORE REGISTERS AND RETURN 
+SAVEAREA DC   18F'0'                                               
+CLSCR    DC   X'C11140403C40400013'   BUFFER CONTROL ORDERS      
+         END  
