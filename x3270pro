@@ -23,6 +23,7 @@ x3270.keymap.mine: #override \
     <Key>Escape           : Clear()\n\
     <Key>Return           : Newline()\n\
     <Key>Control_R        : Enter()\n\
+    <Key>Mode_switch      : Enter()\n\ 
     <Key>Control_L        : Reset()\n\
     <Key>ISO_Level3_Shift : Enter()\n\
     Ctrl Alt Mod2<Key>d   : Disconnect()\n\
