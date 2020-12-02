@@ -42,8 +42,9 @@ makebuf
   jeah = substr(dat,7,2)
   tack = substr(dat,4,2)
   mohn = substr(dat,1,2)
-if jeah <= 88 then do
-if mohn <2 & mohn = 12 then do
+/*   say "jeah tack mohn"jeah tack mohn */
+if jeah <= 22 then do
+if mohn = 12 then do
 DROPBUF
 MAKEBUF
 "IDENTIFY ( FIFO"
@@ -66,7 +67,7 @@ MAKEBUF
   ORT = WO
        END
        if name ^= "RELAY" then do
-       "SF CHRISTMAS EXEC A " NAME " AT " ORT " (ack"
+       "SF xmas EXEC A " NAME " AT " ORT " (ack"
        end
     END
  END
@@ -91,7 +92,7 @@ ANZ = 1
       END
       ANZ = ANZ + 1
        IF NIXIS = 0 THEN DO
-       "SF CHRISTMAS EXEC A " ID " AT " NODE " (ack"
+       "SF xmas EXEC A " ID " AT " NODE " (ack"
        END
     END
  END
