@@ -1,0 +1,42 @@
+/* cpu indicator */
+ 
+parse value translate(diag(8,"INDICATE LOAD"), " ", "15"x) ,
+       with 1 "AVGPROC-" cpu "%" 1 "PAGING-"  page "/"
+ 
+/* parse value Value("CPU_HIGH" ,, GlobalVS) with highwater hipct hitime hidate hiju  */
+ 
+cpu = right( cpu+0, 3)
+ 
+say 'All CPU avg: 'cpu '%     Paging: 'page
+parse value stsi(1,1,1) with 49  type   +4 ,
+                             81  seq   +16 ,
+                            101  model +16 .
+ 
+parse value stsi(2,2,2) with 33 lnum   +2 ,  /* Partition number       */
+                             39 lcpus  +2 ,  /* # of CPUs in the LPAR  */
+                             45 lname  +8    /* partition name         */
+ 
+parse value stsi(3,2,2) with 39 vcpus  +2 ,  /* # of CPUs in the v.m.  */
+                             57 cp_id +16
+ 
+parse value c2d(lnum) c2d(lcpus) c2d(vcpus) right(seq,5) lname model ,
+       with     lnum      lcpus      vcpus        ser    lname model .
+ 
+blist = "- 2097 z10-EC 2098 z10-BC 2817 z196 2818 z114",
+        "  2827 zEC12  2828 zBC12 2964 z13 2965 z13s"
+ 
+brand = strip(translate( word(blist, wordpos(type, blist)+1), " ", "-"))
+ 
+cfg = htopversion lcpus" CPUs" brand
+parse value diag(8,"QUERY STORAGE")   with . . rstor rstor? . "15"x
+if rstor? <> "" then     /* We have real storage */
+  cfg = cfg " " rstor
+ 
+cfg = type
+ 
+ 
+say 'Machine type: 'cfg'     RAM: 'rstor
+say 'Number of CPU: in LPAR: 'lcpus
+say '==================================='
+ 
+exit
