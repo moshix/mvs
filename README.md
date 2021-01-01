@@ -1,6 +1,6 @@
 # MVS and z/VM Utilities
 
-this repository includes some very useful utilities for people working with MVS, z/OS on real mainframes or emulated ones. Most of the topics covered by these programs are covered in my youtube mainframe channel here: https://www.youtube.com/channel/UCR1ajTWGiUtiAv8X-hpBY7w
+this repository includes some very useful utilities for people working with MVS, z/OS, VM/SP and z/VM on real mainframes or emulated ones. Most of the topics covered by these programs are covered in my youtube mainframe channel here: https://www.youtube.com/channel/UCR1ajTWGiUtiAv8X-hpBY7w
 
 Here are some of the programs and tools included in this repo:
 
