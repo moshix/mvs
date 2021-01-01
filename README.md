@@ -69,7 +69,9 @@ Here are some of the programs and tools included in this repo:
 
 25. my c3270pro file with keybindings for z/VM, VM/370, MVS and z/OS
 
-26. and so much more
+26. A z/VM machine load information utility
+
+27. and so much more
 
 
 
@@ -77,4 +79,5 @@ Here are some of the programs and tools included in this repo:
 Enjoy!
 
 moshix
-September 2020
+<br>
+January 2021
