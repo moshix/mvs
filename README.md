@@ -71,7 +71,9 @@ Here are some of the programs and tools included in this repo:
 
 26. A z/VM machine load information utility
 
-27. and so much more
+27. A working copy of the original CHRIMAS EXEC (OR CHRISTMA EXEC) worm from 1988
+
+28. and so much more
 
 
 
