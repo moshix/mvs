@@ -73,7 +73,9 @@ Here are some of the programs and tools included in this repo:
 
 27. A working copy of the original CHRIMAS EXEC (OR CHRISTMA EXEC) worm from 1988
 
-28. and so much more
+28. A payroll report source code in MVT Cobol with test data and the JES2 output listing
+
+29. and so much more
 
 
 
@@ -82,4 +84,4 @@ Enjoy!
 
 moshix
 <br>
-January 2021
+May  2021
