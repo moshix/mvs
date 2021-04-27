@@ -1,4 +1,4 @@
-# MVS and z/VM Utilities
+# MVS, z/OS, VM/370 and z/VM Utilities
 
 this repository includes some very useful utilities for people working with MVS, z/OS, VM/SP and z/VM on real mainframes or emulated ones. Most of the topics covered by these programs are covered in my youtube mainframe channel here: https://www.youtube.com/channel/UCR1ajTWGiUtiAv8X-hpBY7w
 
