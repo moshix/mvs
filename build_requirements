@@ -1,0 +1,6 @@
+
+apt install zlib1g-dev
+
+apt install libbz2-dev
+
+apt install libregina3-dev
