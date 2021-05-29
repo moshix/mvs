@@ -1,0 +1,108 @@
+//HERC01P  JOB (BAL),                                                  
+//             'PAYROLL REPORT',                                       
+//             CLASS=A,                                                
+//             MSGCLASS=A,                                             
+//             TIME=1440,                                              
+//             MSGLEVEL=(1,1)                                          
+//ASMCLG  EXEC ASMFCG,PARM.ASM=(OBJ,NODECK),MAC1='SYS2.MACLIB',        
+//             REGION.GO=428K                                          
+//ASM.SYSLIB   DD                                                      
+//             DD DISP=SHR,DSN=SYS1.MACLIB                             
+//ASM.SYSIN DD *                                                       
+         PRINT GEN                                                     
+REPORT   CSECT                                                         
+         SAVE  (14,12)                 SAVE REGISTERS ON ENTRY         
+         BASR  R12,0                   SET UP MY                       
+         USING *,R12                             BASE REGISTER         
+         ST    R13,SAVEA+4             ENSURE SAVE AREA                
+         LA    R13,SAVEA                        CHAIN BUILT CORRECTLY. 
+*---------------------------------------------------------------------*
+INOPEN   OPEN (INDCB,INPUT,OUTDCB,OUTPUT) OPEN BOTH DCBS AT ONCE       
+WRTITLE  PUT   OUTDCB,PTITLE           PRINT REPORT TITLE              
+*---------------------------------------------------------------------*
+READREC  GET   INDCB,PAYREC            READ IN EMPLOYEE RECORD         
+*---------------------------------------------------------------------*
+CPYSTUFF MVC   PEMPID,EMPID                                            
+         MVC   PEMPLOYE,EMPLOYEE                                       
+         MVC   PSALARY,SALARY                                          
+*                                                                      
+PACKIT   PACK  ZSALARY,SALARY          PACK SALARY                     
+         AP    ZTOTSAL,ZSALARY         ADD MONTHLY WAGE TO TOTAL       
+WRITEPR  PUT   OUTDCB,OUTAREA          WRITE TO PRINTER                
+         B     READREC                 AND REPEAT TILL FILE EXHAUSTED. 
+*---------------------------------------------------------------------*
+**CLOS   MVC  ATOTAL-1(L'ATOTAL+1),=X'4020202021206B202020'             
+INCLOS   MVC  ATOTAL,EDWD                                               
+         LA   R1,ATOTAL                                                 
+         ED   ATOTAL,ZTOTSAL                                            
+         PUT   OUTDCB,TOTALLNE         PRINT TOTAL LINE                 
+CLSALL   CLOSE (INDCB,,OUTDCB)         WE GET HERE FROM EODAD           
+*                                      FOR END OF BLOCK ON WGET BUT OK  
+*                                   TO ALSO CLOSE OUTDCB AS EXIT SOON   
+         L     R13,SAVEA+4             R13 = PREVIOUS SAVE AREA ADDR.   
+         RETURN (14,12),RC=0           RETURN TO CALLER (Z/OS)          
+         LTORG                                                          
+SAVEA    DS    18F                     FOR REGISTER SAVE AREA           
+*---------------------------------------------------------------------* 
+INDCB    DCB MACRF=GM,DDNAME=INDD,DSORG=PS,EODAD=INCLOS                 
+OUTDCB   DCB MACRF=PM,DDNAME=OUTDD,DSORG=PS                             
+*                          PAYROLL REPORT STRUCTURE                     
+PAYREC   DS    0CL80       HANDLE FOR THE STRUCTURE                     
+EMPID    DS    CL4         EMPLOYEE ID                                  
+         DS    CL6         FILLER TO POSITION 10                        
+EMPLOYEE DS    CL21        NAME OF EMPLOYEE                             
+         DS    CL2         FILLER TO POSITION 34                        
+SALARY   DS    CL4         MONTHLY SALARY                               
+TOEND    DS    CL43        80 BYTES SO FAR                              
+*--------S-T-A-R-T----O-F----O-U-T-P-U-T----S-T-R-U-C-T-U-R-E---------* 
+PTITLE   DC    CL121' P A Y R O L L  R E P O R T  -  B I M  C O R P.'   
+OUTAREA  DC    0CL133' '                                                
+EMPTY    DC    CL1' '                                                   
+PEMPID   DS    CL4' '                                                   
+         DC    CL6' '                                                   
+PEMPLOYE DS    CL20' '                                                  
+         DC    CL2' '                                                   
+PDOLLAR  DC    CL1' '                                                   
+PSALARY  DS    CL5' '                                                   
+OFILLER  DC    CL94' '                                                  
+*                                                                       
+ZSALARY  DC    PL3'0'      INITIALIZE SLARY PACKED FIELD
+PSALARY  DS    CL5' '                                                    
+OFILLER  DC    CL94' '                                                   
+*                                                                        
+ZSALARY  DC    PL3'0'      INITIALIZE SLARY PACKED FIELD                 
+ZTOTSAL  DC    PL05'0'     INITIALIZE TOTAL WAGES PACKED FIELD           
+EDWD     DC    X'4020202020206B2020'                                     
+TOTALLNE DS    0CL133                                                    
+SKIP     DC    CL1'0'                                                    
+TFILL1   DC    CL09' '                                                   
+TFILL2   DC    CL17' '                                                   
+TDOLLAR  DC    CL1'$'                                                    
+ATOTAL   DC    CL10' '                                                   
+TFILL3   DC    CL12' '                                                   
+TOTMSG   DC    CL61'TOTAL MONTHLY WAGES'                                 
+TFILL4   DC    CL33' '                                                   
+R0       EQU   0                                                         
+R1       EQU   1                                                         
+R2       EQU   2                                                         
+R3       EQU   3                                                         
+R4       EQU   4                                                         
+R5       EQU   5                                                         
+R6       EQU   6                                                         
+R7       EQU   7                                                         
+R8       EQU   8                                                         
+R9       EQU   9                                                         
+R10      EQU   10                                                        
+R11      EQU   11                                                        
+R12      EQU   12                                                        
+R13      EQU   13                                                        
+R14      EQU   14                                                        
+R15      EQU   15                                                        
+         END                                                             
+/*                                                                       
+//GO.SYSPRINT DD SYSOUT=*                                                
+//GO.SYSUDUMP DD SYSOUT=*                                                
+//GO.SYSABEND DD SYSOUT=* 
+//GO.OUTDD  DD   SYSOUT=*,DCB=(RECFM=FBA,LRECL=122,BLKSIZE=122)        
+//GO.INDD   DD   DSN=HERC01.SALARIES.INPUT,DISP=SHR                    
+//                                                                                                                                    
