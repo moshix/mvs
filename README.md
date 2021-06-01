@@ -1,5 +1,8 @@
 # MVS, z/OS, VM/370 and z/VM Utilities
 
+[![Discord](https://img.shields.io/discord/423767742546575361.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/vpEv3HJ)
+
+
 Tapes are the standard way to exchange files, utilities and information between mainframe information. Some mainframe shops are now connected thru the HNET Bitnet II international dial-up network. I also noticed recently the industry is moving towards the world wide web, we is why I now make this colleciton of tools and utiliteis available on Github on this crazy new world of the web!
 
 For more information on HNET/Bitnet II, chck out here: http://moshix.dynu.net
