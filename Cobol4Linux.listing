@@ -1,4 +1,4 @@
-1PP 5737-L11 IBM COBOL for Linux                     1.1.0                Date 07/16/2021  Time 19:16:48   Page     1               
+1PP 5737-L11 IBM COBOL for Linux                     1.1.0                Date 07/30/2021  Time 13:16:53   Page     1               
 0Options in effect:
   NOADATA                                                                                                                            
     ADDR(32)                                                                                                                         
@@ -51,7 +51,7 @@
     XREF(FULL)                                                                                                                       
     YEARWINDOW(1900)                                                                                                                 
     ZWB                                                                                                                              
-1PP 5737-L11 IBM COBOL for Linux                     1.1.0      PRIMES    Date 07/16/2021  Time 19:16:48   Page     2               
+1PP 5737-L11 IBM COBOL for Linux                     1.1.0      PRIMES    Date 07/30/2021  Time 13:16:53   Page     2               
    LineID  PL SL  ----+-*A-1-B--+----2----+----3----+----4----+----5----+----6----+----7-|--+----8 Map and Cross Reference           
 0  000001            10 * //////////////////////////////////////////////////////////         PRIME|                                  
    000002            20 * // Name: Peter M. Maurer                                           PRIME|                                  
@@ -85,14 +85,7 @@
    000030           300 **                                                                   PRIME|                                  
    000031           310  INPUT-OUTPUT SECTION.                                               PRIME|                                  
    000032           320  FILE-CONTROL.                                                       PRIME|                                  
-   000033           330      SELECT PRIMES.INPUT                                                  |42                                
-                                                                                                  |                                  
- ==000033==> IGYDS0001-W A blank was missing before character "I" in column 26.  A blank was assum|                                  
-                         ed.                                                                      |                                  
-                                                                                                  |                                  
- ==000033==> IGYDS1089-S "INPUT" was invalid.  Scanning was resumed at the next area "A" item, lev|                                  
-                         el-number, or the start of the next clause.                              |                                  
-                                                                                                  |                                  
+   000033           330      SELECT PRIMES-SYSIN                                             PRIME|42                                
    000034           340         ASSIGN TO UT-S-SYSIN.                                        PRIME|                                  
    000035           350 ***                                                                  PRIME|                                  
    000036           360 ***                                                                  PRIME|                                  
@@ -101,52 +94,14 @@
    000039           390 **                                                                   PRIME|                                  
    000040           400 **                                                                   PRIME|                                  
    000041           410  FILE SECTION.                                                       PRIME|                                  
-   000042           420  FD  PRIMES.INPUT                                                    PRIME|                                  
-                                                                                                  |                                  
- ==000042==> IGYGR1216-I A "RECORDING MODE" of "F" was assumed for file "PRIMES".                 |                                  
-                                                                                                  |                                  
- ==000042==> IGYDS0001-W A blank was missing before character "I" in column 19.  A blank was assum|                                  
-                         ed.                                                                      |                                  
-                                                                                                  |                                  
+   000042           420  FD  PRIMES-SYSIN                                                    PRIME|                                  
    000043           430      RECORDING MODE IS F                                             PRIME|                                  
    000044           440      RECORD CONTAINS 80 CHARACTERS                                   PRIME|                                  
-                                                                                                  |                                  
- ==000044==> IGYDS6052-S Expected data-name/FILLER after level-number; found CHARACTERS. Data desc|                                  
-                         ription entry ignored.                                                   |                                  
-                                                                                                  |                                  
-1PP 5737-L11 IBM COBOL for Linux                     1.1.0      PRIMES    Date 07/16/2021  Time 19:16:48   Page     3               
-   LineID  PL SL  ----+-*A-1-B--+----2----+----3----+----4----+----5----+----6----+----7-|--+----8 Map and Cross Reference           
-0  000045           450      BLOCK  CONTAINS  1 RECORDS                                      PRIME|                                  
-                                                                                                  |                                  
- ==000045==> IGYDS1089-S "BLOCK" was invalid.  Scanning was resumed at the next area "A" item, lev|                                  
-                         el-number, or the start of the next clause.                              |                                  
-                                                                                                  |                                  
- ==000045==> IGYDS6052-S Expected data-name/FILLER after level-number; found RECORDS. Data descrip|                                  
-                         tion entry ignored.                                                      |                                  
-                                                                                                  |                                  
+   000045           450      BLOCK  CONTAINS  1 RECORDS                                      PRIME|                                  
    000046           460      LABEL RECORDS ARE OMITTED                                       PRIME|                                  
-                                                                                                  |                                  
- ==000046==> IGYDS1089-S "LABEL" was invalid.  Scanning was resumed at the next area "A" item, lev|                                  
-                         el-number, or the start of the next clause.                              |                                  
-                                                                                                  |                                  
    000047           470      DATA RECORD IS PRIMES-SYSIN-RECORD.                             PRIME|                                  
-   000048           480  01  PRIMES.INPUT-RECORD.                                            PRIME|                                  
-                                                                                                  |                                  
- ==000048==> IGYDS0001-W A blank was missing before character "I" in column 19.  A blank was assum|                                  
-                         ed.                                                                      |                                  
-                                                                                                  |                                  
- ==000048==> IGYPS0089-S Expected INTEGER, but found INPUT-RECORD.  The statement was discarded.  |                                  
-                                                                                                  |                                  
-   000049           490   02 PRIMES.INPUT-NUMBER PIC 99999999 OCCURS 10.                     PRIME|                                  
-                                                                                                  |                                  
- ==000049==> IGYDS0001-W A blank was missing before character "I" in column 19.  A blank was assum|                                  
-                         ed.                                                                      |                                  
-                                                                                                  |                                  
- ==000049==> IGYPS0089-S Expected INTEGER, but found INPUT-NUMBER.  The statement was discarded.  |                                  
-                                                                                                  |                                  
- ==000049==> IGYDS1159-E A "PICTURE" clause was not found for elementary item "FILLER".  "PICTURE |                                  
-                         X(1)" was assumed.                                                       |                                  
-                                                                                                  |                                  
+   000048           480  01  PRIMES-SYSIN-RECORD.                                            PRIME|                                  
+   000049           490   02 PRIMES-SYSIN-NUMBER PIC 99999999 OCCURS 10.                     PRIME|                                  
    000050           500 **                                                                   PRIME|                                  
    000051           510 **                                                                   PRIME|                                  
    000052           520  WORKING-STORAGE SECTION.                                            PRIME|                                  
@@ -155,7 +110,9 @@
    000055           550  77 K PIC 99999999 COMP VALUE 1.                                     PRIME|                                  
    000056           560  77 N PIC 99999999 COMP.                                             PRIME|                                  
    000057           570  77 N-2 PIC 99999999 COMP.                                           PRIME|                                  
-   000058           580  77 SQRTN PIC 99999999 COMP.                                         PRIME|                                  
+1PP 5737-L11 IBM COBOL for Linux                     1.1.0      PRIMES    Date 07/30/2021  Time 13:16:53   Page     3               
+   LineID  PL SL  ----+-*A-1-B--+----2----+----3----+----4----+----5----+----6----+----7-|--+----8 Map and Cross Reference           
+0  000058           580  77 SQRTN PIC 99999999 COMP.                                         PRIME|                                  
    000059           590  77 PRODUCT PIC 99999999 COMP.                                       PRIME|                                  
    000060           600  01 BLANK-LINE PIC X(160).                                           PRIME|                                  
    000061           610  01 OUT-INTEGER.                                                     PRIME|                                  
@@ -171,50 +128,9 @@
    000071           710 **                                                                   PRIME|                                  
    000072           720 **                                                                   PRIME|                                  
    000073           730  MAIN-PART.                                                          PRIME|                                  
-   000074           740      OPEN INPUT PRIMES.INPUT.                                       PRIME |42                                
-                                                                                                  |                                  
- ==000074==> IGYDS0001-W A blank was missing before character "I" in column 30.  A blank was assum|                                  
-                         ed.                                                                      |                                  
-                                                                                                  |                                  
- ==000074==> IGYPS2072-S "INPUT" was invalid.  Skipped to the next verb, period or procedure-name |                                  
-                         definition.                                                              |                                  
-                                                                                                  |                                  
- ==000074==> IGYPS0009-E ". " should not begin in area "A".  It was processed as if found in area |                                  
-                         "B".                                                                     |                                  
-                                                                                                  |                                  
-1PP 5737-L11 IBM COBOL for Linux                     1.1.0      PRIMES    Date 07/16/2021  Time 19:16:48   Page     4               
-   LineID  PL SL  ----+-*A-1-B--+----2----+----3----+----4----+----5----+----6----+----7-|--+----8 Map and Cross Reference           
-0  000075           750      READ PRIMES.INPUT AT END DISPLAY '** EOF on SYSIN **'.          PRIME|42                                
-                                                                                                  |                                  
- ==000075==> IGYDS0001-W A blank was missing before character "I" in column 24.  A blank was assum|                                  
-                         ed.                                                                      |                                  
-                                                                                                  |                                  
- ==000075==> IGYPS2072-S "INPUT" was invalid.  Skipped to the next verb, period or procedure-name |                                  
-                         definition.                                                              |                                  
-                                                                                                  |                                  
- ==000075==> IGYPS0009-E "AT" should not begin in area "A".  It was processed as if found in area |                                  
-                         "B".                                                                     |                                  
-                                                                                                  |                                  
-   000076           760      MOVE PRIMES.INPUT-NUMBER     TO N.                              PRIME|                                  
-                                                                                                  |                                  
- ==000076==> IGYPS0037-S "PRIMES" was not a uniquely defined name.  The definition to be used coul|                                  
-                         d not be determined from the context.  The reference to the name was disc|                                  
-                         arded.                                                                   |                                  
-                                                                                                  |                                  
- ==000076==> IGYPS2000-S Expected a data-name, but found ". ".  The "MOVE" statement was discarded|                                  
-                         .                                                                        |                                  
-                                                                                                  |                                  
- ==000076==> IGYDS0001-W A blank was missing before character "I" in column 24.  A blank was assum|                                  
-                         ed.                                                                      |                                  
-                                                                                                  |                                  
- ==000076==> IGYDS0017-E "INPUT-NUMBER" should begin in area "A".  It was processed as if found in|                                  
-                          area "A".                                                               |                                  
-                                                                                                  |                                  
- ==000076==> IGYPS2072-S "TO" was invalid.  Skipped to the next verb, period or procedure-name def|                                  
-                         inition.                                                                 |                                  
-                                                                                                  |                                  
- ==000076==> IGYPS2145-E A period was required.  A period was assumed before "TO".                |                                  
-                                                                                                  |                                  
+   000074           740 **   OPEN INPUT PRIMES-SYSIN.                                        PRIME|                                  
+   000075           750 **   READ PRIMES-SYSIN AT END DISPLAY '** EOF on SYSIN **'.          PRIME|                                  
+   000076           760      MOVE 500                     TO N.                              PRIME|56                                
    000077           761      DISPLAY "Calculating for max primes:   " N.                          |56                                
    000078           770 **   CLOSE PRIMES-SYSIN.                                             PRIME|                                  
    000079           780      SUBTRACT 2 FROM N GIVING N-2.                                   PRIME|56 57                             
@@ -241,9 +157,7 @@
    000100           990 **                                                                   PRIME|                                  
    000101          1000 **                                                                   PRIME|                                  
    000102          1010  INIT-1.                                                             PRIME|                                  
-1PP 5737-L11 IBM COBOL for Linux                     1.1.0      PRIMES    Date 07/16/2021  Time 19:16:48   Page     5               
-   LineID  PL SL  ----+-*A-1-B--+----2----+----3----+----4----+----5----+----6----+----7-|--+----8 Map and Cross Reference           
-0  000103          1020      MOVE 1 TO ISPRIME (I).                                          PRIME|53 66                             
+   000103          1020      MOVE 1 TO ISPRIME (I).                                          PRIME|53 66                             
    000104          1030      ADD 2 TO I.                                                     PRIME|53                                
    000105          1040 **                                                                   PRIME|                                  
    000106          1050 **                                                                   PRIME|                                  
@@ -255,7 +169,9 @@
    000112      1   1110          MULTIPLY I BY I GIVING PRODUCT                              PRIME|53 53 59                          
    000113      1   1120          PERFORM CROSS-OUT UNTIL PRODUCT GREATER THAN N.             PRIME|59 56 121                         
    000114          1130      ADD 2 TO I.                                                     PRIME|53                                
-   000115          1140 **                                                                   PRIME|                                  
+1PP 5737-L11 IBM COBOL for Linux                     1.1.0      PRIMES    Date 07/30/2021  Time 13:16:53   Page     4               
+   LineID  PL SL  ----+-*A-1-B--+----2----+----3----+----4----+----5----+----6----+----7-|--+----8 Map and Cross Reference           
+0  000115          1140 **                                                                   PRIME|                                  
    000116          1150 **                                                                   PRIME|                                  
    000117          1160  ADVANCE.                                                            PRIME|                                  
    000118          1170      ADD 2 TO I.                                                     PRIME|53                                
@@ -282,7 +198,7 @@
    000139      2   1380              MOVE 1 TO J.                                            PRIME|54                                
    000140      1   1390      IF I GREATER N-2 AND J NOT EQUAL 1 DISPLAY OUT-LINE.            PRIME|53 57 54 64                       
    000141          1400      ADD 2 TO I.                                                     PRIME|53                                
-1PP 5737-L11 IBM COBOL for Linux                     1.1.0      PRIMES    Date 07/16/2021  Time 19:16:48   Page     6               
+1PP 5737-L11 IBM COBOL for Linux                     1.1.0      PRIMES    Date 07/30/2021  Time 13:16:53   Page     5               
 0An "M" preceding a data-name reference indicates that the data-name is modified by this reference.
   
   Defined   Cross-reference of data names   References                                                                               
@@ -293,19 +209,19 @@
        66   ISPRIME. . . . . . . . . . . .  M103 109 110 M122 132                                                                                                                                
        54   J. . . . . . . . . . . . . . .  M91 92 M111 123 133 M135 136 M139 140                                                                                                                
        55   K. . . . . . . . . . . . . . .  92 95 M134                                                                                                                                           
-       56   N. . . . . . . . . . . . . . .  77 79 81 85 93 96 113                                                                                                                                
+       56   N. . . . . . . . . . . . . . .  M76 77 79 81 85 93 96 113                                                                                                                            
        57   N-2. . . . . . . . . . . . . .  M79 140                                                                                                                                              
        63   OUT                                                                                                                                                                                  
        61   OUT-INTEGER. . . . . . . . . .  63                                                                                                                                                   
        64   OUT-LINE . . . . . . . . . . .  137 M138 140                                                                                                                                         
        65   PRIME-FLAGS                                                                                                                                                                          
-       42   PRIMES . . . . . . . . . . . .  33 74 75                                                                                                                                             
-       48   PRIMES                                                                                                                                                                               
-       49   PRIMES                                                                                                                                                                               
+       42   PRIMES-SYSIN . . . . . . . . .  33                                                                                                                                                   
+       49   PRIMES-SYSIN-NUMBER                                                                                                                                                                  
+       48   PRIMES-SYSIN-RECORD                                                                                                                                                                  
        59   PRODUCT. . . . . . . . . . . .  M112 113 122 M123                                                                                                                                    
        62   SHOWIT . . . . . . . . . . . .  M92 M95 M96 98 M133                                                                                                                                  
        58   SQRTN. . . . . . . . . . . . .  81 M82 88 108 M128                                                                                                                                   
-1PP 5737-L11 IBM COBOL for Linux                     1.1.0      PRIMES    Date 07/16/2021  Time 19:16:48   Page     7               
+1PP 5737-L11 IBM COBOL for Linux                     1.1.0      PRIMES    Date 07/30/2021  Time 13:16:53   Page     6               
 0Context usage is indicated by the letter preceding a procedure-name reference.
  These letters and their meanings are:
      A = ALTER (procedure-name)
@@ -322,75 +238,17 @@
       107   CHECK-NUMBER . . . . . . . . .  P88                                                                                                                                                  
       121   CROSS-OUT. . . . . . . . . . .  P113                                                                                                                                                 
       102   INIT-1 . . . . . . . . . . . .  P85                                                                                                                                                  
-       76   INPUT-NUMBER                                                                                                                                                                         
        73   MAIN-PART                                                                                                                                                                            
       126   NEXT-SQUARE. . . . . . . . . .  P81                                                                                                                                                  
       131   PRINT. . . . . . . . . . . . .  P93                                                                                                                                                  
-1PP 5737-L11 IBM COBOL for Linux                     1.1.0      PRIMES    Date 07/16/2021  Time 19:16:48   Page     8               
+1PP 5737-L11 IBM COBOL for Linux                     1.1.0      PRIMES    Date 07/30/2021  Time 13:16:53   Page     7               
 0 Defined   Cross-reference of programs     References                                                                               
   
        19   PRIMES                                                                                                                                                                               
-1PP 5737-L11 IBM COBOL for Linux                     1.1.0      PRIMES    Date 07/16/2021  Time 19:16:48   Page     9               
-0LineID  Message code  Message text
-                                                                                                                                     
-     33  IGYDS0001-W   A blank was missing before character "I" in column 26.  A blank was assumed.
-                                                                                                                                     
-     33  IGYDS1089-S   "INPUT" was invalid.  Scanning was resumed at the next area "A" item, level-number, or the start of the next c
-                       lause.
-                                                                                                                                     
-     42  IGYGR1216-I   A "RECORDING MODE" of "F" was assumed for file "PRIMES".
-                                                                                                                                     
-     42  IGYDS0001-W   A blank was missing before character "I" in column 19.  A blank was assumed.
-
-                       Same message on line:     48     49
-                                                                                                                                     
-     44  IGYDS6052-S   Expected data-name/FILLER after level-number; found CHARACTERS. Data description entry ignored.
-                                                                                                                                     
-     45  IGYDS1089-S   "BLOCK" was invalid.  Scanning was resumed at the next area "A" item, level-number, or the start of the next c
-                       lause.
-                                                                                                                                     
-     45  IGYDS6052-S   Expected data-name/FILLER after level-number; found RECORDS. Data description entry ignored.
-                                                                                                                                     
-     46  IGYDS1089-S   "LABEL" was invalid.  Scanning was resumed at the next area "A" item, level-number, or the start of the next c
-                       lause.
-                                                                                                                                     
-     48  IGYPS0089-S   Expected INTEGER, but found INPUT-RECORD.  The statement was discarded.
-                                                                                                                                     
-     49  IGYPS0089-S   Expected INTEGER, but found INPUT-NUMBER.  The statement was discarded.
-                                                                                                                                     
-     49  IGYDS1159-E   A "PICTURE" clause was not found for elementary item "FILLER".  "PICTURE X(1)" was assumed.
-                                                                                                                                     
-     74  IGYDS0001-W   A blank was missing before character "I" in column 30.  A blank was assumed.
-                                                                                                                                     
-     74  IGYPS2072-S   "INPUT" was invalid.  Skipped to the next verb, period or procedure-name definition.
-
-                       Same message on line:     75
-                                                                                                                                     
-     74  IGYPS0009-E   ". " should not begin in area "A".  It was processed as if found in area "B".
-                                                                                                                                     
-     75  IGYDS0001-W   A blank was missing before character "I" in column 24.  A blank was assumed.
-
-                       Same message on line:     76
-                                                                                                                                     
-     75  IGYPS0009-E   "AT" should not begin in area "A".  It was processed as if found in area "B".
-                                                                                                                                     
-     76  IGYPS0037-S   "PRIMES" was not a uniquely defined name.  The definition to be used could not be determined from the context.
-                         The reference to the name was discarded.
-                                                                                                                                     
-     76  IGYPS2000-S   Expected a data-name, but found ". ".  The "MOVE" statement was discarded.
-                                                                                                                                     
-     76  IGYDS0017-E   "INPUT-NUMBER" should begin in area "A".  It was processed as if found in area "A".
-                                                                                                                                     
-     76  IGYPS2072-S   "TO" was invalid.  Skipped to the next verb, period or procedure-name definition.
-                                                                                                                                     
-     76  IGYPS2145-E   A period was required.  A period was assumed before "TO".
--Messages    Total    Informational    Warning    Error    Severe    Terminating
-0Printed:      25           1              7         5        12            
-1PP 5737-L11 IBM COBOL for Linux                     1.1.0      PRIMES    Date 07/16/2021  Time 19:16:48   Page    10               
 -* Statistics for COBOL program PRIMES:
  *    Source records = 141
  *    Data Division statements = 16
- *    Procedure Division statements = 45
+ *    Procedure Division statements = 42
 0Locale = C.UTF.UTF-8
-0End of compilation 1,  program PRIMES,  highest severity: Severe.
-0Return code 12
+0End of compilation 1,  program PRIMES,  no statements flagged.
+0Return code 0
