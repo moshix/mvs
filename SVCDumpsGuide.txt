@@ -1,0 +1,197 @@
+A BEGINNER'S GUIDE TO SVC DUMPS
+by Anne Peticolas
+
+Anne Peticolas is a systems programmer at the Veteran's
+Administration Data Processing Center in Austin, Texas.
+
+To the novice systems programmer, system dumps are baffling indeed. 
+It's often very unclear what the problem was, and even where, among
+all those sheets of paper, to find what task failed and which are
+its registers.  The best guide, of course, is an experienced and
+patient co-worker.  But, failing that, this article attempts to
+help a beginner start to read system dumps and extract meaningful
+information.
+
+There are two kinds of system dumps:  SVC dumps and standalone
+dumps.  Techniques for reading them differ somewhat, and this
+article will deal only with SVC dumps.
+
+Print Parameters
+
+So your system has produced a SVC dump.  You want to look at it,
+so you're going to format and print it with AMDPRDMP.  What
+parameters should you use?
+
+A good set to begin with is:
+
+SUMMARY, SUMDUMP, LPAMAP, EPA, NUCMAP EPA, LOGDATA, TRACE, MTRACE,
+PRINT CURRENT
+
+(Of course you will want to add JES2, JES3, or VTAMMAP to these
+when appropriate.)  You can always reprint the dump using other
+parameters should you need more later--but most times you will not.
+
+On the top right-hand side of most pages in your printed dump, you
+will have, reading from the right, a page number, a time, a date,
+and a module name.  Very frequently the module name will be
+IEAVTSDT.  This is not because IEAVTSDT is IBM's worst coded module
+and has lots of problems.  Rather, IEAVTSDT is the dump task, and
+it is often the current task when an SVC dump is taken.
+
+Scheduled Vs. Synchronous Dumps
+
+When you see IEAVTSDT, the dump you have in hand was a "scheduled
+dump", and was produced by issuing an SDUMP macro with a BRANCH=YES
+option.  The macro saved some information, scheduled an SRB for the
+dump task, and returned to the dispatcher.
+
+When BRANCH=NO is specified, on the other hand, an SVC 33 is issued
+directly by the failing task.  Your system "freezes" (no work is
+dispatched) while the SVC dump is produced.  This type of dump is
+called a "synchronous dump".  It is easy to see that "current"
+information is more likely to be relevant to your problem in a
+synchronous than in a scheduled dump.
+
+If information in a synchronous dump is more immediate, why would
+a scheduled dump be taken?  One common reason is that for some
+reason the failing task is not able to issue an SVC so the code
+must be branched to.  (For instance, a task can't issue an SVC when
+locked.)
+
+The Dump Title
+
+On the top left-hand side of most pages you will see the dump
+title, for instance:
+
+TITLE FROM DUMP:  SMF ABEND,ERRMOD=IFAPCWTR,
+                  RECVMOD=IFAPCWTR
+
+The title itself is somewhat informative, but you can get still 
+more information by looking at Appendix B of the MVS/XA Diagnostic
+Techniques manual.  There the titles are listed alphabetically,
+along with an explanation, tips on which areas to pay attention to
+in the dump, and whether "a software record is written to
+SYS1.LOGREC".  The component and the issuing module associated with
+the dump title will be given, but since these modules are
+frequently recovery routines (ESTAEs or FRRs), this does not
+necessarily mean that the source of the problem has been located.
+
+The Dump Summary Page  
+
+This is page 1 and usually 2 of the dump, immediately following the
+print dump index.
+
+Look at the area following the words MVS SYMPTOM STRING.  Here is
+listed the abend code and some other information.  FI stands for
+FAILING INSTRUCTION AREA.  This shows the code for six bytes below
+and above where the failing PSW points.  Often, the instruction
+that caused the trouble can be seen.  
+
+The REGS information shows which registers at the time of failure
+point into that area, and what the displacement from the register
+is.  For instance, "0B008" would mean that the failing PSW can be
+obtained by adding 8 to register 11.  On pages 3 and 4 you can find
+the registers and PSW at the time of failure, and ASID number, and
+the SDWA.
+
+MTRACE
+
+Now is a good time to look at the output from the MTRACE verb. 
+Here will be seen the system log data, which obviously can be quite
+helpful in discovering what was going on before the dump was taken. 
+Previous failures may be seen in the log (debugging should start
+with the dump from the first problem to occur) along with clues to
+what combination of circumstances caused a problem.  Of course, any
+information the operators have provided or that has been observed
+must also be taken into account.
+LOGDATA
+
+After a brief look at MTRACE output, the LOGDATA output is a good
+place to go.  SYS1.LOGREC is used as a place to record information
+about both hardware and software errors.  This verb will show the
+most recently recorded information, but there will not necessarily
+be anything related to the problem at hand.  Look carefully at the
+time stamp.  If an error occurred some time before (and several
+minutes is a long time to a computer), it's  most likely
+irrelevant.  
+
+Look for a real connection to the problem.  Naturally, if the dump
+title information indicated a record would be found here, one can
+be expected.  In this case the errorid (right before the jobname
+in the formatted LOGREC record) will match the errorid right below
+the dump title on the dump summary page.  
+
+The LOGREC record will have information about registers, completion
+code, PSW, and the RTM2 work area.  Often, in fact, it will tell
+all that is needed to locate the problem.
+
+Much of the information obtainable from the RTM2WA is the same as
+that in the SDWA.  They can be cross-checked against each other for
+verification.
+
+PRINT CURRENT Output
+
+Another avenue to pursue is the PRINT CURRENT output.  This prints
+TCB's for current tasks in the system.  The completion codes of the
+TCB's (at the far left of the first line of the formatted TCB) can
+be scanned for non-zero completion codes.  Beware, however, of
+assuming that any abnormal completion code is necessarily related
+to the current problem.  After all, usually when a problem program
+abends, normal recovery occurs and there is no system problem
+whatsoever.
+
+However, when a relevant failing TCB is located, valuable
+information may be obtained, particularly if for some reason this
+information is not available elsewhere in the dump.  The RTWA
+pointer will point to the RTM2WA if it exists, and the RB chain
+will give information that is similar to what might be found in an
+application dump, with the WLIC field showing SVC's invoked. 
+(Remember SVC numbers can be looked up in Volume 1 Chapter 5 of the
+Debugging Handbook.)  The RSV area at PRB+60 will give a program
+name in EBCDIC, and the RTPSW field on the first line of the
+formatted PRB will preserve information about the program check
+that caused the abend (refer to page 23 of the SEARS card).  The
+OPSW field in the PRB will give you information about the resume
+PSW; at times this may be necessary.  The CDE's, as in an
+application dump, will give the information about programs actually
+loaded by this task.
+
+LPAMAP And NUCMAP
+
+The LPAMAP and NUCMAP parameters map out locations of modules in
+the LPA and nucleus.  This can sometimes be useful to locate a
+failure that can't otherwise be found.  Does the PSW (or another
+address that's become of interest for good reason) point to an area
+in one of these maps?
+
+TRACE
+
+The TRACE parameter prints the most recent entries in the system
+trace table.  This table should always be read from the bottom up
+as the most recent entries are last.  The system trace table
+contains the CPUID, the ASID, the TCB address, the type, and the
+unique fields mapped in the Debugging Handbook.  As mentioned
+before, program checks can be looked up in the SEARS card.  
+
+Near an I/O interrupt, a SRB should be seen being dispatched. 
+Frequently, an entry will be seen which says:  "TRACE DATA IS NOT
+AVAILABLE FROM ALL PROCESSORS BEFORE (or AFTER) THIS TIME."  Ignore
+it.  An "*" indicates a significant entry.  Frequently this tells
+why the dump was produced.  In any case, the trace table can give
+a good idea of what was going on in the system.
+
+Conclusion
+
+So, now you know some places to look for meaningful information in
+that tall heap of paper.  In closing, remember two things:
+
+o Don't look for something interesting; look for something relevant
+to your problem.  MVS is very interesting, and you can chase things
+that are not related to your problem all day.      
+   
+o Don't be over-awed and over-complicate your task.  Most often you
+may not need to look at all the elements I've mentioned.  
+
+True, system dumps can be really tough; but with an idea of where
+to start and a few techniques, they are often not much harder to
+shoot than the average applications dump
