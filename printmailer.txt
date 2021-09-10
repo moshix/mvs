@@ -1,0 +1,10 @@
+#!/bin/bash
+inotifywait -m /var/www/html/print/spool/mvs/CLASSA/ -e create -e moved_to |
+  while read dir action file; do
+     echo "The file '$file' appeared in directory '$dir' via '$action'"
+     sleep 0.5
+     sendemail -f listing@soso -t soso2@gmail.net -u "OVH Class A Listing" -m "New Class A Listing!" -a  $dir"$file" || echo "could not email $dir/$file"
+  done
+~                                                                                                                              
+~                                                                                                                              
+~                                               
