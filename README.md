@@ -87,7 +87,7 @@ Here are some of the programs and tools included in this repo:
 
 29. The EDGAR full screen editor for VM/370 and VM/SP
 
-31. a disassembler, \ and much, much more
+31. a disassembler, and much, much more
 
 
 
