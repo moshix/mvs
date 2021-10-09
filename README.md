@@ -43,7 +43,7 @@ Here are some of the programs and tools included in this repo:
 
 6. my PL/I implementation of the N x N queens problem
 
-7. Sorichetti's vpwpc output seprator for Hercules printers
+7. an output separator for Hercules printers
 
 8. The usefuljcl/ directory contains very useful JCL jobs which you will use on adaily basis as a MVS or z/OS SYSPROG
 
@@ -95,4 +95,4 @@ Enjoy!
 
 moshix
 <br>
-September  2021
+October  2021
