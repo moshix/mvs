@@ -1,0 +1,202 @@
+//HERC01   JOB 1,CLASS=A,MSGCLASS=X,MSGLEVEL=(1,1),
+//  TIME=1440,REGION=2048K
+//*  EXECUTE ASMH ASSEMBLER, LINK AND GO
+//*  MOSHIX (C) 2021
+//*  THIS IS THE ASM H VERSION,
+//*  BUT WORKS JUST THE SAME ON FX ASSEMBLER
+//*  NOTICE THAT THIS BACKTRACKING ALGORITHM
+//*  IS NOT ANY FASTER IN ASSEMBLER THAN IN FORTRAN OR PL1
+//ASMH     EXEC  PGM=IEV90,REGION=2048K
+//**EPLIB  DD    DSN=SYS1.ASMH.LOADLIB,DISP=SHR
+//SYSLIB   DD    DSN=SYS1.AMODGEN,DISP=SHR
+//         DD    DSN=SYS1.MACLIB,DISP=SHR
+//SYSUT1   DD    DSN=&&SYSUT1,UNIT=SYSDA,SPACE=(1700,(600,100))
+//SYSUT2   DD    DSN=&&SYSUT2,UNIT=SYSDA,SPACE=(1700,(300,50))
+//SYSUT3   DD    DSN=&&SYSUT3,UNIT=SYSDA,SPACE=(1700,(300,50))
+//SYSPRINT DD    SYSOUT=*,DCB=BLKSIZE=1089
+//SYSPUNCH DD    SYSOUT=B
+//SYSLIN   DD DSN=&&LOADSET,DISP=(,PASS),UNIT=SYSDA,
+//            SPACE=(3120,(50,20)),DCB=LRECL=80
+//SYSIN    DD *
+         MACRO
+&LAB     XDECO  &REG,&TARGET
+&LAB     B      I&SYSNDX           BRANCH AROUND WORK AREA
+P&SYSNDX DS     0D,PL8             PACKED
+W&SYSNDX DS     CL13               CHAR
+I&SYSNDX CVD    &REG,P&SYSNDX          CONVERT TO DECIMAL
+         MVC    W&SYSNDX,=X'40202020202020202020212060'  NICE MASK
+         LA     R1,W&SYSNDX+7
+         EDMK   W&SYSNDX,P&SYSNDX+2    EDIT AND MARK
+         BCTR   R1,0                   LOCATE THE RIGHT PLACE
+         MVC    0(1,R1),W&SYSNDX+12    MOVE THE SIGN
+         MVC    &TARGET.(12),W&SYSNDX  MOVE TO TARGET
+         MEND
+*
+         PRINT GEN
+NQUEENS  CSECT
+         SAVE   (14,12)            SAVE REGISTERS ON ENTRY
+         BALR   R12,0              ESTABLISH ADDRESSABILITY
+         USING  *,R12              SET BASE REGISTER
+         ST     R13,SAVEA+4        LINK MYSA->PREVSA
+         LA     R11,SAVEA          MYSA
+         ST     R11,8(R13)         LINK PREVSA->MYSA
+         LR     R13,R11            SET MYSA POINTER
+         LA     R7,LL              L
+         LA     R6,1               I=1
+OPENEM   OPEN   (OUTDCB,OUTPUT)    OPEN THE PRINTER FILE
+*
+TITLE    PUT    OUTDCB,TITLEL      PRINT TITLE LINE
+         XDECO  R7,SOLNR+13
+TOTAL    PUT    OUTDCB,SOLNR
+*
+LOOPI    LR     R1,R6              DO I=1 TO L
+         SLA    R1,1               I*2
+         STH    R6,A-2(R1)         A(I)=I
+         LA     R6,1(R6)           I=I+1
+         BCT    R7,LOOPI           LOOP DO I
+*
+STRT     LA     R9,1               N=1 START OF LOOP
+LOOPN    CH     R9,L               DO N=1 TO L
+         BH     ELOOPN             IF N>L THEN EXIT LOOP
+         SR     R8,R8              M=0
+         LA     R10,1              I=1
+         LR     R5,R9              N
+         SLA    R5,1               N*2
+         BCTR   R5,0               R=2*N-1
+E40      CR     R10,R9             IF I>N
+         BH     E80                THEN GOTO E80
+         LR     R11,R10            J=I
+E50      LR     R1,R10             I
+         SLA    R1,1               I*2
+         LA     R6,A-2(R1)         R6=@A(I)
+         LR     R1,R11             J
+         SLA    R1,1               J*2
+         LA     R7,A-2(R1)         R7=@A(J)
+         MVC    Z,0(R6)            Z=A(I)
+         MVC    Y,0(R7)            Y=A(J)
+         LR     R3,R10             I
+         SH     R3,Y               -Y
+         AR     R3,R9              P=I-Y+N
+         LR     R4,R10             I
+         AH     R4,Y               +Y
+         BCTR   R4,0               Q=I+Y-1
+         MVC    0(2,R6),Y          A(I)=Y
+         MVC    0(2,R7),Z          A(J)=Z
+         LR     R1,R3              P
+         SLA    R1,1               P*2
+         LH     R2,U-2(R1)         U(P)
+         LTR    R2,R2              IF U(P)<>0
+         BNE    E60                THEN GOTO E60
+         LR     R1,R4              Q
+         AR     R1,R5              Q+R
+         SLA    R1,1               (Q+R)*2
+         LH     R2,U-2(R1)         U(Q+R)
+         C      R2,=F'0'           IF U(Q+R)<>0
+         BNE    E60                THEN GOTO E60
+         LR     R1,R10             I
+         SLA    R1,1               I*2
+         STH    R11,S-2(R1)        S(I)=J
+         LA     R0,1               R0=1
+         LR     R1,R3              P
+         SLA    R1,1               P*2
+         STH    R0,U-2(R1)         U(P)=1
+         LR     R1,R4              Q
+         AR     R1,R5              Q+R
+         SLA    R1,1               (Q+R)*2
+         STH    R0,U-2(R1)         U(Q+R)=1
+         LA     R10,1(R10)         I=I+1
+         B      E40                GOTO E40
+E60      LA     R11,1(R11)         J=J+1
+         CR     R11,R9             IF J<=N
+         BNH    E50                THEN GOTO E50
+E70      BCTR   R11,0              J=J-1
+         CR     R11,R10            IF J=I
+         BE     E90                GOTO E90
+         LR     R1,R10             I
+         SLA    R1,1               I*2
+         LA     R6,A-2(R1)         R6=@A(I)
+         LR     R1,R11             J
+         SLA    R1,1               J*2
+         LA     R7,A-2(R1)         R7=@A(J)
+         MVC    Z,0(R6)            Z=A(I)
+         MVC    0(2,R6),0(R7)      A(I)=A(J)
+         MVC    0(2,R7),Z          A(J)=Z;
+         B      E70                GOTO E70
+E80      LA     R8,1(R8)           M=M+1
+E90      BCTR   R10,0              I=I-1
+         LTR    R10,R10            IF I=0
+         BZ     ZERO               THEN GOTO ZERO
+         LR     R1,R10             I
+         SLA    R1,1               I*2
+         LH     R2,A-2(R1)         R2=A(I)
+         LR     R3,R10             I
+         SR     R3,R2              -A(I)
+         AR     R3,R9              P=I-A(I)+N
+         LR     R4,R10             I
+         AR     R4,R2              +A(I)
+         BCTR   R4,0               Q=I+A(I)-1
+         LR     R1,R10             I
+         SLA    R1,1               I*2
+         LH     R11,S-2(R1)        J=S(I)
+         LA     R0,0               R0=0
+         LR     R1,R3              P
+         SLA    R1,1               P*2
+         STH    R0,U-2(R1)         U(P)=0
+         LR     R1,R4              Q
+         AR     R1,R5              Q+R
+         SLA    R1,1               (Q+R)*2
+         STH    R0,U-2(R1)         U(Q+R)=0
+         B      E60                GOTO E60
+ZERO     XDECO  R9,PG+0            EDIT N
+         XDECO  R8,PG+12           EDIT M
+         PUT    OUTDCB,PG          PRINT BUFFER
+         LA     R9,1(R9)           N=N+1
+         B      LOOPN              LOOP DO N
+ELOOPN   CLOSE  (OUTDCB)           CLOSE OUTPUT
+         L      R13,SAVEA+4        PREVIOUS SAVE AREA ADDRS
+         RETURN (14,12),RC=0       RETURN TO CALLER WITH RC=0
+         LTORG
+SAVEA    DS     18F                SAVE AREA FOR CHAINING
+OUTDCB   DCB    DSORG=PS,MACRF=PM,DDNAME=OUTDD  USE OUTDD IN JCL
+LL       EQU    11                 LL<=16
+L        DC     AL2(LL)            INPUT VALUE
+A        DS     (LL)H
+S        DS     (LL)H
+Z        DS     H
+Y        DS     H
+TITLEL   DC     CL36'1 N QUEENS SOLVER - MOSHIX DEC 2021'
+PRTLINE  DC     CL133' '
+SOLNR    DC     CL19'1 MAX NXN:       '
+PRTLINE2 DC     CL133' '
+PG       DS     CL20               BUFFER
+U        DC     (4*LL-2)H'0'       STACK
+R0       EQU    0
+R1       EQU    1
+R2       EQU    2
+R3       EQU    3
+R4       EQU    4
+R5       EQU    5
+R6       EQU    6
+R7       EQU    7
+R8       EQU    8
+R9       EQU    9
+R10      EQU    10
+R11      EQU    11
+R12      EQU    12
+R13      EQU    13
+R14      EQU    14
+R15      EQU    15
+         END    NQUEENS
+/*
+//LKED     EXEC PGM=IEWL,PARM=(LET,LIST,MAP),COND=(4,LT,ASMH)
+//SYSPRINT DD SYSOUT=*
+//SYSLMOD  DD DSN=&&GOSET(GO),DISP=(,PASS),UNIT=SYSDA,
+//            SPACE=(6144,(50,20,1)),DCB=RECFM=U
+//SYSUT1   DD UNIT=SYSDA,SPACE=(1024,(50,20))
+//SYSLIN   DD DSN=&&LOADSET,DISP=(OLD,PASS)
+//*
+//GO       EXEC PGM=*.LKED.SYSLMOD,COND=(4,LT,ASMH)
+//GO.OUTDD DD SYSOUT=*,LRECL=121,RECFM=FBA
+//GO.SYSPRINT DD SYSOUT=*
+//GO.SYSABEND DD SYSOUT=*
+//
