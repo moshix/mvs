@@ -1,0 +1,54 @@
+VOL=SER=MOSHIX
+dsn=stuff.work.jcl
+
+//P53TAP   JOB   (TAPE),'WRITE TAPE',CLASS=A,MSGCLASS=X,            
+//   MSGLEVEL=(1,1),NOTIFY=P53,TIME=1440                            
+//TAPE     EXEC  PGM=IEBCOPY,REGION=758K                            
+//SYSPRINT DD SYSOUT=*                                              
+//TAPE     DD UNIT=480,DISP=NEW,DSN=STUFF.WORK.JCL,                 
+//            VOL=SER=MOSHIX,LABEL=(,SL)                            
+//PDS      DD DSN=P53.WORK.JCL,DISP=SHR                             
+//SYSUT3   DD UNIT=SYSDA,SPACE=(80,(80,45)),DISP=(NEW,DELETE)       
+//SYSIN    DD *                                                     
+ COPY INDD=PDS,OUTDD=TAPE                                           
+/*                                                                  
+//                                                                  
+
+IEB167I  FOLLOWING MEMBER(S) UNLOADED FROM INPUT DATA SET REFERENCED BY PDS     
+IEB154I  ADDUSER  HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  ADRDSSU  HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  ARTINPUT HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  ASMEMPTY HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  ASMJ     HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  BOOK     HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  CHESSA   HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  CHESSP   HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  COB24PR  HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  COMPRESS HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  DEFRAG   HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  DMPNUC   HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  DUCHES   HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  DUMPT    HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  ENGINES  HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  FIBONAC  HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  FORTART  HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  FORTQUEE HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  FORT1    HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  HLASM    HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  IEBGENER HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  IEBPTPCH HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  IEBUPTDE HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  IFOX00   HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  IOCP     HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  LOADTAP  HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  PLICAL   HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  PLQUEEN  HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  PSWDCHAN HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  QASM     HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  QASMH    HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  QUEEN    HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  REGS     HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  SMFCLEAR HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  TOTAPE   HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB154I  WTO      HAS BEEN SUCCESSFULLY UNLOADED                                
+IEB147I  END OF JOB -00 WAS HIGHEST SEVERITY CODE                               
