@@ -1,12 +1,156 @@
-c3270.keymap.foo: \                                                                                                                 
- <Key>Escape        : Clear() \n\                                       
-  <Key>`            : PA(1)\n\                                          
- Ctrl<Key>i         : ToggleInsert()\n\                                 
- Shift<Key>2        : PA(2)\n\                                          
- <Key>Prior         : PF(7)\n\                                          
- <Key>Next          : PF(8)\n\                                          
- Ctrl<Key>q         : PrintText()\n\                                    
- Ctrl<Key>w         : NextWord()\n\                                     
- <Key>Return        : Newline()\n\                                      
- <Key>Mode_switch   : Enter()\n\                                        
- Ctrl<Key>x: Disconnect()
+! vim:	ts=8 noexpandtab
+
+!		Keymap definitions for c3270
+!
+!         Date: Jan 3, 2021 (revised and documented)
+!       Original Author: ahd@kew.com (Drew Derbyshire)
+!      Address: Kendra Electronic Wonderworks
+!               Kenmore, WA
+!      Adapted and updated by moshix
+!      Now Enter is just a Newline, (as it should be) and Contrl-Z is Enter
+! 
+! The generic map provides keys for functions like client-side
+! editing and program control. The map overrides the compiled in base
+! keymap in the following cases:
+!
+! * NPAGE (scroll client forward) and PPAGE (scroll client previous)
+!   are more useful to tell the host the standard PF keys for forward
+!   and back.
+! * Ctrl-D (FieldMark) Dup and Ctrl-F (FieldMark) are two functions
+!   I never used during 16 years of daily 3270 work. The keys are
+!   better suited for Disconnect and NextWord
+!
+! Alt U+00D is Alt-ENTER, but c3270 doesn't let us call it that.
+! U+007F is the ANSI DELETE character, not to be confused with the DELETE
+! key (under INSERT/Help)
+
+c3270.keymap.generic:	\
+	<Key>BTAB:	BackTab()\n\
+	<Key>U+007F:	Erase\n\
+	Alt<Key>U+000D:	Newline()\n\
+	Alt<Key>a:	Attn()\n\
+	Alt<Key>c:	Clear()\n\
+	Ctrl<Key>z:	Enter()\n\
+	Alt<Key>e:	EraseEOF()\n\
+	Alt<Key>q:	Enter()\n\
+    <Key>Return: Newline()\n\
+	Alt<Key>w:	Enter()
+
+! The full Mac keyboard has "Help" where the PC key board has "Insert", and
+! we use it as the latter. Set all Help key variations to toggle Insert on and
+! off, as opposed to the real hardware which turns Insert ON with the key but
+! turns it OFF via the RESET key.
+!
+! Alt<F> is Alt<Key>Help, but c3270 doesn't let us call it that.
+!
+! Note: The bare Help key is eaten on by MacOS, hence the modified versions.
+!
+!
+! Due to search order, shifted keys must be first!
+
+c3270.keymap.insert:	\
+	Alt<Key>F:	ToggleInsert()\n\
+	<Key>Help:	ToggleInsert()\n\
+	Ctrl<Key>A <Key>i:	ToggleInsert()\n\
+	Alt<Key>i:	ToggleInsert()
+
+! Make page up/down the standard PF keys for up (PF7) & down (PF8)
+
+c3270.keymap.scroll:	\
+	<Key>PPAGE:	PF(7)\n\
+	<Key>NPAGE:	PF(8)
+
+!
+!	PA keys are important on IBM VM hosts, so we provide several mappings
+!	below to avoid making the user hit a chord every time they want a
+!	common function. (This is a reason in and of itself to use x3270,
+!	which doesn't have the problem nearly as much.)
+!
+
+! The names of keys as defined by curses to the right of F12.
+
+c3270.keymap.curses-PAK:	\
+	<Key>F13:	PA(1)\n\
+	<Key>F14:	PA(2)\n\
+	<Key>F15:	Enter()\n\
+
+c3270.keymap.xterm-PFK:	\
+	Alt<Key>[ <Key>1 <Key>1 <Key>~:	PF(1)\n\
+	Alt<Key>[ <Key>1 <Key>2 <Key>~:	PF(2)\n\
+	Alt<Key>[ <Key>1 <Key>3 <Key>~:	PF(3)\n\
+	Alt<Key>[ <Key>1 <Key>4 <Key>~:	PF(4)
+
+! The strings sent by Macs for keys to the right of F12.
+!
+! xterm-color256 F13-F15 on MacOS Catalina doesn't match the
+! curses definition.
+
+c3270.keymap.xterm-256color-PAK:	\
+	Alt<Key>[ <Key>2 <Key>5 <Key>~:	PA(1)\n\
+	Alt<Key>[ <Key>2 <Key>6 <Key>~:	PA(2)\n\
+	Alt<Key>[ <Key>2 <Key>8 <Key>~:	PA(3)
+
+! The strings sent by VT-100 terminals for keys to the right of F12.
+
+c3270.keymap.vt100-PAK:	\
+	<Key>U+00b1:	PA(1)\n\
+	<Key>U+00b2:	PA(2)\n\
+	<Key>U+00b3:	PA(3)
+
+! c3270 doesn't know the names of most of the keypad keys, so we can
+! only define ENTER by name, the rest by sequence. On the keypad:
+!
+!	PF13-PF24 are (in order) 789 456 123 0 . (period) ENTER
+!       PA1 is - (minus) and PA2 is + (plus sign)
+!
+! Note if the emulator (i.e. Putty) enables the VT-100 PF keys,
+! the top row including - (minus) returns PF1-PF4, not as documented
+! above.
+
+c3270.keymap.pc-keypad:	\
+	Alt<Key>O <Key>w:	PF(13)\n\
+	Alt<Key>O <Key>x:	PF(14)\n\
+	Alt<Key>O <Key>y:	PF(15)\n\
+	Alt<Key>O <Key>t:	PF(16)\n\
+	Alt<Key>O <Key>u:	PF(17)\n\
+	Alt<Key>O <Key>v:	PF(18)\n\
+	Alt<Key>O <Key>q:	PF(19)\n\
+	Alt<Key>O <Key>r:	PF(20)\n\
+	Alt<Key>O <Key>s:	PF(21)\n\
+	Alt<Key>O <Key>p:	PF(22)\n\
+	Alt<Key>O <Key>n:	PF(23)\n\
+	<Key>ENTER:	PF(24)\n\
+	Alt<Key>O <Key>m:	PA(1)\n\
+	Alt<Key>O <Key>l:	PA(2)\n\
+
+! The NetBSD 7.2 console with wscons claims to be a VT-100 but sends
+! keys for a VT-220. This keymap is DISABLED.  A better solution
+! than enabling this keymap is to set TERM=wsvt25 when running c3270
+! on the NetBSD console.
+
+c3270.keymap.netbsd.console:	 \
+	Alt<Key>[ <Key>1 <Key>1 <Key>~:	PF(1)\n\
+	Alt<Key>[ <Key>1 <Key>2 <Key>~:	PF(2)\n\
+	Alt<Key>[ <Key>1 <Key>3 <Key>~:	PF(3)\n\
+	Alt<Key>[ <Key>1 <Key>4 <Key>~:	PF(4)\n\
+	Alt<Key>[ <Key>1 <Key>5 <Key>~:	PF(5)\n\
+	Alt<Key>[ <Key>1 <Key>7 <Key>~:	PF(6)\n\
+	Alt<Key>[ <Key>1 <Key>8 <Key>~:	PF(7)\n\
+	Alt<Key>[ <Key>1 <Key>9 <Key>~:	PF(8)\n\
+	Alt<Key>[ <Key>2 <Key>0 <Key>~:	PF(9)\n\
+	Alt<Key>[ <Key>2 <Key>1 <Key>~:	PF(10)\n\
+	Alt<Key>[ <Key>2 <Key>3 <Key>~:	PF(11)\n\
+	Alt<Key>[ <Key>2 <Key>4 <Key>~:	PF(12)
+
+! Use the keymaps defined above.
+c3270.keymap:	generic,insert,pc-keypad,vt100-PAK,xterm-256color-PAK,xterm-PFK,curses-PAK,scroll
+
+c3270.cursesColorForDefault:	green
+c3270.cursesColorForIntensified:	magenta
+c3270.cursesColorForProtected:	cyan
+c3270.cursesColorForProtectedIntensified:	white
+
+! Use ugly but always available ASCII characters for pop up keymap
+c3270.asciiBoxDraw: true
+
+c3270.ftHost: vm
