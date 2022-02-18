@@ -87,7 +87,9 @@ Here are some of the programs and tools included in this repo:
 
 29. The EDGAR full screen editor for VM/370 and VM/SP
 
-31. a disassembler, and much, much more
+31. a disassembler
+
+32.  Sample parameterhandling jobs, and much, much more
 
 
 
@@ -96,4 +98,4 @@ Enjoy!
 
 moshix
 <br>
-October  2021
+February 2022
