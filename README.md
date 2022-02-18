@@ -3,7 +3,7 @@
 <a href=" https://github.com/moshix/mvs/blob/master/codenotary.com"><img src="https://raw.githubusercontent.com/moshix/mvs/master/secured-by-immudb.svg" width="109px;"/></a>
 <a href="https://cas.codenotary.com"><img src="https://raw.githubusercontent.com/codenotary/cas/master/extra/badge/secured-by-cas.svg" width="109px;"/></a>
 
-# MVS, z/OS, VM/370 and z/VM Utilities
+# MVS, and VM Goodies
 
 
 Tapes are the standard way to exchange files, utilities and information between mainframe information. Some mainframe shops are now connected thru the HNET Bitnet II international dial-up network. I also noticed recently the industry is moving towards the world wide web, we is why I now make this colleciton of tools and utiliteis available on Github on this crazy new world of the web!
