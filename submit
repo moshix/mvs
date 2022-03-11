@@ -1,0 +1,99 @@
+#!/bin/bash
+# copyright 2021 by moshix
+# GPL3 license
+# many, many thanks to https://www.shellcheck.net/#
+# v 0.01 Make ftp work
+# v 0.11 put sensitive variables outside script
+# v 0.12 list .vimrc changes 
+# v 0.20 display something if job was not executed
+# v 0.21 remove listing before getting out script
+# v 0.30 test for set variables before execution
+# v 0.40 beautify a bit
+# v 0.50 set passive mode for folks behind NAT on ipv4
+# v 0.60 user /tmp for temporary files...
+# v 1.00 beginning of MVS 3.8 TK4- version 
+# v 1.10 tail tk4 printer file
+# v 1.30 fixed nasty bash-related bug with spaces after EOF
+
+VERSION="1.20"
+
+# Variables used (best to supply before submit execution for security reasons 
+#user=
+#pwd=
+#host=
+arg2=$2
+mode=""
+#echo "before executiong of ifs: $user $pwd $host"
+
+check_tk4 () {
+if [[ "$arg2" == "tk4" ]]; then
+    mode="tk4"
+fi
+}
+check_vars () {
+# test if variables set before running submit and if not, abort
+if [ -n "$user" ]; then 
+   :
+else
+  echo "No user defined. export user and retry"
+fi
+
+if [ -n "$pwd" ]; then                                                            
+   : 
+else                                                                                      
+  echo "No password  defined. export pwd and retry"                               
+fi  
+
+if [ -n "$host" ]; then                                                            
+   : 
+else                                                                                      
+  echo "No remote host defined. export host and retry"                               
+fi  
+}
+
+check_tk4   # check if we are talking to MVS 3.8 TK4-
+check_vars  # check vars
+
+# now let's check if a job was supplied
+if [ -n "$1" ]&& [[ "$mode" != "tk4" ]]; then
+    job=$1
+    output=${job%.*}
+    echo "Job not executed!! Check connection, userid,pwd and IP and retry..." >  $output.listing
+    #echo "user: $user   pwd:******   job:$job    output:$output.listing"
+    ftp -n $host <<**
+    quote USER $user
+    quote PASS $pwd
+    passive
+    quote site filetype=jes
+    quote site jesjobname=* jesstatus=all jesowner=*
+    get $job /tmp/$output.listing
+    bye
+    END
+**
+    cat /tmp/$output.listing #show the listing
+    rm /tmp/$output.listing #remove it so we don't pollute directory
+else
+  echo "No file name was supplied as job argument!"
+fi
+
+# let's check for TK4 case
+if [ -n "$1" ] && [[ "$mode" == "tk4" ]]; then                                  
+    job=$1
+    # make user and pwd upper caase for TK4
+    uuser=`echo ${user^^}`
+    upwd=`echo ${pwd^^}`
+    ftp -n $host  <<**
+    USER $uuser                                                            
+    PASS $upwd                                                             
+    put $job AANTRDR
+    END                                                                         
+**
+    echo "file submitted to MVS 3.8 TK4-"
+else                                                                            
+    echo "Something is wrong with tk4 supplied input.."
+fi    
+
+#  .vimrc changes:
+#  nnoremap <F10>   :split new <CR>:resize 40<CR>                                  
+#  nnoremap <f11>   :% ! submit                                                    
+#  nnoremap <f8>    :set autoread | au CursorHold * checktime | call feedkeys("lh")  
