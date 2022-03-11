@@ -89,7 +89,9 @@ Here are some of the programs and tools included in this repo:
 
 31. a disassembler
 
-32.  Sample parameterhandling jobs, and much, much more
+32.  Sample parameterhandling jobs, 
+
+33.  submit bash script for z/OS or MVS workflow in vim, and more...much, much more
 
 
 
@@ -98,4 +100,4 @@ Enjoy!
 
 moshix
 <br>
-February 2022
+March,  2022
