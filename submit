@@ -81,7 +81,8 @@ if [ -n "$1" ] && [[ "$mode" == "tk4" ]]; then
     $user 
     $pwd 
     asci
-    put $job AAINTRDR 
+    put $job AAINTRDR
+    quit
 **
     echo "file submitted to MVS 3.8 TK4-"
 else                                                                            
