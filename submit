@@ -15,7 +15,7 @@
 # v 1.10 tail tk4 printer file
 # v 1.30 fixed nasty bash-related bug with spaces after EOF
 
-VERSION="1.20"
+VERSION="1.30"
 
 # Variables used (best to supply before submit execution for security reasons 
 #user=
@@ -72,21 +72,16 @@ if [ -n "$1" ]&& [[ "$mode" != "tk4" ]]; then
 **
     cat /tmp/$output.listing #show the listing
     rm /tmp/$output.listing #remove it so we don't pollute directory
-else
-  echo "No file name was supplied as job argument!"
 fi
 
 # let's check for TK4 case
 if [ -n "$1" ] && [[ "$mode" == "tk4" ]]; then                                  
     job=$1
-    # make user and pwd upper caase for TK4
-    uuser=`echo ${user^^}`
-    upwd=`echo ${pwd^^}`
-    ftp -n $host  <<**
-    USER $uuser                                                            
-    PASS $upwd                                                             
-    put $job AANTRDR
-    END                                                                         
+    ftp -n $host 2300 <<**
+    $user 
+    $pwd 
+    asci
+    put $job AAINTRDR 
 **
     echo "file submitted to MVS 3.8 TK4-"
 else                                                                            
