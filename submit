@@ -14,8 +14,9 @@
 # v 1.00 beginning of MVS 3.8 TK4- version 
 # v 1.10 tail tk4 printer file
 # v 1.30 fixed nasty bash-related bug with spaces after EOF
+# v 1.40 fix for MVS 3.8 tk4
 
-VERSION="1.30"
+VERSION="1.40"
 
 # Variables used (best to supply before submit execution for security reasons 
 #user=
@@ -92,4 +93,5 @@ fi
 #  .vimrc changes:
 #  nnoremap <F10>   :split new <CR>:resize 40<CR>                                  
 #  nnoremap <f11>   :% ! submit                                                    
-#  nnoremap <f8>    :set autoread | au CursorHold * checktime | call feedkeys("lh")  
+#  nnoremap <f8>    :set autoread | au CursorHold * checktime | call feedkeys("lh") 
+# .vimrc: set autoread   
