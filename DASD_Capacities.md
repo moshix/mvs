@@ -1,4 +1,4 @@
-DASD Capacities by type
+DASD Capacities by Type
 =======================
 
 
