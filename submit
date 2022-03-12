@@ -15,8 +15,9 @@
 # v 1.10 tail tk4 printer file
 # v 1.30 fixed nasty bash-related bug with spaces after EOF
 # v 1.40 fix for MVS 3.8 tk4
+# v 1.50 fix some minor typos etc., version used in Youtube video
 
-VERSION="1.40"
+VERSION="1.50"
 
 # Variables used (best to supply before submit execution for security reasons 
 #user=
@@ -59,12 +60,13 @@ check_vars  # check vars
 if [ -n "$1" ]&& [[ "$mode" != "tk4" ]]; then
     job=$1
     output=${job%.*}
-    echo "Job not executed!! Check connection, userid,pwd and IP and retry..." >  $output.listing
+    echo "Job not executed!! Check connection, userid,pwd and IP and retry..." >  /tmp/$output.listing
     #echo "user: $user   pwd:******   job:$job    output:$output.listing"
     ftp -n $host <<**
     quote USER $user
     quote PASS $pwd
     passive
+    put $job
     quote site filetype=jes
     quote site jesjobname=* jesstatus=all jesowner=*
     get $job /tmp/$output.listing
@@ -86,8 +88,6 @@ if [ -n "$1" ] && [[ "$mode" == "tk4" ]]; then
     quit
 **
     echo "file submitted to MVS 3.8 TK4-"
-else                                                                            
-    echo "Something is wrong with tk4 supplied input.."
 fi    
 
 #  .vimrc changes:
