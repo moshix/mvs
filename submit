@@ -2,6 +2,7 @@
 # copyright 2021 by moshix
 # GPL3 license
 # many, many thanks to https://www.shellcheck.net/#
+# and to: https://www.youtube.com/watch?v=9a2hrGroxl0&t=2639s
 # v 0.01 Make ftp work
 # v 0.11 put sensitive variables outside script
 # v 0.12 list .vimrc changes 
