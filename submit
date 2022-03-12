@@ -73,7 +73,7 @@ if [ -n "$1" ]&& [[ "$mode" != "tk4" ]]; then
     bye
     END
 **
-    cat /tmp/$output.listing #show the listing
+    cat /tmp/$output.listing #show the listing, ideally we would also use linux userid, to make multi-user friendly
     rm /tmp/$output.listing #remove it so we don't pollute directory
 fi
 
