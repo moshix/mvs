@@ -1,6 +1,10 @@
 #!/bin/bash
 # copyright 2021 by moshix
 # GPL3 license
+# Watch this video to learn how to use this script:
+#       https://www.youtube.com/watch?v=RG5L-drDCv4
+#
+#
 # many, many thanks to https://www.shellcheck.net/#
 # and to: https://www.youtube.com/watch?v=9a2hrGroxl0&t=2639s
 # v 0.01 Make ftp work
