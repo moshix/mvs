@@ -1,3 +1,6 @@
+Refer to the 3270 Datastream Application Programming
+Reference, and the CICS Application Programming Guide
+
 Type Code Possible values and meaning
 ATTRIBUTE X'C0' Same attribute bytes used with SF order (X'1d)'
 COLOR x'2842' X'F1' to x'F7': Blue, Red, Pink, Green, Turq, Yellow, White
@@ -84,3 +87,4 @@ complexity. The most common causes of error are malformed
 addresses, incorrect values in byte pairs, incorrect number of
 byte pairs specified in SFE, and so on.
 
+https://www.cbttape.org/xephon/xephons/sna0212.pdf
