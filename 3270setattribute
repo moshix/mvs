@@ -1,0 +1,86 @@
+Type Code Possible values and meaning
+ATTRIBUTE X'C0' Same attribute bytes used with SF order (X'1d)'
+COLOR x'2842' X'F1' to x'F7': Blue, Red, Pink, Green, Turq, Yellow, White
+HILIGHT X'41' X'00' (No hilight) x'F1' (blink) x'F2' (reverse) x'F4'(underline)
+OUTLINE X'C2' From X'00' to X'0F', in any combination of the following values: x'01' (under), x'02' (right), x'04'(over), x'08'(left)
+
+So, if we want our arrow in the above example to be yellow, we
+need to specify a colour code x'42' followed by the yellow value
+x'F6'. And we must also indicate the basic attribute that makes
+the field protected (X'F8') preceded by the attribute indicator
+x'C0'. This gives us two byte pairs in our SFE order, which
+means the order will be:
+x'29Ø242F6CØF8' (SFE: 2 byte pairs) (colour: yellow) (attrb: prot,askip)
+This SFE order replaces the simple SF order (x'1DF0') that we
+had previously, which means that our stream becomes:
+x'114Ø4Ø1DFØ114D7429Ø242F6CØF8'===>x'1D4Ø13114E581DFØ'(Enter your name)
+If we also want our arrow in reverse video, then we add another
+byte pair – hilight (X'41') with the desired value x'F2' – and our
+SFE, now with three byte pairs, becomes
+X'290342F641F2C0F8'. The sequence in which the byte pairs
+are specified is not important, as long as they correspond to the
+total number indicated.
+The last type of attribute mentioned above – the outline – is
+probably less known and less used than the others. Indeed, I
+only discovered it quite recently, and not all 3270 emulators can
+display outline.
+Field outlining consists of drawing a thin line above, below, or
+at the sides of a field, in any combination. The above and below
+lines are drawn just in between the text rows, and don’t occupy
+a character cell. The left line is drawn in the ‘dead’ byte (the
+position just before a field, where the cursor never stops) that
+precedes the field, and the right line goes into the next field’s
+dead byte; both left and right lines occupy a character cell.
+The field outline code is x'C2', and the value is a byte in which
+the four left bits are zero and the four right bits each indicate a
+line position, in any desired combination, so the byte can range
+from x'00' (no outlining) to x'15' (full box).
+If we wanted our example input field to be fully outlined, so that
+it appeared with a box drawn all around it, we would start by
+replacing the start field (SF) order with an SFE order. We would
+then choose the byte pairs: the outline pair (x'C20F'), the
+attribute pair (X'C040'), and perhaps also a colour pair, to avoid
+the default colour. Let’s imagine, however, that in this case we
+aren’t bothered about colour specification. Our SFE will be:
+x'2902C20FC040', and our stream becomes:
+x'114Ø4Ø1DFØ114D7429Ø242F6CØF8'===>x'29Ø2C2ØFCØ4Ø13114E581DFØ'(Enter
+your name)
+Note that outline should not be confused with underline (which
+is part of the ‘hilight’ feature). An underlined field has a thicker
+line than a lower outline. It’s also possible to have a field both
+outlined and underlined, and the two lines will be clearly distinct.
+Note also that the drop-down boxes of ISPF (and DITTO)
+menus are not made with outlining (this is discussed in more
+detail later).
+The last order to discuss is the ‘set attribute’ (SA) order, which
+modifies the characteristics of a field starting at the point where
+it is inserted. To undo this modification and restore the field to
+its previous characteristic, issue another SA order for the same
+characteristic with the default value x'00'. It consists of three
+bytes: the SA order code (x'28') followed by a single byte pair,
+identical to the byte pairs used in SFE. An SA can be inserted
+anywhere in a stream: after a set buffer address order, in the
+middle of text, and so on. Unlike start field orders that take up
+a ‘dead’ byte, SA orders don’t occupy the screen, so you can
+assign a different colour to each letter of a word, or make it
+appear as reverse, or blinking, etc. By the way, this is how the
+ISPF editor creates those effects when you FIND text or when
+
+you HILIGHT the syntax of a program source.
+Let’s say that you want the last sentence of our example stream
+to appear with the parentheses blinking, and a different colour
+to each letter of the word ‘Enter’. The SAs to use would be
+x'2841F1' (blink), x'284100' (undo the blink), and x'2842Fn' for
+the colours, where n is the colour number.
+That part of the stream would become:
+x'2841F1'('2841ØØ 2842F4'E'2842F7'n'2842F1't'2842F3'e'2842F5'r your name
+x'2841F1')
+which reads: set blink, ‘(’, undo blink, set colour green, ‘E’, set
+colour white, ‘n’, etc.
+I suggest that you pause here and practise a little based on the
+above examples, until you become familiar with the whole
+process, starting simply and gradually increasing the degree of
+complexity. The most common causes of error are malformed
+addresses, incorrect values in byte pairs, incorrect number of
+byte pairs specified in SFE, and so on.
+
