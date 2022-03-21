@@ -91,7 +91,9 @@ Here are some of the programs and tools included in this repo:
 
 32.  Sample parameterhandling jobs, 
 
-33.  submit bash script for z/OS or MVS workflow in vim, and more...much, much more
+33.  submit bash script for z/OS or MVS workflow in vim, 
+34.  3270 attributes 
+35.  and more...much, much more
 
 
 
