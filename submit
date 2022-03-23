@@ -1,12 +1,7 @@
 #!/bin/bash
 # copyright 2021 by moshix
 # GPL3 license
-# Watch this video to learn how to use this script:
-#       https://www.youtube.com/watch?v=RG5L-drDCv4
-#
-#
 # many, many thanks to https://www.shellcheck.net/#
-# and to: https://www.youtube.com/watch?v=9a2hrGroxl0&t=2639s
 # v 0.01 Make ftp work
 # v 0.11 put sensitive variables outside script
 # v 0.12 list .vimrc changes 
@@ -21,8 +16,11 @@
 # v 1.30 fixed nasty bash-related bug with spaces after EOF
 # v 1.40 fix for MVS 3.8 tk4
 # v 1.50 fix some minor typos etc., version used in Youtube video
+# v 1.60 check if FTP is installed 
+# v 1.70 remove JES2 obnoxious messaged....gee....
+# v 1.80 don't use sed becuase BSD (ie Macos) and Linux versions behave differently
 
-VERSION="1.50"
+VERSION="1.80"
 
 # Variables used (best to supply before submit execution for security reasons 
 #user=
@@ -61,6 +59,13 @@ fi
 check_tk4   # check if we are talking to MVS 3.8 TK4-
 check_vars  # check vars
 
+# does the ftp client program exist?
+if ! command -v ftp &> /dev/null
+then
+    echo "ftp client program could not be found"
+    exit
+fi
+
 # now let's check if a job was supplied
 if [ -n "$1" ]&& [[ "$mode" != "tk4" ]]; then
     job=$1
@@ -78,6 +83,13 @@ if [ -n "$1" ]&& [[ "$mode" != "tk4" ]]; then
     bye
     END
 **
+#    sed "s/$JESOBNOXIOUS/d"  /tmp/$output.listing > /tmp/$output.listing.cl
+    while IFS= read line; do 
+           [[ $line =~ ^" !! END OF JES SPOOL" ]] || printf "%s\n" "$line"
+    done < /tmp/$output.listing > /tmp/$output.listing.cl
+
+    rm /tmp/$output.listing
+    mv /tmp/$output.listing.cl /tmp/$output.listing
     cat /tmp/$output.listing #show the listing, ideally we would also use linux userid, to make multi-user friendly
     rm /tmp/$output.listing #remove it so we don't pollute directory
 fi
@@ -100,3 +112,4 @@ fi
 #  nnoremap <f11>   :% ! submit                                                    
 #  nnoremap <f8>    :set autoread | au CursorHold * checktime | call feedkeys("lh") 
 # .vimrc: set autoread   
+
