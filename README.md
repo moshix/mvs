@@ -91,9 +91,15 @@ Here are some of the programs and tools included in this repo:
 
 32.  Sample parameterhandling jobs, 
 
-33.  submit bash script for z/OS or MVS workflow in vim, 
-34.  3270 attributes 
-35.  and more...much, much more
+33.  submit bash script for z/OS or MVS workflow in vim
+
+35.  3270 extended attribute codes
+
+36.  a link to an archive with a fully installed MVS 3.8 TK4- Update 8 with ISPF, BREXX, NJE38 compiler bug fixes etc. 
+
+37.  some very cool VM/370 add-ons
+
+37.  and more...much, much more
 
 
 
@@ -102,4 +108,4 @@ Enjoy!
 
 moshix
 <br>
-March,  2022
+May,  2022
