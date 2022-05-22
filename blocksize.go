@@ -13,70 +13,93 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 )
 
 func main() {
 
-	var lrecl int = 0 // initialize lrecl
-	var dasd = ""     //  initialize DASD type
+	var lrecl = 0 // initialize lrecl
+	var dasd = "" //  initialize DASD type
 
-	dasdPtr := flag.String("dasd", "", "DASD model")
+	flag.StringVar(&dasd, "dasd", "", "DASD model. One of 2311 2314 3330 3340 3350 3375 3380 3390 9345")
 	// default to no DASD
-	lreclPtr := flag.Int("lrecl", 0, "logical record length")
+	flag.IntVar(&lrecl, "lrecl", 0, "logical record length")
 	//default to zero lrecl
-	helpPtr := flag.Bool("help", false, "help flag")
-	// default  to no help
-	flag.Parse() //  this parses the command line arguments
 
-	lrecl = *lreclPtr // assign argument to main variable lrecl
-	dasd = *dasdPtr   // assign dasd type to main variable dasd
+	flag.Usage = func() {
+		fmt.Fprintln(flag.CommandLine.Output(), `BLK080I Usage example:
+BLK080I blocksize -dasd 3380 -lrecl 80`)
+		flag.PrintDefaults()
+	}
+
+	flag.Parse() //  this parses the command line arguments
 
 	if dasd == "" { // no dasd type was input
 		fmt.Println("\nBLK205R No DASD type entered. ")
 		fmt.Println("BLK206R pls enter DASD type or restart with -h for list of DASD types")
-		fmt.Scan(&dasd)
+		if _, err := fmt.Scan(&dasd); err != nil {
+			log.Fatalf("could not scan DASD: %v", err)
+		}
 	}
 	if lrecl == 0 { // no lrecl was input
 
 		fmt.Printf("\nBLK201R lrecl command line argument is not included.\n")
 		fmt.Println("BLK202R Please enter lrecl length: ")
-		fmt.Scan(&lrecl)
+		if _, err := fmt.Scan(&lrecl); err != nil {
+			log.Fatalf("could not scan lrecl: %v", err)
+		}
+
 	}
-	if *helpPtr { // user asked for help
-		fmt.Println("BLK080I Usage example:   ")
-		fmt.Println("BLK080I blockfactor -h -dasd=3380K -lrecl=80")
-		fmt.Println(" ")
-		fmt.Println("-h          show this help         ")
-		fmt.Println("-dasd=3380  IBM DASD type (see table below)")
-		fmt.Println("-lrecl=80   logical record length")
-		fmt.Println("Possible IBM DASD types:")
-		fmt.Println("2311 2314 3330 3340 3350 3375 3380 3390 9345")
-		return
+	blockSize, err := getBlockSize(dasd, lrecl)
+	if err != nil {
+		log.Fatalf("could not get blockSize: %v", err)
 	}
+
+	fmt.Println("\nBLK100I Ideal block size for DASD type", dasd, ", LRECL: ", lrecl, " is: ", blockSize)
+	fmt.Println("BLK900I END OF PROCESSING")
+}
+func getBlockSize(dasd string, lrecl int) (int, error) {
 	// build table with full track size
+	dasds := []*DASD{
+		{"2311", 3625},
+		{"2314", 7294},
+		{"3330", 13030},
+		{"3340", 8368},
+		{"3350", 19069},
+		{"3375", 35616},
+		{"3380", 47476},
+		{"3390", 56664},
+		{"9345", 46456},
+	}
 	table := make(map[string]int)
-	table["2311"] = 3625
-	table["2314"] = 7294
-	table["3330"] = 13030
-	table["3340"] = 8368
-	table["3350"] = 19069
-	table["3375"] = 35616
-	table["3380"] = 47476
-	table["3390"] = 56664
-	table["9345"] = 46456
-	/*  this is just an exampmle on how to print out table
-		    p.s. prints out in random order.... not sure why
+	for _, dasd := range dasds {
+		table[dasd.Name] = dasd.TrackSize
+	}
+	/*  this is just an example of how to print out table
+	   p.s. prints out in random order.
+	For an explanation, read https://go.dev/blog/maps -> iteration order
 	    	for model, size := range table {
 		         fmt.Println("Model",model, "size",size)
 		    } */
 
-	/* formula:  BLOCKIZE = INT(half of TRKSZIE/LRECL) * LRECL */
+	/* formula:  BLOCKSIZE = INT(half of TRKSIZE/LRECL) * LRECL */
 
-	halftracks := table[dasd] / 2 // half track size
-	blocksize := int((halftracks / lrecl) * lrecl)
+	tracks, ok := table[dasd]
+	if !ok {
+		return 0, fmt.Errorf("unknown dasd model: %s", dasd)
+	}
 
-	fmt.Println("\nBLK100I Ideal blocksize for DASD type", dasd, ", LRECL: ", lrecl, " is: ", blocksize)
-	fmt.Println("BLK900I END OF PROCESSING")
+	halfTracks := tracks / 2 // half track size
+	blockSize := (halfTracks / lrecl) * lrecl
 
-	return
+	return blockSize, nil
+}
+
+type DASD struct {
+	Name      string
+	TrackSize int
+}
+
+func (d *DASD) String() string {
+	return fmt.Sprintf("[Name: %8s, Track-Size: %8d]", d.Name, d.TrackSize)
 }
