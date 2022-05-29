@@ -85,7 +85,7 @@ Here are some of the programs and tools included in this repo:
 
 28. A payroll report source code in MVT Cobol with test data and the JES2 output listing
 
-29. The EDGAR full screen editor for VM/370 and VM/SP
+29. VM/370 extensions
 
 31. a disassembler
 
