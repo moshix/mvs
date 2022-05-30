@@ -87,6 +87,9 @@ Here are some of the programs and tools included in this repo:
 
 29. VM/370 extensions
 
+30. The TELPAR operating system for EDA (Electronic Design Automation) and 
+ ATG (Automatic Test Generation) of Stanford University
+
 31. a disassembler
 
 32.  Sample parameterhandling jobs, 
