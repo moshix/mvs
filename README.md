@@ -6,7 +6,7 @@
 # MVS, and VM Goodies
 
 
-Tapes are the standard way to exchange files, utilities and information between mainframes. Some mainframe shops are now connected thru the HNET Bitnet II international dial-up network. I also noticed that recently the industry is moving towards a new fad called the "World Wide Web", which is why I now make this colleciton of tools and utiliteis available on Github on this crazy new world of the Internet!
+Tapes are the standard way to exchange files, utilities and information between mainframes. Some mainframe shops are now connected thru the HNET Bitnet II international dial-up network. I also noticed that recently the industry is moving towards a new fad called the "World Wide Web", which is why I now make this colleciton of tools and utiliteis available on Github in this crazy new world of the Internet!
 
 For more information on HNET/Bitnet II, chck out here: http://moshix.dynu.net
 
