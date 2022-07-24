@@ -99,9 +99,11 @@ Here are some of the programs and tools included in this repo:
 
 36.  a link to an archive with a fully installed MVS 3.8 TK4- Update 8 with ISPF, BREXX, NJE38 compiler bug fixes etc. 
 
-37.  some very cool VM/370 add-ons
+37.  some very cool VM/370 add-ons. 
 
-37.  and more...much, much more
+38.  a tape with VM/370 games. 
+
+39.  and more...much, much more
 
 
 
@@ -110,4 +112,4 @@ Enjoy!
 
 moshix
 <br>
-May,  2022
+July,  2022
