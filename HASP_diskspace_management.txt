@@ -1,0 +1,28 @@
+HASP strives to make DASD storage allocation very efficiently, not only needing no access to DASD to allocate
+or de-allocate space, but also doing a good job of minimizing arm movement on moveable-head devices.    
+
+HASP requires the use of entire volumes for SPOOLing input/output.  The management of this storage works as follows: 
+
+A master cylinder bit-map is maintained in HASP.  This is a string of byes, in which each bit represents 1 cylinder 
+on the SPOOL disk.  A one-bit represents a free cylinder, while a zero-bit shows that the give cylinder is allocated 
+to some JOB.  
+
+HASP also remembers for each disk which cylinder was the last referenced, thus always noting the current position 
+of the read/write heads. 
+
+Two key bit-maps exist for each JOB, one for SYSIN data and the other for SYSOUT data. Whenever a cylinder is required 
+for a JOB, HASP searches for a free one in the following fashion:   
+
+-It first searches the master bit-map for a free cylinder at the current position of any read/write head, i.e. where 
+it can read or write without moving a head. 
+
+-It then searches for a free cylinder at +1 from the current head position, then –1 from each, followed by +2, -2, etc.,
+up to +8, -8 cylinders away from the current head position. 
+
+If the above fails, it searches sequentially through all cylinders in the master bit-map.  When a cylinder is found, 
+its bit is turned off (to zero) in the master bit-map, and turned on in the appropriate JOB bit-amp.  
+The overall effect of this process is to minimize head movement.    
+
+When disk storage for a JOB is to be released, the de-allocation scheme is extremely fast and efficient:   
+
+The JOB’s bit-maps are just ORed into the master bit-map, thus returning all of the cylinders to free storage.
