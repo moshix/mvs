@@ -14,11 +14,10 @@ this repository includes some very useful utilities for people working with MVS,
 
 Here are some of the programs and tools included in this repo:
 
-1. recv390 is a receive command for Linux or Windows. It extracts XMIT files. recv390 is by James Morrison. I made some fixes and 
-   somall enhancement to the program. compile simply with gcc -o recv90 recv390.c.
+1. recv390 is a receive command for Linux or Windows. It extracts XMIT files. recv390 is by James Morrison. I made some fixes and small enhancements to the program. Compile simply with gcc -o recv90 recv390.c.
 
 
-2. SYCPLK.ccdk is a 3390-3 volume (SYSCPK) which incluedes about 10 or 12 compilers for the mainframe, including:
+2. SYCPLK.ccdk is a 3390-3 volume (SYSCPK) which includes about 10 or 12 compilers for the mainframe, including:
 
 - PLI F compiler
 - Cobol compiler from the 60s
