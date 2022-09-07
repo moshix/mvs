@@ -40,7 +40,7 @@ Here are some of the programs and tools included in this repo:
 
 5. my .vimrc file for VIM. It color highlights correctly JCl and assembler for S/370. 
 
-6. my PL/I implementation of the N x N queens problem
+6. NJE config files
 
 7. an output separator for Hercules printers
 
@@ -110,6 +110,6 @@ Here are some of the programs and tools included in this repo:
 
 Enjoy!
 
-moshix
+moshix   
 <br>
-July,  2022
+August,  2022  
