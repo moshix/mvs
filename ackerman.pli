@@ -1,0 +1,32 @@
+/******************************************************/
+/* This program evaluates the Ackermann function      */
+/* A(m,n), and increases the size of the stack        */
+/* because of the large number of recursive calls.    */
+/******************************************************/
+ack:
+    procedure options(main,stack(2000));
+    declare 
+        (m,maxm,n,maxn) fixed;
+    put skip list('Type max m,n: ');
+    get list(maxm,maxn);
+    put skip
+        list('         ',(decimal(n,4) do n=0 to maxn));
+    do m = 0 to maxm;
+       put skip list(decimal(m,4),':');
+       do n = 0 to maxn;
+          put list(decimal(ackermann(m,n),4));
+       end;
+    end;
+    stop;
+
+    ackermann:
+             procedure(m,n) returns(fixed) recursive;
+             declare (m,n) fixed;
+             if m = 0 then
+                return(n+1);
+             if n = 0 then
+                return(ackermann(m-1,1));
+             return(ackermann(m-1,ackermann(m,n-1)));
+    end ackermann;
+
+end ack;
