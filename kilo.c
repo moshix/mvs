@@ -143,6 +143,7 @@ struct editorSyntax HLDB[] = {
 /*** prototypes ***/
 
 void editorSetStatusMessage(const char *fmt, ...);
+void Help(const char *fmt, ...);
 void editorRefreshScreen();
 char *editorPrompt(char *prompt, void (*callback)(char *, int));
 
@@ -1101,11 +1102,6 @@ void initEditor() {
 
   if (getWindowSize(&E.screenrows, &E.screencols) == -1) die("getWindowSize");
   E.screenrows -= 2;
-}
-
-void Help() {
- editorSetStatusMessage(
-    "C^S save | C^K quit | C^F find | C^T Top | C^E bottom | C^A begLine | C^Z endLine");
 }
 
 
