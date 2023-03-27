@@ -33,10 +33,9 @@ clean:
 
 /*** defines ***/
 
-#define KILO_VERSION "0.0.2"
+#define KILO_VERSION "0.0.4"
 #define KILO_TAB_STOP 8
-#define KILO_QUIT_TIMES 2
-#define ARM_QUIT 0
+#define KILO_QUIT_TIMES 3
 
 #define CTRL_KEY(k) ((k) & 0x1f)
 
@@ -100,7 +99,7 @@ struct editorConfig {
   erow *row;
   int dirty;
   char *filename;
-  char statusmsg[80];
+  char statusmsg[90];
   time_t statusmsg_time;
   struct editorSyntax *syntax;
   struct termios orig_termios;
@@ -994,16 +993,6 @@ void editorProcessKeypress() {
       write(STDOUT_FILENO, "\x1b[H", 3);
       exit(0);
       break;
-   case CTRL_KEY('q'):
-        if (E.dirty && ARM_QUIT > 0) {
-        editorSetStatusMessage("WARNING!!! File has unsaved changes. "
-          "Press Ctrl-C  to quit.");
-        return;
-      }
-      write(STDOUT_FILENO, "\x1b[2J", 4);
-      write(STDOUT_FILENO, "\x1b[H", 3);
-/*      exit(0); */
-     break;
 
     case CTRL_KEY('s'):
       editorSave();
@@ -1040,9 +1029,12 @@ void editorProcessKeypress() {
       break;
 
     case BACKSPACE:
-    case CTRL_KEY('h'):
+      if (c == DEL_KEY) editorMoveCursor(ARROW_RIGHT);
+      editorDelChar();
+      break;
+    case CTRL_KEY('h'): /* Ctrl X show meny */
         editorSetStatusMessage(
-    "C^S save | C^K quit | C^F find | C^T Top | C^E bottom | C^A begLine | C^Z endLine");
+    "v0.0.4 - C^S save | C^K quit | C^F find | C^T Top | C^E bottom | C^A begLine | C^Z endLine");
         break;
     case DEL_KEY:
       if (c == DEL_KEY) editorMoveCursor(ARROW_RIGHT);
@@ -1122,3 +1114,30 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
+
+/*
+const reset = "\x1b[0m"
+const bright = "\x1b[1m"
+const dim = "\x1b[2m"
+const underscore = "\x1b[4m"
+const blink = "\x1b[5m"
+const reverse = "\x1b[7m"
+const hidden = "\x1b[8m"
+
+const black = "\x1b[30m"
+const red = "\x1b[31m"
+const green = "\x1b[32m"
+const yellow = "\x1b[33m"
+const blue = "\x1b[34m"
+const magenta = "\x1b[35m"
+const cyan = "\x1b[36m"
+const white = "\x1b[37m"
+
+const BGblack = "\x1b[40m"
+const BGred = "\x1b[41m"
+const BGgreen = "\x1b[42m"
+const BGyellow = "\x1b[43m"
+const BGblue = "\x1b[44m"
+const BGmagenta = "\x1b[45m"
+const BGcyan = "\x1b[46m"
+const BGwhite = "\x1b[47m" */
