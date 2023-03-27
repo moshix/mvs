@@ -3,6 +3,7 @@
 * v0.0.2  JCL and PLI 
 * v0.0.3  Added navigation shortcuts within file and lines
 * v0.0.4  Added backspace handling
+* v0.0.5  Arm logic for Ctrl K - Ctrl C
 
 * Makefile: 
 all: kilo
