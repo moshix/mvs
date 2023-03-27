@@ -3,7 +3,7 @@
 * v0.0.2  JCL and PLI 
 * v0.0.3  Added navigation shortcuts within file and lines
 * v0.0.4  Added backspace handling
-* v0.0.5  Arm logic for Ctrl K - Ctrl C
+* v0.0.5  Fast forward Ctrl P - Fast backwards Ctrl O
 
 * Makefile: 
 all: kilo
@@ -36,7 +36,7 @@ clean:
 
 /*** defines ***/
 
-#define KILO_VERSION "0.0.4"
+#define KILO_VERSION "0.0.5"
 #define KILO_TAB_STOP 8
 #define KILO_QUIT_TIMES 3
 
@@ -1031,13 +1031,21 @@ void editorProcessKeypress() {
       editorFind();
       break;
 
+    case CTRL_KEY('p'): /* move forward 25 lines */
+       E.cy = E.cy + 25;
+       break;
+
+     case CTRL_KEY('o'): /* move forward 25 lines */
+       E.cy = E.cy - 25;
+       break;
+
     case BACKSPACE:
       if (c == DEL_KEY) editorMoveCursor(ARROW_RIGHT);
       editorDelChar();
       break;
     case CTRL_KEY('h'): /* Ctrl X show meny */
         editorSetStatusMessage(
-    "v0.0.4 - C^S save | C^K quit | C^F find | C^T Top | C^E bottom | C^A begLine | C^Z endLine");
+    "v0.0.5 - C^S save | C^K quit | C^F find | C^T Top | C^E bottom | C^A begLine | C^Z endLine");
         break;
     case DEL_KEY:
       if (c == DEL_KEY) editorMoveCursor(ARROW_RIGHT);
