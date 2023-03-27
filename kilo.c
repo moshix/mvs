@@ -1,8 +1,10 @@
-/* based on original work by Salvatore Sanfilippo 2016 */
-/* enahnced by https://viewsourcecode.org/snaptoken/kilo/index.html */
-/* enahnced by moshix 2013 */
+/* editor lesson by  by https://viewsourcecode.org/snaptoken/kilo/index.html */
+/* moshix 2013 
+* v0.0.2  JCL and PLI 
+* v0.0.3  Added navigation shortcuts within file and lines
+* v0.0.4  Added backspace handling
 
-/* Makefile: 
+* Makefile: 
 all: kilo
 
 kilo: kilo.c
