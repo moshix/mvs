@@ -15,6 +15,20 @@
 //             REGION.GO=328K,PARM.GO='/1000'
 //ASM.SYSIN DD *
          PRINT GEN
+         MACRO 
+&LAB     XDECO  &REG,&TARGET
+&LAB     B      I&SYSNDX           branch around work area
+P&SYSNDX DS     0D,PL8             packed
+W&SYSNDX DS     CL13               char
+I&SYSNDX CVD    &REG,P&SYSNDX          convert to decimal
+         MVC    W&SYSNDX,=X'40202020202020202020212060'  nice mask
+         EDMK   W&SYSNDX,P&SYSNDX+2    edit and mark
+         BCTR   R1,0                   locate the right place
+         MVC    0(1,R1),W&SYSNDX+12    move the sign
+         MVC    &TARGET.(12),W&SYSNDX  move to target
+         MEND
+*
+*
 ACKERMAN CSECT
          USING  ACKERMAN,R12       r12 : base register
          LR     R12,R15            establish base register
