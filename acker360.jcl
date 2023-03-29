@@ -5,11 +5,11 @@
 //             TIME=1440,
 //             MSGLEVEL=(1,1)
 //SYSLIB      DD DSN=SYS2.MACLIB,DSN=SHR
-/
+//            DD DSN=SYS1.MACLIB,DSN=SHR
 //********************************************************************
 //*   THIS IS AN IMPLEMENTATION OF THE ACKERMAN FUNCTION
 //*   IT'S A NEAT WAY TO STRESS TEST YOUR SYSTEM SINCE THIS CAN 
-//*   VERY EASILY TAKE HOURS OR DAYS TO COMPUTER ON REAL HARDWARE
+//*   VERY EASILY TAKE HOURS OR DAYS TO COMPUTE ON REAL HARDWARE
 //********************************************************************
 //ULAM  EXEC ASMFCG,PARM.ASM=(OBJ,NODECK),MAC1='SYS2.MACLIB',
 //             REGION.GO=328K,PARM.GO='/1000'
