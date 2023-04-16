@@ -10,6 +10,7 @@
 # v 0.3 Color!
 # v 0.4 Generalized version for MacOs and Linux
 # v 0.5 Nicer output
+# v 0.6 Gets your external IP or timesout telling you no external IP
 
 
 # terminal handling globals
@@ -27,7 +28,7 @@ reset=`tput sgr0`
 
 #echo "These are your IPv4 addresses on your system"
 
-for nictype in en utun bridge docker tap tun ens eth
+for nictype in lo en utun bridge docker tap tun ens eth
 do 
   for counter in 0 1 2 3 4 5 6 100 101 102 103 104 160 161 162
      do
@@ -39,3 +40,5 @@ do
         fi
      done
 done
+# now lets get external IP or timeout
+echo -e "${blue}External IP: \t${white}"`timeout 2.3 curl ifconfig.me 2>/dev/null || echo "${red}no external IP${reset}"`
