@@ -1,57 +1,41 @@
 #!/bin/bash
-# Linux  all IPv4  addresses parser
+# Macos all addresses parser
+# run with ./nicparser.bash, for example in your .bash_profile
+#
 # Copyright 2023 by Moshix - All right reserved
 # You may only execute this script but not redistribute or enhance without first including the full 
 #  script in its entirety as comment in your own changes or enhancements
 # v 0.1 Humble beginnings
 # v 0.2 Exclude non IP4 interfaces
-# v 0.3 Linux usual NICs as well as Hercules tap/tun/docker stuff
-
-for counter in 0 1 ;
-do
-   result=`ifconfig docker"$counter" 2>/dev/null`
-   if grep -q "inet " <<< "$result"; then
-      echo -n -e "NIC docker$counter:\t"
-      ifconfig docker"$counter" |  grep "inet " | awk '{print $2}'
-   fi
-done
+# v 0.3 Color!
+# v 0.4 Generalized version for MacOs and Linux
+# v 0.5 Nicer output
 
 
-for counter in 0 1 2 3 4 5 6 160 161 162 164
-do
-   result=`ifconfig ens"$counter" 2>/dev/null`
-   if grep -q "inet " <<< "$result"; then
-      echo -n -e "NIC ens$counter:\t"
-      ifconfig ens"$counter" |  grep "inet " | awk '{print $2}'
-   fi
-done
+# terminal handling globals
+red=`tput setaf 1`
+green=`tput setaf 2`
+yellow=`tput setaf 3`
+blue=`tput setaf 4`
+magenta=`tput setaf 5`
+cyan=`tput setaf 6`
+white=`tput setaf 7`
+blink=`tput blink`
+rev=`tput rev`
+reset=`tput sgr0`
+# echo "${red}red text ${green}green text${reset}"
 
+#echo "These are your IPv4 addresses on your system"
 
-
-for counter in 0 1 2 3 4 5 6;
-do
-   result=`ifconfig eth"$counter" 2>/dev/null`
-   if grep -q "inet " <<< "$result"; then
-      echo -n -e "NIC eth$counter:\t"
-      ifconfig eth"$counter" |  grep "inet " | awk '{print $2}' 
-   fi
-done
-
-
-for counter in 0 1 2 3 4 5;
-do
-   result=`ifconfig tap"$counter" 2>/dev/null`
-   if grep -q "inet " <<< "$result"; then
-      echo -n -e "NIC tap$counter:\t"
-      ifconfig tap"$counter" |  grep "inet " | awk '{print $2}'
-   fi
-done
-
-for counter in 0 1 2 3 4 ;
-do
-   result=`ifconfig tun"$counter" 2>/dev/null`
-   if grep -q "inet " <<< "$result"; then
-      echo -n -e "NIC tun$counter:\t"
-      ifconfig tun"$counter" |  grep "inet " | awk '{print $2}'
-   fi
+for nictype in en utun bridge docker tap tun ens eth
+do 
+  for counter in 0 1 2 3 4 5 6 100 101 102 103 104 160 161 162
+     do
+        result=`ifconfig $nictype$counter 2>/dev/null`
+        if grep -q "inet " <<< "$result"; then #NIC exists...
+           echo -n -e "${blue}$nictype$counter:     \t${reset}"
+           ifconfig "$nictype$counter" |  grep "inet " | awk 'BEGIN{ORS=""}{print $2}' # ORS controls new line
+           echo  -e "${reset}"
+        fi
+     done
 done
