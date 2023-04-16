@@ -14,7 +14,7 @@
 # v 0.7 Get extenral IP optional with -e switch 
 # v 0.8 Set time out in second argument to n.n seconds (e.g. 2.1) with 2.2, only if -e is present, (e.g. -e 1.2)
 # v 0.9 Added more common Linux NICs
-# v 1.0 Now with multi-threading, with semaphore
+# v 1.0 Now with DNS check and user speed perception improvements
 
 version="1.0"
 
@@ -33,33 +33,15 @@ reset=`tput sgr0`
 # echo "${red}red text ${green}green text${reset}"
 }
 
-get_external() {
-semaphore=1
-ext=`timeout $delay curl ifconfig.me 2>/dev/null`
-semaphore=0
-#echo "external value from curl: $external"
-
-#echo -e "${blue}External IP: \t${white}"`timeout $delay curl ifconfig.me 2>/dev/null || echo "${red}no internet connection - or delay too short${reset}"`
-}
 
 # main loop here
-if [[ "$1" == "-e" ]]; then
-   if [[ -z "$2" ]]; then
-      delay=1.4
-      get_external & # call external IP routine
-   else
-      delay=$2
-      get_external & 
-   fi
-else
+set_color 
+if [[ "$1" != "-e" ]]; then
      echo "Use the -e 1.2 switch to get your external IP with timeout 1.2 secs" # we don't have color yet, to make things faster
 fi
 
-set_color 
-
-
-for nictype in lo wlan enp3s wlp2s en utun bridge docker tap tun ens eth vde-dnet-tap inettap 
-do 
+for nictype in lo en  # this gives the user the impression that the search for IPs is taking long, not the external IP check
+do
   for counter in 0 1 2 3 4 5 6 100 101 102 103 104 160 161 162
      do
         result=`ifconfig $nictype$counter 2>/dev/null`
@@ -72,14 +54,41 @@ do
 done
 
 
-if [[ "$semaphore" == 1 ]]; then
-   sleep 0.4 # give it another chance
+if [[ "$1" == "-e" ]]; then
+   if [[ -z "$2" ]]; then
+      delay=1.4
+      ext=`timeout $delay curl ifconfig.me 2>/dev/null`  
+   else
+      delay=$2
+      ext=`timeout $delay curl ifconfig.me 2>/dev/null` 
+   fi
 fi
 
-if [[ "$semaphore" == 1 ]]; then
+dnscheck=`dig -t srv www.google.com`
+
+for nictype in  wlan enp3s wlp2s utun bridge docker tap tun ens eth vde-dnet-tap inettap 
+do 
+  for counter in 0 1 2 3 4 5 6 100 101 102 103 104 160 161 162
+     do
+        result=`ifconfig $nictype$counter 2>/dev/null`
+        if grep -q "inet " <<< "$result"; then #NIC exists...
+           echo -n -e "${blue}$nictype$counter:     \t${reset}"
+           ifconfig "$nictype$counter" |  grep "inet " | awk 'BEGIN{ORS=""}{print $2}' # ORS controls new line
+           echo  -e "${reset}"
+        fi
+     done
+done
+
+if [[ -z "$dnscheck" ]]; then
+    sleep 0.2 # this gives external ip a bit more time
+else
+   echo -e "${blue}DNS config:  \t${white}OK ${reset}"
+fi
+
+if [[ -z "$ext" ]]; then
     echo -e "External IP: \t${red}no internet connection - or delay too short${reset}" # the other thread definetely not done yet
 else
-   echo -e "${blue}External IP: \t${white}"`timeout $delay curl ifconfig.me 2>/dev/null || echo "${red}no internet connection - or delay too short${reset}"`
+   echo -e "${blue}External IP: \t${white}$ext ${reset}"
 
 fi
 
