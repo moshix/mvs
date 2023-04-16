@@ -59,4 +59,6 @@ if [[ "$1" == "-e" ]]; then
       delay=$2
       get_external
    fi
+else
+     echo "${cyan}Use the -e 1.2 switch to get your external IP with timeout 1.2 secs${reset}"
 fi
