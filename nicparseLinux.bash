@@ -32,13 +32,13 @@ reset=`tput sgr0`
 
 get_external() {
 # now lets get external IP or timeout
-echo -e "${blue}External IP: \t${white}"`timeout $delay curl ifconfig.me 2>/dev/null || echo "${red}no internet connection${reset}"`
+echo -e "${blue}External IP: \t${white}"`timeout $delay curl ifconfig.me 2>/dev/null || echo "${red}no internet connection - or delay too short${reset}"`
 }
 
 # main loop here
 set_color
 
-for nictype in lo wlan enp3s wlp2s en utun bridge docker tap tun ens eth vde-dnet-tap inettap lxd
+for nictype in lo wlan enp3s wlp2s en utun bridge docker tap tun ens eth vde-dnet-tap inettap 
 do 
   for counter in 0 1 2 3 4 5 6 100 101 102 103 104 160 161 162
      do
