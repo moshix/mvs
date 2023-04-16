@@ -10,9 +10,12 @@
 # v 0.3 Color!
 # v 0.4 Generalized version for MacOs and Linux
 # v 0.5 Nicer output
-# v 0.6 Gets your external IP or timesout telling you no external IP
+# v 0.6 Gets your external IP or times out telling you no external IP
+# v 0.7 Get extenral IP optional with -e switch 
+# v 0.8 Set time out in second argument to n.n seconds (e.g. 2.1) with 2.2, only if -e is present, (e.g. -e 1.2)
+# v 0.9 Added more common Linux NICs
 
-
+set_color() {
 # terminal handling globals
 red=`tput setaf 1`
 green=`tput setaf 2`
@@ -25,10 +28,17 @@ blink=`tput blink`
 rev=`tput rev`
 reset=`tput sgr0`
 # echo "${red}red text ${green}green text${reset}"
+}
 
-#echo "These are your IPv4 addresses on your system"
+get_external() {
+# now lets get external IP or timeout
+echo -e "${blue}External IP: \t${white}"`timeout $delay curl ifconfig.me 2>/dev/null || echo "${red}no internet connection${reset}"`
+}
 
-for nictype in lo en utun bridge docker tap tun ens eth
+# main loop here
+set_color
+
+for nictype in lo wlan enp3s wlp2s en utun bridge docker tap tun ens eth
 do 
   for counter in 0 1 2 3 4 5 6 100 101 102 103 104 160 161 162
      do
@@ -40,5 +50,13 @@ do
         fi
      done
 done
-# now lets get external IP or timeout
-echo -e "${blue}External IP: \t${white}"`timeout 2.3 curl ifconfig.me 2>/dev/null || echo "${red}no external IP${reset}"`
+
+if [[ "$1" == "-e" ]]; then
+   if [[ -z "$2" ]]; then 
+      delay=1.8
+      get_external # call external IP routine
+   else
+      delay=$2
+      get_external
+   fi
+fi
