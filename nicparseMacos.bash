@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Macos all addresses parser
+# NIC addresses parser for Linux, AIX, Macos, Solaris
 # run with ./nicparser.bash, for example in your .bash_profile
 #
 # Copyright 2023 by Moshix - All right reserved
@@ -59,4 +59,6 @@ if [[ "$1" == "-e" ]]; then
       delay=$2
       get_external
    fi
+else
+     echo "${cyan}Use the -e 1.2 switch to get your external IP with timeout 1.2 secs${reset}"
 fi
