@@ -1,5 +1,5 @@
-#!/bin/bash
-# Macos all addresses parser
+#!/usr/bin/env bash
+# NIC addresses parser for Linux, AIX, Macos, Solaris
 # run with ./nicparser.bash, for example in your .bash_profile
 #
 # Copyright 2023 by Moshix - All right reserved
