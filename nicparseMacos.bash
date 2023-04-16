@@ -14,6 +14,9 @@
 # v 0.7 Get extenral IP optional with -e switch 
 # v 0.8 Set time out in second argument to n.n seconds (e.g. 2.1) with 2.2, only if -e is present, (e.g. -e 1.2)
 # v 0.9 Added more common Linux NICs
+# v 1.0 Now with multi-threading, with semaphore
+
+version="1.0"
 
 set_color() {
 # terminal handling globals
@@ -31,12 +34,29 @@ reset=`tput sgr0`
 }
 
 get_external() {
-# now lets get external IP or timeout
-echo -e "${blue}External IP: \t${white}"`timeout $delay curl ifconfig.me 2>/dev/null || echo "${red}no internet connection${reset}"`
+semaphore=1
+ext=`timeout $delay curl ifconfig.me 2>/dev/null`
+semaphore=0
+#echo "external value from curl: $external"
+
+#echo -e "${blue}External IP: \t${white}"`timeout $delay curl ifconfig.me 2>/dev/null || echo "${red}no internet connection - or delay too short${reset}"`
 }
 
 # main loop here
-set_color
+if [[ "$1" == "-e" ]]; then
+   if [[ -z "$2" ]]; then
+      delay=1.4
+      get_external & # call external IP routine
+   else
+      delay=$2
+      get_external & 
+   fi
+else
+     echo "Use the -e 1.2 switch to get your external IP with timeout 1.2 secs" # we don't have color yet, to make things faster
+fi
+
+set_color 
+
 
 for nictype in lo wlan enp3s wlp2s en utun bridge docker tap tun ens eth vde-dnet-tap inettap 
 do 
@@ -51,14 +71,19 @@ do
      done
 done
 
-if [[ "$1" == "-e" ]]; then
-   if [[ -z "$2" ]]; then 
-      delay=1.8
-      get_external # call external IP routine
-   else
-      delay=$2
-      get_external
-   fi
+
+if [[ "$semaphore" == 1 ]]; then
+   sleep 0.4 # give it another chance
+fi
+
+if [[ "$semaphore" == 1 ]]; then
+    echo -e "External IP: \t${red}no internet connection - or delay too short${reset}" # the other thread definetely not done yet
 else
-     echo "${cyan}Use the -e 1.2 switch to get your external IP with timeout 1.2 secs${reset}"
+   echo -e "${blue}External IP: \t${white}"`timeout $delay curl ifconfig.me 2>/dev/null || echo "${red}no internet connection - or delay too short${reset}"`
+
+fi
+
+
+if [[ "$1" == "-v" ]]; then
+      echo -e "${white}Version "$version"${reset}"
 fi
