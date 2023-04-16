@@ -32,7 +32,7 @@ reset=`tput sgr0`
 
 get_external() {
 # now lets get external IP or timeout
-echo -e "${blue}External IP: \t${white}"`timeout $delay curl ifconfig.me 2>/dev/null || echo "${red}no external IP${reset}"`
+echo -e "${blue}External IP: \t${white}"`timeout $delay curl ifconfig.me 2>/dev/null || echo "${red}no internet connection${reset}"`
 }
 
 # main loop here
