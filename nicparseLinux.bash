@@ -43,7 +43,6 @@ semaphore=0
 }
 
 # main loop here
-set_color
 if [[ "$1" == "-e" ]]; then
    if [[ -z "$2" ]]; then
       delay=1.4
@@ -53,9 +52,10 @@ if [[ "$1" == "-e" ]]; then
       get_external & 
    fi
 else
-     echo "${cyan}Use the -e 1.2 switch to get your external IP with timeout 1.2 secs${reset}"
+     echo "Use the -e 1.2 switch to get your external IP with timeout 1.2 secs" # we don't have color yet, to make things faster
 fi
 
+set_color 
 
 
 for nictype in lo wlan enp3s wlp2s en utun bridge docker tap tun ens eth vde-dnet-tap inettap 
@@ -71,12 +71,18 @@ do
      done
 done
 
+
 if [[ "$semaphore" == 1 ]]; then
-    echo -e "External IP: \t${red}no internet connection - or delay too short${reset}"
+   sleep 0.4 # give it another chance
+fi
+
+if [[ "$semaphore" == 1 ]]; then
+    echo -e "External IP: \t${red}no internet connection - or delay too short${reset}" # the other thread definetely not done yet
 else
    echo -e "${blue}External IP: \t${white}"`timeout $delay curl ifconfig.me 2>/dev/null || echo "${red}no internet connection - or delay too short${reset}"`
 
 fi
+
 
 if [[ "$1" == "-v" ]]; then
       echo -e "${white}Version "$version"${reset}"
