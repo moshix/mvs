@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Macos all addresses parser
 # run with ./nicparser.bash, for example in your .bash_profile
 #
