@@ -35,15 +35,11 @@ reset=`tput sgr0`
 }
 
 os_type() {
-unameOut="$(uname -s)"
-case "${unameOut}" in
-    Linux*)     ostype=Linux;;
-    Darwin*)    ostype=Mac;;
-    *)          ostype="UNKNOWN:${unameOut}"
-esac
 case "$OSTYPE" in
       freebsd*) ostype=FreeBSD;;
       win32*)   ostype=Windows;;
+      linux*)   ostype=Linux;;
+      darwin*)  ostype=Mac;;
       *)        ostype="UNKNOWN"
 esac
 #echo ${ostype}
