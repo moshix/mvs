@@ -14,9 +14,10 @@
 # v 0.7 Get extenral IP optional with -e switch 
 # v 0.8 Set time out in second argument to n.n seconds (e.g. 2.1) with 2.2, only if -e is present, (e.g. -e 1.2)
 # v 0.9 Added more common Linux NICs
-# v 1.0 Now with DNS check and user speed perception improvements
+# v 1.0 DNS check and user speed perception improvements
+# v 1.1 Which NIC to internet
 
-version="1.0"
+version="1.1"
 
 set_color() {
 # terminal handling globals
@@ -33,6 +34,17 @@ reset=`tput sgr0`
 # echo "${red}red text ${green}green text${reset}"
 }
 
+os_type() {
+unameOut="$(uname -s)"
+case "${unameOut}" in
+    Linux*)     ostype=Linux;;
+    Darwin*)    ostype=Mac;;
+    CYGWIN*)    ostype=Cygwin;;
+    MINGW*)     ostype=MinGw;;
+    *)          ostype="UNKNOWN:${unameOut}"
+esac
+#echo ${ostype}
+}
 
 # main loop here
 set_color 
@@ -46,7 +58,7 @@ do
      do
         result=`ifconfig $nictype$counter 2>/dev/null`
         if grep -q "inet " <<< "$result"; then #NIC exists...
-           echo -n -e "${blue}$nictype$counter:     \t${reset}"
+           echo -n -e "${blue}$nictype$counter:     \t\t${reset}"
            ifconfig "$nictype$counter" |  grep "inet " | awk 'BEGIN{ORS=""}{print $2}' # ORS controls new line
            echo  -e "${reset}"
         fi
@@ -72,7 +84,7 @@ do
      do
         result=`ifconfig $nictype$counter 2>/dev/null`
         if grep -q "inet " <<< "$result"; then #NIC exists...
-           echo -n -e "${blue}$nictype$counter:     \t${reset}"
+           echo -n -e "${blue}$nictype$counter:     \t\t${reset}"
            ifconfig "$nictype$counter" |  grep "inet " | awk 'BEGIN{ORS=""}{print $2}' # ORS controls new line
            echo  -e "${reset}"
         fi
@@ -82,13 +94,13 @@ done
 if [[ -z "$dnscheck" ]]; then
     sleep 0.2 # this gives external ip a bit more time
 else
-   echo -e "${blue}DNS config:  \t${white}OK ${reset}"
+   echo -e "${blue}DNS config:  \t\t${white}OK ${reset}"
 fi
 
 if [[ -z "$ext" ]]; then
     echo -e "External IP: \t${red}no internet connection - or delay too short${reset}" # the other thread definetely not done yet
 else
-   echo -e "${blue}External IP: \t${white}$ext ${reset}"
+   echo -e "${blue}External IP: \t\t${white}$ext ${reset}"
 
 fi
 
@@ -96,3 +108,16 @@ fi
 if [[ "$1" == "-v" ]]; then
       echo -e "${white}Version "$version"${reset}"
 fi
+
+os_type # call os type determination 
+if [[ "$ostype" == "Linux" ]]; then
+ routenic=` route | grep '^default' | grep -o '[^ ]*$'`  # for Linux
+ echo -e "${blue}NIC to Internet: \t${white}$routenic${reset}"
+fi
+
+
+if [[ "$ostype" == "Mac" ]]; then
+ routenic=`route -n get default | grep 'interface:' | grep -o '[^ ]*$'`
+ echo -e "${blue}NIC to Internet: \t${white}$routenic${reset}"
+fi
+
