@@ -18,8 +18,9 @@
 # v 1.1 Which NIC to internet
 # v 1.2 Add more NIC types and handle loopback better
 # v 1.3 Hanlde virtual NICS like ens160:1
+# v 1.4 -n switch provides no color for better machine further passing in out (ie in pipe (
 
-version="1.3"
+version="1.4"
 
 set_color() {
 # terminal handling globals
@@ -48,7 +49,10 @@ esac
 }
 
 # main loop here
-set_color 
+if [[ "$1" != "-n" ]]; then
+   set_color  # user didnt' specify no color
+fi
+
 if [[ "$1" != "-e" ]]; then
      echo "Use the -e 1.5 switch to get your external IP with timeout 1.5 secs" # we don't have color yet, to make things faster
 fi
@@ -59,7 +63,7 @@ os_type # find out which OS
 if [[ "$ostype" == "Linux" ]]; then
    result=`ifconfig lo  2>/dev/null`
    if grep -q "inet " <<< "$result"; then #NIC exists...
-           echo -n -e "${blue}lo:     \t\t${reset}"
+           echo -n -e "${blue}lo:     \t\t\t${reset}"
            ifconfig lo |  grep "inet " | awk 'BEGIN{ORS=""}{print $2}'
            echo  -e "${reset}"
    fi
@@ -80,7 +84,7 @@ do
 done
 
 
-if [[ "$1" == "-e" ]] || [[ "$1" == "-v" ]]; then
+if [[ "$1" == "-e" ]] || [[ "$1" == "-v" ]] || [[ "$1" == "-n" ]]; then
    if [[ -z "$2" ]]; then
       delay=1.4
       ext=`timeout $delay curl ifconfig.me 2>/dev/null`  
