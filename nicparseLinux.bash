@@ -80,7 +80,7 @@ do
 done
 
 
-if [[ "$1" == "-e" ]]; then
+if [[ "$1" == "-e" ]] || [[ "$1" == "-v" ]]; then
    if [[ -z "$2" ]]; then
       delay=1.4
       ext=`timeout $delay curl ifconfig.me 2>/dev/null`  
@@ -122,11 +122,6 @@ else
 fi
 
 
-if [[ "$1" == "-v" ]]; then
-      echo -e "${white}Version "$version"${reset}"
-fi
-
-os_type # call os type determination 
 if [[ "$ostype" == "Linux" ]]; then
  routenic=`route | grep '^default' | grep -o '[^ ]*$'`  # for Linux
  echo -e "${blue}NIC to Internet: \t${white}$routenic${reset}"
@@ -142,4 +137,8 @@ if [[ -z "$dnscheck" ]]; then
     sleep 0.2 # this gives external ip a bit more time
 else
    echo -e "${blue}DNS config:  \t\t${white}OK ${reset}"
+fi
+
+if [[ "$1" == "-v" ]]; then
+      echo -e "${cyan}Version:\t\t"${white}$version"${reset}"
 fi
