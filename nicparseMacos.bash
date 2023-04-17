@@ -39,9 +39,12 @@ unameOut="$(uname -s)"
 case "${unameOut}" in
     Linux*)     ostype=Linux;;
     Darwin*)    ostype=Mac;;
-    CYGWIN*)    ostype=Cygwin;;
-    MINGW*)     ostype=MinGw;;
     *)          ostype="UNKNOWN:${unameOut}"
+esac
+case "$OSTYPE" in
+      freebsd*) ostype=FreeBSD;;
+      win32*)   ostype=Windows;;
+      *)        ostype="UNKNOWN"
 esac
 #echo ${ostype}
 }
