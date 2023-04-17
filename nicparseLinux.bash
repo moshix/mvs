@@ -17,8 +17,9 @@
 # v 1.0 DNS check and user speed perception improvements
 # v 1.1 Which NIC to internet
 # v 1.2 Add more NIC types and handle loopback better
+# v 1.3 Hanlde virtual NICS like ens160:1
 
-version="1.2"
+version="1.3"
 
 set_color() {
 # terminal handling globals
@@ -100,6 +101,15 @@ do
            echo -n -e "${blue}$nictype$counter:     \t\t${reset}"
            ifconfig "$nictype$counter" |  grep "inet " | awk 'BEGIN{ORS=""}{print $2}' # ORS controls new line
            echo  -e "${reset}"
+           for virtual in :0 :1 :2 :3 :4 :5 :6 :6
+              do
+                resultvirt=`ifconfig $nictype$counter$virtual 2>/dev/null`
+                if grep -q "inet " <<< "$resultvirt"; then #virtual NIC exists...
+                   echo -n -e "${blue}$nictype$counter$virtual:     \t\t${reset}"
+                   ifconfig "$nictype$counter$virtual" |  grep "inet " | awk 'BEGIN{ORS=""}{print $2}' # ORS controls new line
+                   echo  -e "${reset}"
+                fi
+               done 
         fi
      done
 done
