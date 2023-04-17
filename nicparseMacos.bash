@@ -53,8 +53,12 @@ if [[ "$1" != "-n" ]]; then
    set_color  # user didnt' specify no color
 fi
 
-if [[ "$1" != "-e" ]]; then
-     echo "Use the -e 1.5 switch to get your external IP with timeout 1.5 secs" # we don't have color yet, to make things faster
+if [[ "$1" == "-h" ]]; then
+     echo "-e 1.5 to get your external IP with timeout of 1.5 secs"
+     echo "-n to suppress color " 
+     echo "-v to show the version" 
+     echo "-h to show this help" 
+     exit 0
 fi
 
 os_type # find out which OS
