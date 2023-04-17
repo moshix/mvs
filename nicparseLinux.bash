@@ -16,8 +16,9 @@
 # v 0.9 Added more common Linux NICs
 # v 1.0 DNS check and user speed perception improvements
 # v 1.1 Which NIC to internet
+# v 1.2 Add more NIC types and handle loopback better
 
-version="1.1"
+version="1.2"
 
 set_color() {
 # terminal handling globals
@@ -51,6 +52,19 @@ if [[ "$1" != "-e" ]]; then
      echo "Use the -e 1.5 switch to get your external IP with timeout 1.5 secs" # we don't have color yet, to make things faster
 fi
 
+os_type # find out which OS
+
+# in Linux the loopback is just lo without a number
+if [[ "$ostype" == "Linux" ]]; then
+   result=`ifconfig lo  2>/dev/null`
+   if grep -q "inet " <<< "$result"; then #NIC exists...
+           echo -n -e "${blue}lo:     \t\t${reset}"
+           ifconfig lo |  grep "inet " | awk 'BEGIN{ORS=""}{print $2}'
+           echo  -e "${reset}"
+   fi
+fi
+
+
 for nictype in lo en  # this gives the user the impression that the search for IPs is taking long, not the external IP check
 do
   for counter in 0 1 2 3 4 5 6 100 101 102 103 104 160 161 162
@@ -77,7 +91,7 @@ fi
 
 dnscheck=`dig -t srv www.google.com`
 
-for nictype in  wlan enp3s wlp2s utun bridge docker tap tun ens eth vde-dnet-tap inettap 
+for nictype in  wlan enp3s wlp2s utun bridge docker tap tun ens eth vde-dnet-tap inettap lxcbr
 do 
   for counter in 0 1 2 3 4 5 6 100 101 102 103 104 160 161 162
      do
