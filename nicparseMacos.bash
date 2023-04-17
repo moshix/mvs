@@ -111,7 +111,7 @@ fi
 
 os_type # call os type determination 
 if [[ "$ostype" == "Linux" ]]; then
- routenic=` route | grep '^default' | grep -o '[^ ]*$'`  # for Linux
+ routenic=`route | grep '^default' | grep -o '[^ ]*$'`  # for Linux
  echo -e "${blue}NIC to Internet: \t${white}$routenic${reset}"
 fi
 
