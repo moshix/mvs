@@ -105,7 +105,9 @@ Here are some of the programs and tools included in this repo:
 
 40. A JCL and PLI aware small editor
 
-41.  and more...much, much more
+41. A generalized IP address parser for all your NICS (important when you do IPv4 stuff with Hercules)  
+
+42.  and more...much, much more
 
 
 
@@ -114,4 +116,4 @@ Enjoy!
 
 moshix   
 <br>
-March, 2023 
+April, 2023 
