@@ -49,7 +49,7 @@ esac
 # main loop here
 set_color 
 if [[ "$1" != "-e" ]]; then
-     echo "Use the -e 1.2 switch to get your external IP with timeout 1.2 secs" # we don't have color yet, to make things faster
+     echo "Use the -e 1.5 switch to get your external IP with timeout 1.5 secs" # we don't have color yet, to make things faster
 fi
 
 for nictype in lo en  # this gives the user the impression that the search for IPs is taking long, not the external IP check
@@ -91,14 +91,8 @@ do
      done
 done
 
-if [[ -z "$dnscheck" ]]; then
-    sleep 0.2 # this gives external ip a bit more time
-else
-   echo -e "${blue}DNS config:  \t\t${white}OK ${reset}"
-fi
-
 if [[ -z "$ext" ]]; then
-    echo -e "External IP: \t${red}no internet connection - or delay too short${reset}" # the other thread definetely not done yet
+    echo -e "External IP: \t\t${red}no internet connection - or delay too short${reset}" # the other thread definetely not done yet
 else
    echo -e "${blue}External IP: \t\t${white}$ext ${reset}"
 
@@ -121,3 +115,8 @@ if [[ "$ostype" == "Mac" ]]; then
  echo -e "${blue}NIC to Internet: \t${white}$routenic${reset}"
 fi
 
+if [[ -z "$dnscheck" ]]; then
+    sleep 0.2 # this gives external ip a bit more time
+else
+   echo -e "${blue}DNS config:  \t\t${white}OK ${reset}"
+fi
