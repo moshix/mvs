@@ -23,13 +23,17 @@ import sys
 def hexdump(filename):
     with open(filename, 'rb') as f:
         counter = 0
+        mem_f= "{:04d}".format(counter)
+        print("Dec    Hex       Content hex                                       Content asci")
+        print("----   --------- -----------------------------------------------   ------------")
         while True:
             chunk = f.read(16)
             if not chunk:
                 break
+            mem_f= "{:04d}".format(counter)
             hexdata = ' '.join(f'{byte:02X}' for byte in chunk)
             textdata = ''.join(chr(byte) if 32 <= byte <= 126 else '.' for byte in chunk)
-            print(f'{counter:08X}  {hexdata:<48}  {textdata}')
+            print(str(mem_f) +"   " +  f'{counter:08X}  {hexdata:<48}  {textdata}')
             counter += 16 
 
 if __name__ == '__main__':
