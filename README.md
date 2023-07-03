@@ -107,7 +107,9 @@ Here are some of the programs and tools included in this repo:
 
 41. A generalized IP address parser for all your NICS (important when you do IPv4 stuff with Hercules)  
 
-42.  and more...much, much more
+42.  An HP41 calculator in Fortran and REXX
+
+43.  and more...much, much more
 
 
 
@@ -116,4 +118,4 @@ Enjoy!
 
 moshix   
 <br>
-June, 2023 
+July, 2023 
