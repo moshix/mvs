@@ -3,13 +3,15 @@ COBOL compiler name, version, release, product numbers, GA and EOS dates
 Compiler Version                        Product number  General availability (GA)   End of support (EOS)
 ===================================     ==============  ========================    =====================
 
+OS/VS ANSI Cobol 1.2 LVL2             CB545-V2      1972-05-01                  1999-12-31
+OS/VS ANSI Cobol 1.4                  5734-CB2      1976-08-01                  1999-12-31
 OS/VS COBOL	1.2.3	                    5740-CB1	    1974-09-23	                1999-12-31
 OS/VS COBOL	1.2.4	                    5740-CB1	    1976-09-23	                1999-12-31
-VS COBOL II	1.3	                        5668-958	    1988-12-16	                1996-06-30
-VS COBOL II	1.4	                        5668-958	    1993-03-12	                2001-03-31
+VS COBOL II	1.3	                      5668-958	    1988-12-16	                1996-06-30
+VS COBOL II	1.4	                      5668-958	    1993-03-12	                2001-03-31
 COBOL/370 1.1	                        5688-197	    1991-12-20	                1997-09-30
-COBOL for MVS & VM 1.2	                5688-197	    1995-10-27	                2001-12-31
-COBOL for OS/390® & VM 2.1	            5648-A25	    1997-05-23	                2004-12-31
+COBOL for MVS & VM 1.2	              5688-197	    1995-10-27	                2001-12-31
+COBOL for OS/390® & VM 2.1	          5648-A25	    1997-05-23	                2004-12-31
 COBOL for OS/390 & VM 2.2	            5648-A25	    2000-09-29	                2004-12-31
 Enterprise COBOL for z/OS 3.1	        5655-G53	    2001-11-30	                2004-04-04
 Enterprise COBOL for z/OS 3.2	        5655-G53	    2002-09-27	                2005-10-03
@@ -27,4 +29,4 @@ Enterprise COBOL Value Unit z/OS 6.2	5697-V61	    2017-09-08	                Not
 Enterprise COBOL for z/OS 6.3	        5655-EC6	    2019-09-06 	                Not announced yet
 Enterprise COBOL Value Unit z/OS 6.3	5697-V61	    2019-09-06 	                Not announced yet
 Enterprise COBOL for z/OS 6.4	        5655-EC6	    2022-05-27	                Not announced yet
-Enterprise COBOL Value Unitf z/OS1 6.4	5697-V61	    2022-05-27	                Not announced yet
+Enterprise COBOL Value Unit z/OS 6.4  5697-V61	    2022-05-27	                Not announced yet
