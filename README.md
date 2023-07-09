@@ -112,7 +112,7 @@ Here are some of the programs and tools included in this repo:
 43.  and more...much, much more
 
 
-To rebuild failed saved segments CMSPIPES CMSBAM etc etc:
+To rebuild failed saved segments CMSPIPES CMSBAM etc etc, do this as MAINT640:
 <pre>vmfbld list segbld esasegs zvmsegs blddata ( All
 </pre>
 
