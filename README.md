@@ -118,8 +118,13 @@ z/OS 1.13 Indexed full set of manuals: https://www-40.ibm.com/servers/resourceli
 
 
 To rebuild failed saved segments CMSPIPES CMSBAM etc etc, do this as MAINT640:
-<pre>vmfbld list segbld esasegs zvmsegs blddata ( All
+<pre>
+q filepool connection for maint640 vmpsfs:
+pu2prod savecms
+vmfbld list segbld esasegs zvmsegs blddata ( All
 </pre>
+
+
 
 Enjoy!
 
