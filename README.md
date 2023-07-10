@@ -120,14 +120,32 @@ z/OS 1.13 Indexed full set of manuals: https://www-40.ibm.com/servers/resourceli
 To rebuild failed saved segments CMSPIPES CMSBAM etc etc, do this as MAINT640:
 <pre>
 q filepool connection for maint640 vmpsfs:
-pu2prod savecms
+put2prod savecms
+put2prod segments all
 vmfbld list segbld esasegs zvmsegs blddata ( All
 </pre>
 
+If the system name of z/VM has changed follow this:
+
+<pre>
+https://www.ibm.com/docs/en/zvm/7.2?topic=system-changing-name-target
+</pre>
+
+
+Then, do this:
+<pre>
+link to maint 190 as 190 mr
+access 190 K
+put2prod savecms
+put2prod segments all
+service restart
+service gcs bldnuc
+put2prod
+</pre>
 
 
 Enjoy!
 
 moshix   
 <br>
-July, 2023 
+Samedan, July, 2023 
