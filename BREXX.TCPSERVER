@@ -1,0 +1,131 @@
+/* ---------------------------------------------------------------------
+ * TCP Generic Server Example
+ *     Server handling is done in TCPSF (generic)
+ *     Only Events are defined here as call-back routines
+ * *** you need only to code the call-back routines
+ * *** the TCP handling is completely done in TCPSF, which is part of
+ * *** the BREXX delivery.
+ * ---------------------------------------------------------------------
+ */
+ port=3205            /* listening port      */
+ timeout=10           /* time out 10 seconds */
+ ustab=screate(100)   /* create user's table */
+ crlf='0D0A'x
+/* .....................................................................
+ * This is the call to the generic TCPSF module
+ * .....................................................................
+ */
+  call TCPSF port,timeout
+  call slist(ustab)
+exit 0
+
+
+/* *********************************************************************
+ * Here follow the Events, called by TCPSF as call-back
+ * #### This part is the EVENT-HANDLER, you need only code what should
+ * #### happen and set the RCs properly to tell TCPSF how to proceed
+ * *********************************************************************
+ */
+/* ---------------------------------------------------------------------
+ * Receive Data from Client:
+ *         arg(1) TCP socket token (channel to client)
+ *         arg(2) original data,
+ *         arg(3) ebcdic data translated from ascii
+ * ---------------------------------------------------------------------
+ */
+TCPData:
+  parse arg #fd,omsg,emsg
+  say time('l')' Received data 'omsg
+  say          ' Received a2E  'emsg
+  mode=Upper(word(emsg,1))
+  if mode='LOGON' then call logon
+  else if mode='SEND' then call sendmsg
+return 0     /* proceed normally  */
+return 4     /* close  connection */
+return 8     /* stop Server       */
+/* ---------------------------------------------------------------------
+ * Connect to socket was requested
+ *         arg(1): socket number
+ * This is just an informal call. All TCP related activites are done.
+ * you can for example maintain a list of users, etc.
+ * ---------------------------------------------------------------------
+ */
+TCPconnect: say time('l')' Connect Request for 'arg(1)
+   say copies("-",72)
+   parse arg socket
+   call sset(ustab,,"SOCKET "socket" 0 <????>")
+   msgs=e2a('Please Logon ')||crlf
+   say "New Client added: "socket", Request Logon"
+   call TCPSEND(socket,msgs,2)
+return 0     /* proceed normally  */
+return 4     /* reject connection */
+return 8     /* stop Server       */
+/* ---------------------------------------------------------------------
+ * Time out occurred, here you can perform non TCP related work.
+ * ---------------------------------------------------------------------
+ */
+TCPtimeout: say time('l')" TIMEOUT EVENT"
+return 0     /* proceed normally  */
+return 8     /* stop Server       */
+/* ---------------------------------------------------------------------
+ * Close one client socket
+ *         arg(1): socket number
+ * This is just an informal call. The close has already be peformed
+ * you can for example update your list of users, etc.
+ * ---------------------------------------------------------------------
+ */
+TCPclose: say time('l')' Close Event 'arg(1)
+return 8     /* stop Server       */
+return 0     /* proceed normally  */
+return 8     /* stop Server       */
+/* ---------------------------------------------------------------------
+ * Shut Down, application cleanup. TCP cleanup is done internally
+ * This is just an informal call. The TCP shutdown has been peformed
+ * you can do a final cleanup, etc.
+ * ---------------------------------------------------------------------
+ */
+TCPshutDown: say time('l')' SHUT DOWN  Event'
+return
+/* ---------------------------------------------------------------------
+ * Logon received as data input
+ * ---------------------------------------------------------------------
+ */
+logon:
+  say "Logon requested for socket: "#fd
+  ssi=ssearch(ustab,"SOCKET "#fd)
+  if ssi=0 then return 0
+  user=upper(word(emsg,2))
+  say "Socket found, add new user: "user
+  call sset(ustab,ssi,"SOCKET "#fd" 1 USER <"user">")
+  msgs=e2a('You are now logged-in 'user)||crlf
+  call TCPSEND(#fd,msgs,10)
+return 0
+/* ---------------------------------------------------------------------
+ * Send message request received
+ * ---------------------------------------------------------------------
+ */
+sendmsg:
+  user=upper(word(emsg,2))              /* User who should receive       */
+  msgs=e2a('Message from 'getuser(#fd)': 'subword(emsg,3))||crlf
+  ssi=ssearch(ustab,"USER <"user">")    /* search user receiving the msg */
+  if ssi=0 then do                      /* User not signed-on            */
+     say 'User not found 'user
+     call TCPSEND(#fd,'not deliverable: 'msgs,10) /* Return error msg to sender */
+     return 0
+  end
+  record=sget(ustab,ssi)                /* prepare message and send ...  */
+  socket=word(record,2)
+  say "User found: socket user', messsage "msgs
+  call TCPSEND(socket,msgs,10)
+return 0
+/* ---------------------------------------------------------------------
+ * Extract User from logon table
+ * ---------------------------------------------------------------------
+ */
+getuser:
+  parse arg token
+  ssi=ssearch(ustab,"SOCKET "token)
+  if ssi=0 then return ''
+  urec=sget(ustab,ssi)
+  return strip(translate(word(urec,5),,'<>'))
+return
