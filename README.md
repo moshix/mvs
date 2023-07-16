@@ -116,6 +116,7 @@ Useful Links and Invocations
 
 z/OS 1.13 Indexed full set of manuals: https://www-40.ibm.com/servers/resourcelink/svc00100.nsf/pages/zosv1r13-pdf-download?OpenDocument#ASM
 
+How to enable PERFKIT on z/VM (including web interface): https://www.ibm.com/support/pages/system/files/inline-files/Configuring_Perfkit.pdf
 
 To rebuild failed saved segments CMSPIPES CMSBAM etc etc, do this as MAINT640:
 <pre>
