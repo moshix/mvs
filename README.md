@@ -117,7 +117,7 @@ Useful Links and Invocations
 
 z/OS 1.13 Indexed full set of manuals: https://www-40.ibm.com/servers/resourcelink/svc00100.nsf/pages/zosv1r13-pdf-download?OpenDocument#ASM
 
-
+cool stuff: https://archive.org/details/vmhpo42
 
 
 Enjoy!
