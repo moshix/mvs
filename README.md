@@ -121,15 +121,14 @@ z/OS 1.13 Indexed full set of manuals: https://www-40.ibm.com/servers/resourceli
 cool stuff: https://archive.org/details/vmhpo42
 
 
-<br>
-Printing on VM<br>
+Printing on VM
+===============
 
-Start 00e cl a nosep, on the operator console.
-<br>
+Start 00e cl a nosep, on the operator console.  
 
-spool print system
-<br>print file listing a 
-<br><br>
+spool print system  
+<br>print file listing a   
+
 moshix   
 <br>
 Tel Aviv, October, 2023 
