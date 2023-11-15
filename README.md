@@ -116,12 +116,20 @@ Useful Links and Invocations
 ============================
 
 z/OS 1.13 Indexed full set of manuals: https://www-40.ibm.com/servers/resourcelink/svc00100.nsf/pages/zosv1r13-pdf-download?OpenDocument#ASM
+<br>
 
 cool stuff: https://archive.org/details/vmhpo42
 
 
-Enjoy!
+<br>
+Printing on VM<br>
 
+Start 00e cl a nosep, on the operator console.
+<br>
+
+spool print system
+<br>print file listing a 
+<br><br>
 moshix   
 <br>
 Tel Aviv, October, 2023 
