@@ -35,7 +35,7 @@ Here are some of the programs and tools included in this repo:
 
  I  tested in on everything from MVS 3.8 to OS390 all the way to z/OS 1.13 and it works beautifully. There is also a version of this volume on 3350 disk image, but OS390 and up don't have support for such old disks anymore. Copying stuff over to a 3390 disk isn't trivial because of the blocking required by certain compiler libraries. In short, there is a need for this volume. 
 
-3. sort.jcl is a sort job which stresses a Tk4 MVS 3.8 by creating millions of random records and then using IBM Sort to sort them. 
+3. sort.jcl is a sort job which stresses a Tk4 MVS 3.8 by creating millions of random records and then using IBM Sort to sort them. Requires TK4-
 
 4. The amazing standalone operating system for S/360 from Prof Madnick's seminal book on operating system. I also include the assembly output. 
 
@@ -63,54 +63,50 @@ Here are some of the programs and tools included in this repo:
 
 16. LOGREC cleaning JCL
 
-18. Creating users on TSO (Patata approach, which works very nicely)
+18. Creating users on TSO HOWTO
 
 19. Sort jobs example with IBM Sort (Iceman)
 
 21. My .X3270pro file (UPDATE: NOW WITH TURBOPASCAL theme)
 
-22. My RSCS config file for HNET
+22. ISPF Panel Rexx examples
 
-23. ISPF Panel Rexx examples
+23. JSON code for interaction between Golang and DB2
 
-24. JSON code for interaction between Golang and DB2
+24. A z/VM machine load information utility
 
-25. My c3270pro file with keybindings for z/VM, VM/370, MVS and z/OS
+25. A working copy of the original CHRIMAS EXEC (OR CHRISTMA EXEC) worm from 1988
 
-26. A z/VM machine load information utility
+26. A payroll report source code in MVT Cobol with test data and the JES2 output listing
 
-27. A working copy of the original CHRIMAS EXEC (OR CHRISTMA EXEC) worm from 1988
-
-28. A payroll report source code in MVT Cobol with test data and the JES2 output listing
-
-29. VM/370 extensions
-
-30. The TELPAR operating system for EDA (Electronic Design Automation) and 
+27. VM/370 editor
+    
+28. The TELPAR operating system for EDA (Electronic Design Automation) and 
  ATG (Automatic Test Generation) of Stanford University
 
-31. A disassembler
+29. A disassembler
 
-32.  Sample parameterhandling jobs, 
+30.  Sample parameterhandling jobs, 
 
-33.  submit bash script for z/OS or MVS workflow in vim
+31.  submit bash script for z/OS or MVS workflow in vim
 
-35.  3270 extended attribute codes
+32.  3270 extended attribute codes
+    
+33. A treatise on the handling of virtual storage in SVS, MFT, MVT and MVS
 
-36.  a link to an archive with a fully installed MVS 3.8 TK4- Update 8 with ISPF, BREXX, NJE38 compiler bug fixes etc. 
+34.  some very cool VM/370 add-ons. 
 
-37.  some very cool VM/370 add-ons. 
+35.  a tape with VM/370 games. 
 
-38.  a tape with VM/370 games. 
+36. Matlab for VM/CMS  
 
-39. Matlab for VM/CMS  
+37. A JCL and PLI aware small editor
 
-40. A JCL and PLI aware small editor
+38. A generalized IP address parser for all your NICS (important when you do IPv4 stuff with Hercules)  
 
-41. A generalized IP address parser for all your NICS (important when you do IPv4 stuff with Hercules)  
+39.  An HP41 calculator in Fortran and REXX
 
-42.  An HP41 calculator in Fortran and REXX
-
-43.  and more...much, much more
+40.  and more...much, much more
 
 Useful Links and Invocations
 ============================
@@ -131,4 +127,4 @@ spool print system
 
 moshix   
 <br>
-Tel Aviv, October, 2023 
+Tel Aviv, October 7, 2023 
