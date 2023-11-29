@@ -1,0 +1,69 @@
+
+Greg Price
+Nov 28   #3928   
+On 28/11/2023 7:23 am, Jay Maynard wrote:
+Virtual memory does not require separate address spaces. indeed, that was the advance of MVS (OS/VS2 version 2 and 3) over SVS (OS/VS2 version 1): SVS stood for Single Virtual Storage, with everything in one 16 MB address space, while MVS provides separate address spaces for each job/TSO user/started task.
+Yes!
+
+My statements about OS/360 MFT mapping to OS/VS1 and OS/360 MVT mapping to OS/VS2 were about how systems can function as if they had more memory than was "bolted on" to the actual machine thanks to virtual storage which "somehow" maps to real storage (insert the term DAT here) and exploits DASD to page out those parts of storage not needed for a while.
+
+If there are essential data structures that don't need to be referenced any time soon (including the instructions of the calling program), then their occupancy of real storage is a waste of "core" for at least numerous milliseconds, so let's page it out to DASD and use that real storage for something much more useful, likely (perhaps) another job running at the same time.
+
+But as Jay points out, we are all still in a single address space with this, where storage locations from zero to "max" (16MB - 1 if using 24-bit addressing) are all "common".
+
+"Common" means that my job's address 2 million (for example) addresses the same computer memory location as your job's address 2 million.
+
+If my job's address 2 million contained data that your job could not access at address 2 million then my address 2 million could be said to be in "private" storage.
+In that case, the data residing at my address 2 million (and presumably addresses nearby) are not in your "address space".
+Storage in my address space that you cannot access in your address space (and vice versa) is not "common" or "global" but can be said to be "private" or "local".
+
+MVS was the breakout evolutionary step.  Suddenly there is more than one address space in the OS image.
+But this also brings complications.
+
+Control blocks that need to be accessible from any address space reside in SQA (ignoring pre-genned control blocks in the nucleus). (SQA stands for "system queue area".)
+Control blocks that only need to be accessible from the executing address space reside in LSQA.  The L stands for "local".
+SQA is global storage at the top of the (pre-XA) address space. LSQA resides in "private high" storage.
+
+Previously, all dispatchable units of work were TCBs - tasks.  With MVS there was suddenly a requirement to be able to schedule work in another address space.  Enter SRBs.
+(TCB - Task Control Block - "invented" with OS/360 PCP.  SRB - Service Request Block - "invented" with MVS.  VS1, SVS, OS/360 never had SRBs, but all used TCBs to allow multitasking.)
+
+In the ASCB (Address Space Control Block) you will see the field ASCBSRBT.  This is the accumulator of SRB CPU time for the address space.  It has a notoriously low capture ratio, but that's beside the point for the moment.  The point is that SRBs consume CPU time that is accrued while no tasks are being dispatched.  Now in z/OS we have multiple types of SRBs but back in the MVS 3.8 epoch there was only one type of SRB - the original type which pre-empted all dispatchable tasks in that address space.
+
+There is actually a global SRB queue and a local SRB queue.  SRBs on the global queue have priority over any dispatchable address space.
+
+The dispatcher algorithm in MVS 3.8 is "dispatch the highest priority unit of work in the highest priority address space".
+
+SRB work always runs at a higher priority than TCB work within each address space.
+
+Control blocks such as TCBs, RBs, and the VSM (Virtual Storage Manager) control blocks pertaining to your private storage (what you have GETMAINed and what you haven't and what you have freed) all reside in in LSQA.
+
+The "region" that you request in your JCL (or default to) comes from "private low".  LSQA comes from "private high".  (If "private low" expanding up happens to meet up with "private high" expanding down then a storage request failure of some sort will occur.  If this occurs during step initiation such as asking for a region larger than the initiator can provide, then abend S822 results.  (Abend is a contraction of "abnormal end".)  This may depend on storage fragmentation due to previous jobs the initiator has run.  From time to time it may pay to drain all initiators and restart them - which means terminating and recreating address spaces with minty fresh LSQA and private high storage allocations.  z/OS has new settings to largely automate this.)
+
+LSQA is page fixed, as is SQA.  When an address space is swapped in, all that really tells you is that the address space's LSQA is resident in real storage and addressable within that address space. In MVS 3.8, the segment tables and the page tables reside in LSQA, so a swapped in address space is allowed to attempt to reference any of its own private storage.  If a program uses cross-memory access to a swapped-in address space, it is allowed to attempt to access any private page in that "target" address space.
+
+MVS also remembers all pages that were page-fixed by the application.  When a swap-in occurs, all pages that were page-fixed at swap-out time are also paged in and page-fixed before the application is redispatched.
+
+(In MVS/XA all the address space's segment and page tables were in ELSQA.  This is why a simple PGM=IEFBR14 step showed over 8MB in the EXT->SYS part of the IEF374I (which became IEF032I around z/OS 1.12 IIRC) message.
+In z/OS all these translate tables are in a system address space so they do not count in the SYS part of those messages.  Or so I thought.  A simple batch job step still shows about 11MB for the system private storage usage above the 16B line.  Maybe it's only data space and memory object translate tables that go there. Perhaps a real expert will tell us.)
+
+There are other occupiers of "private high" storage.  The "Scheduler Work Area" or SWA contains numerous entities.  Control blocks such as the ACT (pertaining to accounting that may have been specified on the JOB or EXEC JCL statement), the SCTs (one for each step, encoding COND= and other stuff) and SCTXs (which contains things like the program parameter), all the JFCBs (Job File Control Blocks) which hold the details of all of the allocated data sets together with the DSABs, and even the TIOT itself (not to mention the SIOT). I am thinking subpool 236 for the TIOT - from the READY prompt issue
+IM VB
+then
+TCB
+(which is not as a sophisticated command as it should have been) and then
++C
+and then
+F
+to view the TIOT of your TSO session.  It should report the subpool number somewhere (I just checked it works on z/OS) and it should be 236.  I had not checked this when Hercules was new (to me) and assumed the TIOT was in LSQA, and so I was puzzled when my first attempt at IMON option J (for MVS 3.8) abended because it was paged out in the target address space (which was not my TSO session). Turns out that subpool 236 can page out without a problem (for the system and well-behaved applications).
+
+But here comes my nitpick with Jay.  Being a former IBM developer (though not of BCP or anything actually interesting and/or pertinent to our interests here) I am acutely aware of the difference between a "version" and a "release" in IBM parlance.  A new version is a different "product" is the sense that it has a different PID ("product identifier"), whereas a new release of the "same" version implies that existing customers of the "old" release (which means they are licensed for that product or PID) are entitled to the new release of the same product or PID without any change to their license terms or payments to IBM.  (Whether customers have "entitlement" or not can be a big discussion point for IBM support. Sometimes customers raise a case (formerly a PMR when they were handled under ReTAIN) under a customer number which does not have entitlement.  Often the tech (often responsible for several customers) used the wrong customer number when opening the case (formerly PMR).)
+
+Now I admit this all gets a bit irrelevant when you go back to the "bundled" era when you bought an IBM box/system and all software (the OS software, at least) was "free".
+
+Nonetheless, I hold that SVS was the name given to OS/VS2 release (not version) 1, and it was OS/VS2 release 2 that was the first MVS.
+For example, I have gathered that MVS 2.7 (where we would say that 7 is the "mod" level in the modern V.R.M nomenclature) was a widespread release that was used by customers at the time.  Later on, release 3 became current, with 3.7 being stable and 3.8 being the SMP packaged version of 3.7 pretty much otherwise unchanged.
+
+In case it is not clear, my nitpick is that when Jay said "version" I think he should have said "release".
+But maybe I carry these things too far...
+:)
+
