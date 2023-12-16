@@ -41,7 +41,7 @@ Here are some of the programs and tools included in this repo:
 
 5. My .vimrc file for VIM. It color highlights correctly JCl and assembler for S/370. 
 
-6. NJE config files
+6. VM goodies
 
 7. The usefuljcl/ directory contains very useful JCL jobs which you will use on adaily basis as a MVS or z/OS SYSPROG
 
