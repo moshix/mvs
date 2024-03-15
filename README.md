@@ -29,11 +29,9 @@ Here are some of the programs and tools included in this repo:
 - and tons more!
 
  Simply mount the volume on your system, add it to the VTLST00 member as private, and then extend your JES2 to use the included
- SYS2.PROCLIB on SYSCPK. This proclib has procedures for all the included compilers. The run-time libraries, like SYSC.PLILIB are of course included in the volume. 
+ SYS2.PROCLIB on SYSCPK. This proclib has procedures for all the included compilers. The run-time libraries, like SYSC.PLILIB are of course included in the volume. There is also a version of this volume on 3350 disk image, but OS390 and up don't have support for such old disks anymore. Copying stuff over to a 3390 disk isn't trivial because of the blocking required by certain compiler libraries. In short, there is a need for this volume. 
 
- I  tested in on everything from MVS 3.8 to OS390 all the way to z/OS 1.13 and it works beautifully. There is also a version of this volume on 3350 disk image, but OS390 and up don't have support for such old disks anymore. Copying stuff over to a 3390 disk isn't trivial because of the blocking required by certain compiler libraries. In short, there is a need for this volume. 
-
-3. sort.jcl is a sort job which stresses a Tk4 MVS 3.8 by creating millions of random records and then using IBM Sort to sort them. Requires TK4-
+3. sort.jcl is a sort job which stresses a TK4 MVS 3.8 by creating millions of random records and then using IBM Sort to sort them. Requires TK4-
 
 4. The amazing standalone operating system for S/360 from Prof Madnick's seminal book on operating system. I also include the assembly output. 
 
@@ -51,7 +49,7 @@ Here are some of the programs and tools included in this repo:
 
 11. Some JCL for Cobol and VSAM on z/OS
 
-12. My REXX programs for both z/OS and MVS 3.8 to get information from the operating system, such as online users, IPL time etc. 
+12. A REXX programs for both z/OS and MVS 3.8 to get information from the operating system, such as online users, IPL time etc. 
 
 13. SMF reporting tools
 
@@ -115,8 +113,6 @@ z/OS 1.13 Indexed full set of manuals: https://www-40.ibm.com/servers/resourceli
 <br>
 
 
-
-
 Printing on VM
 ===============
 
@@ -127,4 +123,4 @@ spool print system
 
 moshix   
 <br>
-Tel Aviv, October 7, 2023 
+March 2024
