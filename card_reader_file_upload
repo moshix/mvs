@@ -1,0 +1,113 @@
+cat << 'END'
+//UPLOAD  JOB (TSO),
+//             'Upload Text',
+//             CLASS=A,
+//             MSGCLASS=A,
+//             MSGLEVEL=(1,1),
+//             USER=IBMUSER,
+//             PASSWORD=SYS1
+/*JOBPARM   LINES=1000
+//*
+//*  Creates MY.PDS.LOCATION
+//*  Adds all txt files from ./folder
+//*
+//NJE38MAC EXEC PGM=PDSLOAD
+//* Uncomment this line if using MVS/CE
+//*STEPLIB  DD  DSN=SYSC.LINKLIB,DISP=SHR
+//SYSPRINT DD  SYSOUT=*
+//SYSUT2   DD  DSN=MY.PDS.LOCATION,DISP=(NEW,CATLG),
+//             VOL=SER=PUB001,
+//             UNIT=3390,SPACE=(CYL,(1,1,5)),
+//             DCB=(BLKSIZE=3120,RECFM=FB,LRECL=80)
+//SYSUT1   DD  DATA,DLM=@@
+END
+
+for i in folder/*.txt;do
+    filename=$(basename -- "$i")
+    echo "./ ADD NAME=${filename%.*}"
+    cat $i
+done
+echo "@@“
+
+
+cat << 'END'
+//UPLOAD  JOB (TSO),
+//             'Upload Text',
+//             CLASS=A,
+//             MSGCLASS=A,
+//             MSGLEVEL=(1,1),
+//             USER=IBMUSER,
+//             PASSWORD=SYS1
+/*JOBPARM   LINES=1000
+//*
+//*  Creates MY.PDS.LOCATION
+//*  Adds all txt files from ./folder
+//*
+//NJE38MAC EXEC PGM=PDSLOAD
+//* Uncomment this line if using MVS/CE
+//*STEPLIB  DD  DSN=SYSC.LINKLIB,DISP=SHR
+//SYSPRINT DD  SYSOUT=*
+//SYSUT2   DD  DSN=MY.PDS.LOCATION,DISP=SHR
+//SYSUT1   DD  DATA,DLM=@@
+END
+
+for i in folder/*.txt;do
+    filename=$(basename -- "$i")
+    echo "./ ADD NAME=${filename%.*}"
+    cat $i
+done
+echo "@@“
+
+typically i'll use bash script.name.sh | ncat localhost 3505
+
+
+typically i'll use bash script.name.sh | ncat localhost 3505
+
+Something like this should work, point it at the root folder, for example if i have /home/mf/jobs/hts0314.job.nmvs.cntl it would run this script like bash build_jcl.sh /home/mf/jobs
+if [ -z "$1" ]; then
+    base_folder='./'
+else
+    base_folder=$1
+fi
+
+
+cat << 'END'
+//UPLOAD  JOB (TSO),
+//             'Upload Text',
+//             CLASS=A,
+//             MSGCLASS=A,
+//             MSGLEVEL=(1,1),
+//             USER=IBMUSER,
+//             PASSWORD=SYS1
+/*JOBPARM   LINES=1000
+END
+
+STEP=1
+for folder in $(find $base_folder -mindepth 1 -type d -printf '%P\n'); do 
+
+cat << END
+//*
+//*  Creating ${folder^^}
+//*  Adding all files from:
+//*  $base_folder/$folder
+//*
+//STEP$STEP EXEC PGM=PDSLOAD
+//* Uncomment this line if using MVS/CE
+//*STEPLIB  DD  DSN=SYSC.LINKLIB,DISP=SHR
+//SYSPRINT DD  SYSOUT=*
+//SYSUT2   DD  DSN=${folder^^},DISP=(NEW,CATLG),
+//             VOL=SER=PUB001,
+//             UNIT=3390,SPACE=(CYL,(1,1,5)),
+//             DCB=(BLKSIZE=3120,RECFM=FB,LRECL=80)
+//SYSUT1   DD  DATA,DLM=@#
+END
+
+    for i in $folder/*;do
+        filename=$(basename -- "$i")
+        echo "./ ADD NAME=${filename%.*}"
+        cat $i
+    done
+    echo '' # this is incase any of the files dont end on a newline
+    echo "@#"
+    STEP=$((STEP+1))
+done
