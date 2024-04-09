@@ -1,81 +1,104 @@
-/* Conway's Game of Life in REXX  */
+ /* CONWAY'S GAME OF LIFE FOR REXX  */
+ /* FOR BREXX ON MVS 3.8 and VM     */
+ /* COPYRIGHT 2024 BY MOSHIX        */
+ version="0.2"
+ rows = 20
+ cols = 30
+ generations = 5
 
-rows = 20
-cols = 40
-generations = 12
+ say 'Conway Game of life for BREXX'
+ say '============================='
+ say ' '
+ say 'Nr. Rows for this run: 'rows
+ say 'Nr. Cols for this run: 'cols
+ say ' '
+ /* initialize the board with random data */
 
-/* Initialize world with random data */
-do row = 1 to rows
+
+ do row = 1 to rows
     do col = 1 to cols
-        world.row.col = random(0, 1)
+       world.row.col = random(0,1)
     end
-end
+ end
 
-/* Display the initial world */
-say 'Initial World:'
-call DisplayWorld
+ /* display the initial random world */
 
-/* Run through generations */
-do gen = 1 to generations
-    say 'Generation:' gen
+ say 'Initial, random world'
+ say '====================='
+ say ' '
+ call DisplayWorld
+
+
+ /* run throu generations */
+ do gen = 1 to generations
+    say ' '
+    say 'Genneration nr: 'gen
+    say '------------------'
+    say ' '
     call NextGeneration
+    say ' '
     call DisplayWorld
-end
-exit
+ end
 
-NextGeneration:
-    /* Temporary world for calculations */
-    do row = 1 to rows
-        do col = 1 to cols
-            neighbors = CountNeighbors(row, col)
-            /* Apply rules of the Game */
-            if world.row.col = 1 then do
-                if neighbors < 2 | neighbors > 3 then
-                    temp.row.col = 0
-                else
-                    temp.row.col = 1
-            end
-            else do
-                if neighbors = 3 then
-                    temp.row.col = 1
-                else
-                    temp.row.col = 0
-            end
-        end
-    end
+ exit /* end of the program */
 
-    /* Copy the temp world to the main world */
-    do row = 1 to rows
-        do col = 1 to cols
-            world.row.col = temp.row.col
-        end
+
+ NextGeneration:
+ /* implement the rules of Conways Game of life */
+ do row = 1 to rows
+   do col = 1 to cols
+      neighbors = CountNeighbors(row, col)
+      if world.row.col = 1 then do
+         if neighbors < 2 | neighbors > 3 then
+            temp.row.col = 0
+         else
+            temp.row.col = 1
+         end
+      else do
+         if neighbors = 3 then
+              temp.row.col = 1
+         else
+              temp.row.col = 0
+      end
+   end
+ end
+
+ /* copy temp map to display map */
+ do row = 1 to rows
+    do col = 1 to cols
+       world.row.col = temp.row.col
     end
-    return
+ end
+return
+
 
 CountNeighbors:
-    parse arg row, col
-    neighbors = 0
-    do dr = -1 to 1
-        do dc = -1 to 1
-            if dr = 0 & dc = 0 then iterate
-            nr = row + dr
-            nc = col + dc
-            if nr > 0 & nr <= rows & nc > 0 & nc <= cols then
-                neighbors = neighbors + world.nr.nc
-        end
-    end
-    return neighbors
+/* count neighbors per cell */
+parse arg row,col
+neighbors = 0
+do dr = -1 to 1
+   do dc = -1 to 1
+      if dr = 0 & dc = 0 then iterate
+      nr = row + dr
+      nc = col + dc
+      if nr > 0 & nr <= rows & nc > 0 & nc <= cols then
+         neighbors = neighbors + world.nr.nc
+      end
+end
+return neighbors
 
-DisplayWorld:
-    do row = 1 to rows
-        line = ''
-        do col = 1 to cols
-            if world.row.col = 1 then
-                line = line || '#'
-            else
-                line = line || ' '
-        end
-        say line
-    end
-    return
+
+ DisplayWorld:
+ /* show the map on the screen */
+ do row = 1 to rows
+     line = ''
+     do col = 1 to cols
+        if world.row.col = 1 then
+           line = line || '#'
+        else
+           line = line || ' '
+     end
+     say line
+ end
+ return
 
