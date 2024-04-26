@@ -7,8 +7,8 @@ package main
    blocksize DASD LRECL parameters
 
 
-   (c) 2017 by moshix
-   Program source is under Apache license             */
+   (c) 2017-2024 by moshix
+                                                 */
 
 import (
 	"flag"
@@ -86,7 +86,7 @@ func getBlockSize(dasd string, lrecl int) (int, error) {
 
 	tracks, ok := table[dasd]
 	if !ok {
-		return 0, fmt.Errorf("unknown dasd model: %s", dasd)
+		return 0, fmt.Errorf("unknown DASD model: %s", dasd)
 	}
 
 	halfTracks := tracks / 2 // half track size
