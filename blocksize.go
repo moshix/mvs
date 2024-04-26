@@ -55,7 +55,7 @@ BLK080I blocksize -dasd 3380 -lrecl 80`)
 		log.Fatalf("could not get blockSize: %v", err)
 	}
 
-	fmt.Println("\nBLK100I Ideal block size for DASD type", dasd, ", LRECL: ", lrecl, " is: ", blockSize)
+	fmt.Println("\nBLK100I Ideal block size for DASD type", dasd, ", with LRECL ", lrecl, " is: ", blockSize)
 	fmt.Println("BLK900I END OF PROCESSING")
 }
 func getBlockSize(dasd string, lrecl int) (int, error) {
