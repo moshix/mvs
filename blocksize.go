@@ -1,8 +1,8 @@
 package main
 
 /*
-   blocksize
-   block size calculator for most IBM DASDs
+   blocksize.go
+   A block size calculator for most emulated IBM DASDs
    invoke with:
    blocksize DASD LRECL parameters
 
