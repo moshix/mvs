@@ -1,0 +1,245 @@
+Console commands
+================
+
+
+**Managing the 3270 console**
+k a,ref shows areas on operator console
+k a,none – removes “out of line area” from console.  You may need to do k e,d to remove the area first
+k a,14 makes the area 14 lines deep
+k a,6,6 makes two areas A and B, can then use D A,L,L=B for to display the command  D A,L in window B
+Some commands,  eg display commands comes up in a “out of line” frame at bottom of the screen
+
+k d,f scroll forward, sometimes pf8 does this. Check with d pfk
+k e,d remove the bottom “out of line display” area
+Screen
+
+k q clear the backlog of queues messages
+k e clear the scrolling messages
+k s,ref display the current settings
+k s,del=rd have message scroll off the top automatically
+k s,del=n stop messages scrolling off the top
+k e,n  remove nth message from the top of the screen – useful of the messages do not scroll.
+d pfk
+k n,PFk=(001,CMD=’d a,l;d ts,l’) sets the pf key to the command strings separated by ;
+PA1 retrieve previous command
+If you lose the console
+
+v 700,offline
+V CN(L700),ONLINE
+
+**Useful MVS commands**
+d r,l What replies are outstanding – first point of  call when things are “hanging”
+d a,l display what jobs are active
+d a,l,userid=PAICE display what jobs are active for the given userid
+d u,dasd,online display online disks
+d u,,,a80,16 display from a80 for 16
+d u,vol=a3res1 display the unit with this volume
+d ts,l what TSO users are active
+d omvs is OMVS active
+d omvs,f display mounted file systems
+d omvs,options
+d xcf,str lists the structures
+d xcf,strname=xxxx displays info about an individual structure
+d iplinfo gives IPL time as well as parameters used during IPL
+d ssi displays the configured subsystems
+cancel job
+cancel u=paice cancel the TSO userid
+s proc  You start many “system” jobs via a proclib member
+p proc Stop a  “system” job – if they are set up to listen to the stop command
+p jobname.id,A=1234   for example when S CICS.CICS1, and S CICS,CICS2 was issued
+d grs,res=(*) what resources you can display on
+d grs,res=(SYSDSN)   for finding out enqueues etc on resources
+d grs,c  to list resources with contentions
+d grs,e,c  list the resource every one is waiting on
+setprog apf,add,dsn=csq.scsqauth,volume=myres1  make a library APF authorised.  Used when defining subsystems.
+VTAM
+d net,id=
+z net,quick shut down vtam
+v net,act,id=…
+v net,inact,id=…
+Subsystem eg DB2, MQ
+setssi add,s=csq9,i=csq3ini,initparm=’CSQ3EPX,%CSQ9,M’
+%csq9 start qmgr %csq9 matches from previous line
+setssi add,s=dbcg,i=dsn3ini,initparm=’csqnEPX,-DBCG,M’
+-dbcg start db2
+d ssi  look for your subsystem
+d ssi,sub=csq9  display the subsystem of interest
+TCP
+d TCPIP what TCP stacks are available. It may give 1 TCPIP99 CS V2R3 ACTIVE,2 TCPIP CS V2R3 ACTIVE
+d TCPIP,TCPIP99,NETSTAT,CONN  if more than one TCPIP, specify which one ( eg TCPIP 99)
+d TCPIP,,NETSTAT,CONN if only one TCP address space
+d tcpip,tcpip,netstat,HOME   display the IP addresses used by this TCP stack
+JES2
+The command prefix is £ or $ depending on your system and keyboard
+
+$djes2  display the current activity in the JES2 address space,  Outstanding I/O, Active address spaces, Active networking devices
+$di display initiators
+$di1-5
+$Pi2-3 stop initiators 2 to 3
+$si2-3  start initiators 2 to 3
+$add prt1,unit=000e
+$dprt*
+$dprt1
+$sprt1  may have to issue command twice – once after it prompts about set up
+$pprt1 stop the printer
+$DU,STA what units (printers etc) are started
+$pjes2 stop jes after every thing is quiesced
+$T JOBCLASS(STC),OUTDISP=(,) where is the output of my STC going?
+  
+**Commands useful when the spool has filled up**
+
+$DSPOOL how full is the spool
+$D JOBDEF display the number of JOES ( Job Output elements = numbers of files) JOENUM can be increased dynamically using $T OUTDEF,JOENUM=xxxx.  Don’t forget to change it in SYS1.PARMLIB(JESPRMxx) in order to make the change permanent.
+$DJQ,SPL=(%>1) which jobs are using more than 1% of the spool
+$DS,SPL=(%>1) which STCs are using more than 1% of the  spool
+$dt,spl=(%>1) which TSO are using more than 1% of the spool
+$DJQ,DAYS>2 which jobs are more than 2 days old
+$DO JQ,JM=CCP* display all output for jobs beginning with CCP also $DO S and $do S
+$PO JQ,JM=CCP* Purge all output for jobs beginning with CCP also $PO S and $po S
+$DO JQ,AGE>4 Which output data sets are more than 4 days old
+$PO JQ,AGE>4  Purge output data sets are more than 4 days old also $PO S and $po S
+$do jq,jm=cp7*,a>7 Which output data sets belong to cp7* and are a week old also $DO S and $do S
+$po jq,jm=im7*,a>7 Purge output data sets belong to im7* and are a week old also $PO S and $po S
+ZFS
+D OMVS,PFS  display the file systems OMVS knows about.
+f ZFS,QUERY,STATUS all releases – if they are not running under uss. See here.
+f omvs,pfs=zfs,query,status  2.2 or later if you are running ZFS in USS.  See here.
+f zfs,fsinfo,all display detailed information about zFS file systems = aggregates
+f omvs,pfs=zfs,query,…    eg all,dataset,iobydasd,vm.   Displays stats about the ZFS
+zfsadm configquery display the values so you can change them with…
+zfsadm config…. Change the ZFS configuration
+zfsadm aggrinfo ZFS.USERS Display the size etc of the ZFS 
+zfsadm grow -aggregate ZFS.USERS -size kbytes. Make the ZFS bigger
+  
+**TSO commands**  
+ddlist or isrddn what are my TSO allocations – useful for looking for ISPPLIB concatentation etc
+Line commands
+B Browse the first sixteen data sets or a single data set.
+E Edit the first sixteen data sets or
+a single data set.
+V View the first sixteen data sets or a single data set.
+M Show an enhanced member list for the first sixteen data sets or a single data set.
+F Free the entire DDNAME.
+C Compress a PDS using the existing allocation.
+I Provide additional data set information.
+Q Display list of users or jobs using a data set.
+Primary commands
+Apf Browse Con CList COUnt CUstom
+DUPlicates Enq EXclude Find Locate LOAD
+LONg LPa Member MList  Only Parmlib
+Reset Select SHort
+Member name (ddstring) Scan allocations for a particular member.
+Select modname  Search for a loaded module without searching any allocated data sets.
+CUstom Show the values in ISPTCM and some ISPF configurations.
+mount filesystem(‘PAICE.ABC.ZFS’) mountpoint(‘/u/paice/abc’) type(ZFS) mode(read)
+unmount filesystem(‘PAICE.ABC.ZFS’) normal
+  
+**RACF commands**  
+rlist mqcmds MQPA.* AUTHUSER
+permit IRR.DIGTCERT.** class(facility) access(read) id(systask)
+SETR RACLIST(facility)REFRESH   SETRacf options also SETROPTS RACLIST(STARTED) REFRESH
+RDEF MQQUEUE MQ*.* OWNER(SCENU) UACC(ALTER)
+PERMIT MQ*.* CLASS(MQQUEUE) ACCESS(ALTER)ID(USER1)
+permit ‘paice.**’ access(read) id(colin)
+ALU PAICE RESUME PASSWORD(NEW42DAY) reset the password and resume it (ALterUser)
+SEARCH CLASS(USER) mask(IBM) Display all userids beginning with IBM
+SEARCH CLASS(DATASET) NOMASK Display >all<  datasets.  The default is MASK(*) for your userid.
+#SET TRACE(CALLABLE(ALL|TYPE()|NOCALLABLE)   Turn on RACF trace to GTF
+#SET TRACE(CALLABLE(TYPE(40)),JOBNAME(CSQ9WEB)) for SAF keyring problems.
+SDSF
+OWNER myuserid to see jobs that I own, regardless of prefix.
+“I use ST command almost exclusively in stead of DA, O etc..”
+SYSNAME  allows you to see jobs on another connected system
+PREFIX abc displays jobs beginning with abc
+filter ? allows you to select on multiple criteria owner eq paice, jobname eq MQ*
+Sort … sort on column of data sort cpu%
+ARRange CPU% A REAL arranges the columns so the CPU% column is displayed after the REAL column
+Prefix commands
+S display the spool
+SE display in edit mode
+C issues JES command to cancel the job
+? displays the different output files within the job
+SJ allows you to edit the JCL and resubmit it
+log s display the system message log for your MVS system.
+log o displays the merged, sysplex-wide system message log
+ulog displays the output from commands you have issued
+MQ using CSQUTIL or equivilant command
+alter qmgr chlauth(disabled) connauth(‘ ‘)  turn off mq chinit connection security checking
+refresh security(*) type(connauth) and tell MQ to pick up the changes
+  
+**SMF**
+SETSMF INTVAL(01) change how often SMF drives the end of interval
+SETSMF MAXDORM(0010) how long SMF keeps data in its buffer before write it out
+SMS – ISMF
+Display all options on the ISMF panel 0 ISMF Profile.0 User Mode Selection  set to 2 For a Storage Administrator (SA)
+To tailor columns displayed, used view command, specify columns and save it
+Display disks and information about disks  2 Volume.1 Dasd ,
+Acquire Physical Data Y,
+Storage Group Name ” “
+CDS Name ” “
+Press enter
+Display storage group name , 6 Storage Group, 1. List
+and disks in the storage group 1. List,  then line operator listvol
+TASID
+TASID is a “monitor” tool developed internally within IBM to monitor activity on a z/OS system. It is displayed in ISPF on TSO.     It displays IPL info, storage usage, address space usage etc.   Think of unix “top” function.
+
+Note that some options may not  operate correctly on all z/OS systems. Download it from IBM here.
+
+  
+**USS Unix services**
+ls -T file display file tag, ASCII, EBCDIC etc ISO8859-1 is ASCII, code page, codepage
+chtag -p display/change file tag info
+chtag -t -c ISO8859-1 filename  change the filename to be oeditable
+whence name like which name, tells you where a command came from eg whence oedit is /bin/oedit
+tar  like zip
+cp copy files
+find
+find . -name *.sh all files of type .sh in the current directory
+find . -mtime +1 all files in the current directory modified older than one day ago
+find . -mtime -1 all files in the current directory modified less than one day ago
+find . -mtime 4 all files in the current directory modified exactly 4 days ago
+find . -ctime 3 all files with attributes change exactly 3 day ago
+find . -atime -1 all files in the current directory accessed less than one day ago. Though I do not see how this works in a R/O file system across IPLs
+find . -mtime -1 -a -type f files modified less than 1 day ago, and it is a regular file. -type d for dictionary
+mkdir 
+mkdir -p and the intermediate directories
+pax another way of packing files to make them portable. It keeps meta data.
+pax -W “seqparms=’space=(cyl,(30,30))'” -wzvf “//’COLIN.PAX.CONSOLE'” -x os390 *.c *.h *.s *.py to create a dataset with the contents.
+pax -vf “//’COLIN.PAX.CONSOLE'” *.s to list the dataset, matching *.s
+pax -rvf “//’COLIN.PAX.CONSOLE'” *.s to read the dataset matching *.s
+tar -tf myfile.pax To display contents of a pax file.  This can be used on Linux.
+tar -xf myfile.pax  name.type To extract name.type from a pax file. It keeps the directory structure from the pax file.
+TSO OMVS command for example the ESCape NOPFSHOW
+du -ska . display summary of the size of each file below ‘.’ directory in 1KB blocks
+du -ka . display the size of each file below ‘.’ directory in 1KB blocks.
+du -ka /u/paice gives the space on the directory
+du -ka /u/paice/* gives the space on the files within the directory
+du -ka . | sort display the size of each file below ‘.’ directory in 1KB blocks sorted in ascending size.
+cksum file  gives a checksum of a file, and number of bytes in the file.  There is the same command on Linux.  See here for commands on other platforms.
+od -t cx1 colin.conf > ab display a file in text and hex. x1 says one byte hex number. x4 is as an int.
+umask set or display the default permissions mask for when creating a unix file.
+WAS, Liberty,
+Angel processes
+f proc,DISPLAY,SERVERS
+f proc,DISPLAY,SERVERS,PID
+Liberty
+f proc,…
+WLM
+D WLM.
+
+V WLM,POLICY=….
+
+SLIP – to take an action when something happens
+D SLIP
+D SLIP=0001
+SLIP SET,MSGID=BPXM023I,ACTION=SVCD,END
+SLIP MOD,ENABLE ,ID=trapid
+SLIP MOD,DISABLE=trapid
+SLIP SET,COMP=122,ACTION=SVCD   for system abend code 122
+SLIP SET,IF,RANGE=(2060825A,2060825C),JOBNAME=PYT, ACTION=SVCD take a dump when in the range. Jobname can be started task name.
+OMVS
+iconv -f ISO8859-1 -t IBM-037 ascii_file  > ebcdic-file convert an ASCII file to EBCDIC
+iconv -f IBM-037 -t ISO8859-1 ebcdic_file  > ascii-file convert an EBCDIC file to ASCII
+IPCS
+LIST 20608252. ASID(X’0047′) LENGTH(X’1000′) INSTRUCTION display the data in instruction
+LIST 20608252. ASID(X’0047′) LENGTH(4096) str give the value with character representation
