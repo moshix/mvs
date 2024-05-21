@@ -106,13 +106,6 @@ Here are some of the programs and tools included in this repo:
   
 42.  and more...much, much more
 
-Useful Links and Invocations
-============================
-
-z/OS 1.13 Indexed full set of manuals: https://www-40.ibm.com/servers/resourcelink/svc00100.nsf/pages/zosv1r13-pdf-download?OpenDocument#ASM
-<br>
-
-
 Printing on VM
 ===============
 
