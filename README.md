@@ -114,6 +114,15 @@ Start 00e cl a nosep, on the operator console.
 spool print system  
 <br>print file listing a   
 
+CCKD support for Hercules
+=========================
+
+***@ubuntu:~$ sudo apt install zlib1g-dev
+
+***@ubuntu:~$ sudo apt install libbz2-dev
+
+
+
 moshix   
 <br>
 March 2024
