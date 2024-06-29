@@ -7,7 +7,9 @@
 # MVS and VM Goodies
 
 
-Tapes are the standard way to exchange files, utilities and information between mainframers. Some mainframe shops are now connected thru the HNET Bitnet II international dial-up network. I also noticed that recently the industry is moving towards a new fad called the "World Wide Web", which is why I now make this collection of tools and utilities available on Github in this crazy new world of the Internet!
+Tapes are the standard way to exchange files, utilities and information between mainframers. Some mainframe shops are now connected thru the HNET Bitnet II international dial-up network.  
+
+I also noticed that recently the industry is moving towards a new thing called the "World Wide Web", which is why I now make this collection of tools and utilities available on Github in this crazy new world of the Internet!
 
 This repository includes some very useful utilities for people working with MVS, z/OS, VM/SP and z/VM on real mainframes or emulated ones. Most of the topics covered by these programs are covered in my youtube mainframe channel here: https://www.youtube.com/channel/UCR1ajTWGiUtiAv8X-hpBY7w
 
