@@ -103,6 +103,8 @@ Here are some of the programs and tools included in this repo:
 39.  An HP41 calculator in Fortran and REXX
 
 40.  an IBM 1403 font
+    
+41. an assembler in bash
   
 42.  and more...much, much more
 
@@ -125,4 +127,4 @@ CCKD support for Hercules
 
 moshix   
 <br>
-March 2024
+July 2024
