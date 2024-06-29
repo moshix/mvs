@@ -1,3 +1,4 @@
+#!/bin/bash
 # this is the basic structure for an S/370 assembler in bash
 # (c) 2024 by moshix
 # can be easily extended
@@ -5,7 +6,7 @@
 # v 0.1 humble beginnings
 # v 0.2 first few instructions
 # v 0.3 CSECT and DSECT 
-#!/bin/bash
+
 
 # Instruction set (extendable)
 declare -A INSTRUCTIONS=(
@@ -26,7 +27,7 @@ declare -A INSTRUCTIONS=(
 assemble_line() {
     local line="$1"
     local instruction=$(echo "$line" | awk '{print $1}')
-    local operands=$(echo "$line" | awk '{print $2}')
+    local operands=$(echo "$line" | awk '{print $2, $3}')
 
     # Handle special directives
     case "$instruction" in
@@ -72,3 +73,4 @@ if [[ $# -ne 1 ]]; then
 fi
 
 assemble_file "$1"
+
