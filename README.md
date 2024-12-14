@@ -4,10 +4,10 @@
 <a href="https://hits.seeyoufarm.com"><img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fmoshix%2Fmvs&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false"/></a>
 [![View SBOM](https://img.shields.io/badge/sbom.sh-viewSBOM-blue?link=https%3A%2F%2Fsbom.sh%2Fad375d15-0553-4170-bb1e-a6e40ac5dd45)](https://sbom.sh/ad375d15-0553-4170-bb1e-a6e40ac5dd45)
 
-# MVS and VM Goodies
+# MVS and VM Software
 
 
-Tapes are the standard way to exchange files, utilities and information between mainframers. Some mainframe shops are now connected thru the HNET Bitnet II international dial-up network.  
+Tapes are the standard way to exchange files, utilities and information between mainframers. Some mainframe shops are now connected thru the HNET NJE international dial-up network.  
 
 I also noticed that recently the industry is moving towards a new thing called the "World Wide Web", which is why I now make this collection of tools and utilities available on Github in this crazy new world of the Internet!
 
@@ -96,7 +96,7 @@ Here are some of the programs and tools included in this repo:
 
 35.  a tape with VM/370 games. 
 
-36. Matlab for VM/CMS  
+36. Matlab for VM/CMS!!    
 
 37. A JCL and PLI aware small editor
 
@@ -108,7 +108,7 @@ Here are some of the programs and tools included in this repo:
     
 41. an assembler in bash
   
-42.  and more...much, much more
+42.  and more...much, much more  
 
 Printing on VM
 ===============
@@ -116,8 +116,8 @@ Printing on VM
 Start 00e cl a nosep, on the operator console.  
 
 spool print system  
-<br>print file listing a   
-
+print file listing a   
+  
 CCKD support for Hercules
 =========================
 
@@ -129,4 +129,4 @@ CCKD support for Hercules
 
 moshix   
 <br>
-July 2024
+January 2025
