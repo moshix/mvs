@@ -128,4 +128,4 @@ CCKD support for Hercules
 
 moshix   
 <br>
-January 2025
+Taipeh, January 2025
