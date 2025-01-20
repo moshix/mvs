@@ -1,3 +1,11 @@
+                                Moshix Shortcuts:
+                          1200 N 8 1 (no local echo)
+                          ATI+CONFIG to see configuration of device
+                          ATW"SSID,password" to connect to wifi
+                          ATDT"moshix.com,9919" to connect by telnet to that host and port
+
+
+
 Using:
 ------
 Upon initialization, or any time the ESP module is reset, the modem will display its version, and some information about the host hardware, and then read a configuration file from the internal SPIFFS to re-establish the previously set baud rate, and to attempt to re-connect to the previously connected wireless router.  The first time it is run, the firmware will set a baud rate of 1200 and display INITALIZED to let you know that no previous wifi configuration was found.  Once the serial terminal displays READY, it is ready to receive commands.  
