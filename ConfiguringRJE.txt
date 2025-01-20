@@ -1,0 +1,879 @@
+Not clear who the author of this is, but it's not me (moshix)
+
+
+               Configuring RJE on Vintage IBM Systems
+               --------------------------------------
+
+
+                          First Edition
+
+
+This is a compendium of all the knowledge I've gained and can find about how
+to configure and run Remote Job Entry terminals on the vintage IBM operating
+systems DOS, DOS/VS, OS/360, MVS, and VM/370.  I expect this body of
+knowledge of grow and there will be more editions of this document.  If
+you are interested in this subject, you should get the latest version you
+can find.
+
+Before we begin, I should probably talk a little bit about what RJE is and
+what it means on these old systems.  Veterans can skip down to the operating
+system that interests them, or to "Configuring Hercules" below.
+
+RJE obviously stands for Remote Job Entry.   It's simply a way to connect
+a card reader and printer to an IBM mainframe over a communications link
+so as to be able to send cards over the line and receive printouts in
+return.  Optionally, most RJE stations can also receive punched cards
+from mainframe jobs.
+
+There are very, very few big-iron mainframes in the world still running the
+old -- sorry, vintage -- operating systems I'm talking about in this
+document.  However, there's a emulator called Hercules that runs on Windows
+and Linux PCs that fully emulates an IBM System/370.  Intrepid mainframe
+programmers have resurrected the last and greatest versions of all the IBM
+public domain operating systems and gotten them to run on Hercules. However,
+most of these systems are not configured "out of the box" to support RJE.
+That's why you are reading this -- I'll tell you how to get RJE up and
+running.
+
+Remote Job Entry requires a host and a client.  The host is the OS running
+in the mainframe.  Real-world RJE occurred over bisyncronous lines with
+modems on each end, usually at a rate not exceeding 9600 bits per second.
+Hercules does not support a real bisyncronous line with a modem, and this
+is a good thing.  Instead, it emulates such a line over a TCP/IP connection.
+This is much faster and more reliable, and allows you to connect from any
+internet-connected PC to any internet-connected Hercules mainframe.  There
+are several RJE clients written for Hercules, and they emulate an IBM 3780
+or 2780 RJE terminal.  The one I use is RJE80, since I wrote it.  It offers
+an easy-to-use and pleasant Windows interface.  But any working client
+program should do (there's a command-line version of RJE80 for Windows and
+Linux too).
+
+This document doesn't tell you how to connect and use RJE.  RJE80 has a
+help button that will tell you that.  Instead, here we talk about RJE
+from the host's perspective.  Each operating system is different in how
+RJE is configured and operated.  
+
+One thing that is common is how you will tell Hercules about your 2703
+lines.
+
+
+Configuring Hercules
+--------------------
+
+First, before you can configure any OS for RJE lines, you must configure both
+Hercules and the OS to support the 2703 interface that RJE expects to use to
+talk to its remote stations.  Hercules is easy to configure.  Simply add
+a line like this one to your hercules.cnf file for each switched (dial-up)
+line you want to add to your virtual 370:
+
+0070 2703 dial=in lport=3780
+
+Pay attention to that lport= number.  That's the TCP/IP port that you will
+later give to RJE80 to inform it where to connect.  Each line must have its
+own unique port, but the number doesn't really matter, except it should be
+between 1025 and 9999.  The 0070 is of course the device number.  It's
+important because you are going to have to configure the OS to recognize the
+2703 lines you are putting into Hercules.  Here's an example of a bank of
+4 dial-up lines:
+
+0070 2703 dial=in lport=9001
+0071 2703 dial=in lport=9002
+0072 2703 dial=in lport=9003
+0073 2703 dial=in lport=9004
+
+What about leased lines?  The Hercules emulation supports those too. The only
+host OS that benefits from leased lines over dial-up is Os/360, which has a
+three-minute timeout that will disconnect a dial-up line after 3 minutes of
+inactivity.  This is annoying and won't happen on a leased line.  Neither MVS,
+nor DOS/VS, nor VM/370 have this timeout "feature".
+
+For those hosts dial-up is better. A leased line expects to be connected all the
+time.  RJE80 connections come and go, and are better suited for dialup.  If
+you were connecting two mainframes that would be running all the time, the
+leased line (non-switched in IBM parlance) makes more sense. Why would you
+connect two mainframes?  Well, VM/370 RSCS can be a host or a client to
+JES2, so you could connect a VM machine to an MVS one and exchange files and
+submit jobs without RJE80 or another RJE terminal emulator being involved.
+Also, there are small RJE emulator programs written by IBM that in theory
+could also be RJE terminals -- but so far, no one has gotten them to work.
+Here's now to configure a simple leased line:
+
+00E0 2703 dial=no lport=7701 rport=8701
+
+On the other mainframe, the line that connects to this one might look
+like:
+
+0070 2703 dial=no lport=8701 rport=7701
+
+The 2703 has many more options, such as specifying the host name or IP
+address for security.  See the 2703 documentation in the Hercules write-ups
+for more details.
+
+
+
+MVS - JES2
+----------
+
+MVS 3.8J is probably the most popular OS running (legally at least) on
+Hercules.  MVS supports two job entry systems: JES2 and JES3.  I have not
+worked with JES3 and so here I will only talk about JES2.  It's by far the
+most common JES in use anyway.
+
+1. Configuring MVS.
+
+You must be sure that MVS knows about your 2703 lines at the device
+addresses you put into the Hercules.cnf file.  As of this writing, most
+people that are running MVS 3.8J on Hercules are using Volker's Turnkey MVS
+#3.  This system does NOT have any 2703 lines generated into it, because at
+the time Volker was putting together his great Turnkey MVS, the 2703 support
+was nonexistent.  Turnkey #4 is reputed to have 2703 lines already built-in.
+This is a great blessing, for although it's easy to change the stage 1
+sysgen deck in MVS, actually doing a sysgen or an iogen is a great deal of
+work for those of us who do not have decades of sysprog experience.
+
+This document does NOT walk you through the sysgen process.  You'll have to
+consult other documentation for that.  I will tell you what to change and
+how to change it.
+
+So...if you are not running Turnkey #3, best to look at your stage 1
+sysgen I/O configuration and see if there are already lines genned into
+it.  Here's what they look like:
+
+A switched line:
+
+       IODEVICE                                                    +
+             ADDRESS=(070,8),UNIT=BSC2,FEATURE=(AUTOCALL,AUTOANSR),+
+             ADAPTER=BSCA,TCU=2703
+
+An unswitched line:
+
+	IODEVICE                                                    +
+             ADDRESS=(090,8),UNIT=BSC1,ADAPTER=BSCA,TCU=2703
+
+If your stage 1 sysgen deck doesn't contain these definitions, you'll need
+to add them and do an IOGEN or a SYSGEN of MVS.  Good luck, and may the
+ghost of Thomas Watson have mercy on your frail and quivering soul.
+
+2. Configuring JES2.
+
+Once your sysgen is done...there, that was easy to say...you're ready to
+move on to configuring JES2.  Luckily, you don't have to reconfigure and
+re-gen it, you just have to modify the JES2PARM member of SYS1.PARMLIB.
+There's a potential gotcha here, in that in some systems the JES2PARM
+that's in SYS1.PARMLIB isn't the one that counts.  Often, it's kept in
+a dataset called SYS1.JES2PARM.  If this dataset exists on your system,
+then it's probably the one that JES2 is looking at to configure itself.
+Modify it instead, and if you totally blow it, you can restore from the
+saved copy in SYS1.PARMLIB.
+
+You need to add a set of parameters for each line you want to use. Here
+is the model:
+
+&NUMLNES=1
+LINE1  UNIT=070,EBCDIC,TRANSP,LOWSPEED,FDUPLEX,NOADISC,CODEA,IFACEA
+RMT1   3780,LINE=1,NUMPR=1,NUMPU=1,NUMRD=1,TRANSP,NOTABS
+R1.RD1 CLASS=A
+R1.PR1 START,PRWIDTH=132,CLASS=LTZA
+R1.PU1 CLASS=B
+DESTID NAME=RMT01,DEST=R1
+
+If you are adding more than one line, you'll need to modify these parameters
+like this (example for two lines):
+
+&NUMLNES=2
+LINE1  UNIT=070,EBCDIC,TRANSP,LOWSPEED,FDUPLEX,NOADISC,CODEA,IFACEA
+RMT1   3780,LINE=1,NUMPR=1,NUMPU=1,NUMRD=1,TRANSP,NOTABS
+R1.RD1 CLASS=A
+R1.PR1 START,PRWIDTH=132,CLASS=LTZA
+R1.PU1 CLASS=B
+DESTID NAME=RMT01,DEST=R1
+LINE2  UNIT=071,EBCDIC,TRANSP,LOWSPEED,FDUPLEX,NOADISC,CODEA,IFACEA
+RMT2   3780,LINE=1,NUMPR=1,NUMPU=1,NUMRD=1,TRANSP,NOTABS
+R2.RD1 CLASS=A
+R2.PR1 START,PRWIDTH=132,CLASS=LTZA
+R2.PU1 CLASS=B
+DESTID NAME=RMT02,DEST=R2
+
+
+3. Operating RJE with JES2.
+
+
+Now that JES2 is configured, re-IPL your system.  We're now ready to
+use the line.
+
+Once JES2 is up, you need to start each line like this:
+
+$SLINE1
+
+Now you should be able to start RJE80, enter the host name (or address)
+and port to connect to, and send a signon card.  Actually, the signon
+card is optional here, because we didn't configure JES2 for a password.
+You can actually just load some JCL into your RJE80 card reader and SEND
+it to the mainframe.  The printout should arrive automatically on your
+RJE80 printer window.
+
+When you disconnect RJE80, the 2703 "hardware" will see this and drop
+the line, awaiting the next "dial-up" connection.
+
+To shut down the RJE line, use this command:
+
+$PLINE1
+
+If you do need to send a signon card, the format is rather strange:
+
+/*SIGNON       REMOTE1  SECRET
+
+The REMOTE1 has to start in column 16 and the password (here SECRET) has
+to start in column 25.
+
+Sometimes, the line will get confused and not react normally.  You can
+use these commands on the jES2 console to restart it from scratch:
+
+$ELINE1
+$PLINE1
+$SLINE1
+
+
+The $E command will also interrupt the flow of data to or from the line.
+JES2 will restart an interrupted printout at the page where it was
+interrupted.
+
+That's the essentials of RJE on MVS with JES2 and RJE80.
+
+I don't know of any MVS 3.8J vintage JES2 or RJE manuals on the net.  If
+you know, please let me know at ceo1944@yahoo.com.
+
+DOS/VS - POWER/VS
+-----------------
+
+RJE is a pretty nice way of interacting with DOS/VS, and it has more value,
+since there is currently no interactive alternative like RPF for MVS.
+DOS/VS itself doesn't know RJE.  It relies on its spooling software,
+POWER/VS, to provide RJE support.
+
+First, of course, DOS/VS must be told about our 2703 lines.
+
+1. Configuring DOS/VS
+
+You need to look in your SYSGEN deck to see if any 2703 lines might
+already be genned there.  Here's how they look:
+
+        DVCGEN CHUN=X'070',DVCTYP=2703
+
+Simple, eh?  Well, this is DOS/VS.  If there are any, note their device
+addresses and configure Hercules to match.  If not, add some lines and
+re-do your sysgen.  Remember to add devices in device number order.
+
+
+2. Configuring POWER/VS.
+
+Take a look in your POWER/VS generation deck.  If you didn't have a line
+in your sysgen, chances are you'll need to configure POWER/VS.  In a
+non-RJE POWER deck, there's only one macro: POWER.  The RJE macros are
+two, and they are added after the end of the POWER macro parameters.
+Here's an example to match our one 2703 line above:
+
+LINE001  PLINE ADDR=X'070',PSWRD=SECRET,SWITCH=NO
+        PRMT  REMOTE=1,TYPE=3780,PUNROUT=001,LSTROUT=001,LIST=132
+
+Note that this is a leased line, which works fine with DOS/VS, which
+doesn't seem to dislike the other end coming and going like some other
+systems do.  If you'd prepher dial-up, change the SWITCH=NO to
+SWITCH=YES but be sure the Hercules configuration matches.
+
+Once you have re-generated POWER/VS and re-IPLed, you should be ready
+to bring up your line and connect RJE80 to it.
+
+
+3. Operating RJE on POWER/VS.
+
+I assume you've re-IPLed your DOS/VS system, and brought up POWER/VS
+in its partition according to your tastes.  Now, there's at least
+one RJE line generated into it.  To start the line listening, use
+this command:
+
+S RJE,070,SECRET
+
+Obviously, use the device address of the real line you want in place of the
+070.  The SECRET parameter is a password that will override the password you
+gave when you generated the line.  This parameter is optional.
+
+To see the RJE queues, do this:
+
+D RJE
+
+Now, fire up RJE80 or the client of your choice and connect to the host
+and port.  The first card you must send will be a signon card:
+
+* .. SIGNON 1 SECRET
+
+You can, and should, follow that with a card to start the writer, which
+doesn't start automatically:
+
+* .. S LST
+
+Now, if you load jobs into the card reader and SEND them to DOS/VS, you
+will receive the output automatically on your RJE80 printer and punch.
+Each job should be surrounded by JECL.  Here's an example:
+
+* $$ JOB JNM=LVTOC,USER='DUTCH',CLASS=0,DISP=D
+* $$ LST LST=00E,CLASS=A,DISP=D,JSEP=0
+// JOB     LVTOC       - VOLUME VTOC DISPLAY UTILITY
+// ASSGN   SYS004,X'131'
+// ASSGN   SYS005,X'00E'
+// EXEC    PGM=LVTOC
+/*
+/&
+* $$ EOJ
+
+There's a gotcha.  If your JECL asks for a form, as in this
+example:
+
+* $$ LST LST=00E,CLASS=A,DISP=D,JSEP=0,FORM=0001
+
+You'll get a message on the printer asking you to change the forms.
+You need to supply this command to tell POWER/VS to go ahead and
+send you the printout:
+
+* .. G LST
+
+To signoff the line, use the signoff command:
+
+* .. SIGNOFF
+
+You can, from the RJE station or the DOS console, display the
+contents of your queues:
+
+D LST
+D RDR
+
+To stop the line from the DOS console, use
+
+P 070
+
+You may need to stop and re-start the line if it becomes confused
+and stops working right.
+
+That's the essentials of using RJE with DOS/VS POWER/VS.
+
+For more details, see the POWER/VS manual online at www.bitsavers.org.
+
+
+VM/370 - RSCS
+-------------
+
+VM/370 is an interactive system, so one could rightly ask what use RJE might
+have connected with it.  The answer is mainly file transfer.  The part of VM
+that supports RJE terminals is RSCS, the Remote Spooling Communication
+System.  An RJE terminal like the 3780 can connect to an RJE line and send
+card decks from its reader to the virtual reader of a virtual machine, and
+it can receive printouts and punched cards from the output queues of any
+virtual machine.  On a modern PC using Hercules, there are probably better
+ways to get data into VM, but RJE will certainly work.  In the olden days,
+this form of file transfer made good sense in some situations.  The RSCS
+system seems primarily designed to connect mainframe to mainframe though, and
+we will be discussing that possibility also.
+
+
+1. Configuring VM/370.
+
+You need to modify your sysgen specifications in DMKRIO ASSEMBLE to include
+a 2703 bisync line or lines if it doesn't contain some already.  Type 2701
+lines won't do the trick -- it needs to be a 2703.  This is what the spec
+looks like:
+
+        RDEVICE  ADDRESS=(070,16),DEVTYPE=2703,ADAPTER=BSCA
+        RCTLUNIT ADDRESS=070,CUTYPE=2703,FEATURE=16-DEVICE
+
+This specifies 16 2703 BSCA lines at device number 070.
+
+With this in DMKRIO ASSEMBLE, do a sysgen and re-IPL VM/370.  That part
+of the job is done.
+
+2. Configuring RSCS.
+
+These examples are taken using Andy Norrie's 4-pack VM/370 system, which
+has an RSCS virtual machine built into it, with the RSCS software loaded
+onto its own minidisk.  However, RSCS isn't quite ready to run correctly
+in the current incarnation of the 4-pack system.  Here's what needs to be
+done.
+
+First, be sure that the RSCS virtual machine has the lines you need.
+Logon as MAINT, and edit your directory file (VM50 DIRECT on the 4-pack
+system).  Here is the full RSCS user parameters I use:
+
+USER RSCS RSCS 2M 16M                          
+ACCOUNT RSCS RSCS                               
+IPL CMS                                          
+OPTION ECMODE                                   
+CONSOLE 009 3215                                
+SPOOL 001 2540 READ A                           
+SPOOL 00C 2540 READ A                           
+SPOOL 00D 2540 PUNCH A                          
+SPOOL 00E 1403 A                                
+MDISK 191 3350 141 005 VM50-2 WR READ WRITE ALL
+MDISK 192 3350 146 015 VM50-2 WR READ WRITE ALL
+LINK MAINT 190 190 RR                           
+LINK MAINT 194 194 RR                           
+LINK MAINT 19D 19D RR  
+LINK MAINT 19E 19E RR  
+DEDICATE 0B1 070       
+DEDICATE 0B2 071       
+DEDICATE 0B3 072
+DEDICATE 0B4 073
+DEDICATE 0B5 074       
+
+Logoff MAINT and logon to the RSCS user virtual machine.
+
+Now, you need to configure the RSCS macros.  The main one is called
+AXSLINKS COPY.  It defines all the nodes in the RSCS network for this
+machine.  Here is a sample:
+
+    GENLINK ID=MYVMSYS,TYPE=DMTNPT
+    GENLINK ID=DIALUP1,TYPE=DMTNPT,LINE=0B1
+    GENLINK ID=DIALUP2,TYPE=DMTNPT,LINE=0B2
+    GENLINK ID=DIALUP3,TYPE=DMTNPT,LINE=0B3
+    GENLINK ID=DIALUP4,TYPE=DMTNPT,LINE=0B4
+    GENLINK ID=HISVM,TYPE=DMTSML,KEEP=5,LINE=0B5,TASK=SML1
+    GENLINK
+    GENLINK
+
+This defines 5 lines, 4 dial-up and 1 leased.  The first entry supplies the
+name of our node - MYVMSYS in this case.  The next 4 are the 4 switched
+lines.  The fifth line is a potential leased line to another VM or MVS
+system.  The last two entries are blank to provide "expansion slots" so that
+for experimental purposes we could define new lines on the fly in RSCS.
+
+The other file to change is named LAXLINES COPY.  Here you define all
+the lines that RSCS can use.
+
+GENLINE LINE=0B1
+GENLINE LINE=0B2
+GENLINE LINE=0B3
+GENLINE LINE=0B4
+GENLINE LINE=0B5
+
+Once those are changed, we are ready to generate. RSCS in the 4-pack system
+comes with a 5-cylinder minidisk.  We first need to change that so that the
+CMS filesystem fits on 4 of those cylinders and the 5th is reserved for
+an IPLable copy of our RSCS system.  An easy way to do this is to use a tape
+to backup, then format and restore our RSCS files.  Put an empty tape on
+a drive, ATTACH it to virtual device 181 for RSCS, then back it up, then
+format our drive and restore the files.  Here are the commands:
+
+REL B
+REL D
+VMFPLC2 DUMP * * A
+FORMAT 191 A 04
+REWIND 181
+VMFPLC2 LOAD
+ACC 192 B/A
+ACC 194 D/A
+
+You are now ready to generate RSCS itself.  And you have a good backup!
+Here is the sequence of commands to execute.  Since this may be done
+again, I put them all into an EXEC and called it RSCSGEN EXEC.
+
+ERASE DMTLOC MACLIB
+MACLIB GEN DMTLOC AXSLINKS LAXLINES TAGQUEUE
+EXEC VMFASM DMTSYS DMTR60
+CP CLOSE RDR
+CP PURGE RDR
+CP CLOSE PUN
+CP PURGE PUN
+CP SPOOL PUN TO * CLASS A
+CP SPOOL PRT FOR * CLOSE
+VMFLOAD DMTLOAD DMTR60
+CP CLOSE RDR
+CP SPOOL PUN OFF
+CP IPL C CLEAR
+
+Once that last IPL gets executed, you'll get asked four important questions.
+Here they are and the correct answers:
+
+DMTINI407R REWRITE THE NUCLEUS ?
+yes
+DMTINI408R IPL DEVICE ADDRESS =
+191
+DMTINI409R NUCLEUS CYL ADDRESS =
+4
+DMTINI410R ALSO IPL CYLINDER 0 ?
+yes
+
+Now RSCS will write itself onto that 5th cylinder of our minidisk, and
+it will also run for the first time.  You'll see these messages:
+
+RDR  001 DETACHED
+RDR  001 DEFINED
+0001 FILE  PURGED
+11:39:49
+
+MSG FROM RSCS    :      DMTAXS103E FILE 0007 REJECTED...
+
+RSCS (REL 6, LEV 0, 02/01/04) READY
+
+That "FILE REJECTED" message looks bad but it's in fact harmless, and
+you won't be seeing it again unless you do another RSCSGEN.
+
+3. Operating RSCS.
+
+There are a number of commands you can enter in the RSCS virtual machine.
+First, you'll probably want to start your dial-up lines:
+
+START DIALUP1
+START DIALUP2
+
+Now you are ready to connect RJE80 to one of these lines for some file
+transfer action.  The first card you send must be a signon card:
+
+SIGNON DIALUP1 3780 PCHY
+
+This is about the minimum required.  The DIALUP1 is the link name, it
+must match the line you connected to.  You must tell RSCS what device
+you are emulating (notice that you didn't say that during the gen, unlike
+all the other OSes).  The PCHY is telling RSCS you have a punch available,
+if you don't do this, it will assume there is no punch device.  Other
+possible options include TRSY for transparency, and PWD=SECRET for a
+password if one is required.
+
+You now are connected to RSCS.  It will print a confirmation message
+for you.
+
+The cards you send will either be a file to transfer to a user (or virtual
+machine), or commands to RSCS itself.  RSCS tells a file by an ID card
+that precedes it.  The format of this ID card is
+
+ID       USERNAME
+
+There is "ID" in columns 1 and 2, seven blanks, and the username or name
+of the virtual machine to send the card deck to.  Fail to get the username
+in the right column and RSCS will not recognize this as an ID card and will
+complain about "INVALID COMMAND ID" and "ID CARD MISSING - INPUT FILE
+PURGED".  Here's an interesting fact: there is no end-of-file marker. At
+least, not that I can see from the RSCS code -- I don't have an RSCS manual.
+The end of file is the end of cards in the card reader hopper.
+
+If your first card isn't an ID card, it's an RSCS command.  These are a
+subset of the commands the RSCS operator can enter at the RSCS console.
+
+To signoff, use this command:
+
+/*SIGNOFF
+
+Here is a partial list of RSCS commands which are known to work:
+
+QUERY <linkid> STAT
+QUERY <linkid> QUEUE
+QUERY <linkid> DEF
+QUERY SYSTEM [ACTIVE]
+QUERY FILE <spoolid> STAT
+QUERY FILE <spoolid> RSCS
+QUERY FILE <spoolid> VM
+START <linkid> LINE nnn                   (2780/3780 terminal)
+START <linkid> PARM Mid Bxxx <password>   (...HASP host)
+START <linkid> PARM Hid Bxxx <password>   (...HASP station)
+START <linkid> PARM Rid Bxxx <password>   (...RES station)
+START <linkid> PARM Aid Bxxx <password>   (...ASP station)
+    (id must be 2 bytes and match other side, xxx is buffersize)
+CHANGE <linkid> <spoolid> PRIORITY p CLASS c COPY nn HOLD NOHOLD
+TRACE ALL
+TRACE ERRORS
+TRACE END
+FLUSH <linkid>
+HOLD <linkid>
+DRAIN <linkid>    (brings down the link)
+DISCONN           (this brings down RSCS)
+MSG <linkid> text...
+CMD <linkid> command...
+DEFINE <linkid> TYPE DMTSML LINE nnn CLASS c TASK id PARM ...
+DEFINE <linkid> TYPE DMYNPT LINE nnn CLASS c TASK id PARM ...
+DELETE <linkid>
+PURGE <linkid> <spoolid>
+FWDSPACE <linkid>
+BACKSPAC <linkid>  
+
+To connect two mainframes, I'll use an example connecting two VM/370 machines
+together.  We'll use the leased lines to do this.  Once both machines are
+started, and a TCP/IP link established between their Hercules 370s, you can
+start the two lines.  Note that in order to do this, both machines must have
+different node names and the name of the other's node must in the AXSLINKS
+COPY file.  (Or you could use the DEFINE command above but lines and nodes
+you DEFINE won't be there next time you start RSCS.)
+
+One system, let's say it's ours, will be the master station and the other
+will be the slave.  Let's call the other system HISVM for example.  
+Here's how we start up the master on our RSCS console:
+
+START HISVM PARM M01 B256 SECRET
+
+Now, over on the other system enter this command:
+
+START MYVMSYS PARM H01 B256 SECRET
+
+Note that each start names the other's system, and that the 01 after the
+M or H is an ID code that must match between the two systems.  SECRET represents
+a password which must also match of course.  Once the two machines are talking
+over the link, you can use regular CP commands to send files.  Let's say I want
+to send a set of JCL over to user DUTCH on HISVM.  It would take three commands
+from my CMS session:
+
+TAG DEV PUN HISVM DUTCH
+SPOOL PUN TO RSCS
+PUNCH MYSAMPLE JCL (NOH
+
+The file that was in MYSAMPLE JCL on my machine will appear in user DUTCH's
+virtual reader without a header (the NOH option) over on the HISVM machine.
+
+Use the DISCONN command to shut down the RSCS virtual machine.  To start
+it back up, signon as the RSCS user but specify NOIPL in the LOGON:
+
+LOGON RSCS RSCS NOIPL
+
+Then, IPL from device 191 instead and RSCS will IPL and run.
+
+That's the essentials of configuring and running RJE on VM/370.
+
+I don't know of any VM/370 R6 vintage RSCS or RJE manuals on the net.  If
+you know, please let me know at ceo1944@yahoo.com.
+
+
+OS/360 - RJE
+------------
+
+OS/360 was probably the first IBM operating system to support RJE over
+bisync lines.  It shows.  Not only will you probably have to do a
+sysgen to get the 2703 lines into the OS, but you also have to do
+through a fairly extensive generation and configuration of RJE itself.
+
+1. Configure OS/360.
+
+RJE is supported under MFT or MVT.  I have not tried the MFT version.
+The instructions that follow are for an OS/MVT system.  I don't think
+there's much difference in the setup, but who runs MFT anyway?
+
+All you have to do with OS/MVT itself is to add some lines to the
+stage 1 sysgen deck and sysgen the system.  Sounds easy enough, doesn't
+it?  Only if you've never done an OS/360 sysgen!  Here's how the
+definition of the 2703 lines should look:
+
+   IOCONTRL   UNIT=2703,ADDRESS=070
+   IODEVICE   UNIT=BSC2,ADDRESS=(070,16),ADAPTER=BSCA
+
+Another thing you must be sure of is that RJE support is included in the
+operating system.  The OPTIONS parameter of the SCHEDULR macro is where
+it's specified.  Mine looks like this: OPTIONS=(LOG,RJE).  Having made
+sure your stage 1 deck is correct, go and do your sysgen and come back.
+
+We're all ready to proceed now, right?  Okay, on to RJE itself.
+
+
+2. Configure RJE.
+
+The system I run at home lives on 2314 drives, so the JCL I'll be
+using as examples are for those.  There really shouldn't be any
+significant differences.
+
+My RJE system lives on a disk all by itself, called RJE001.  In fact,
+that's a bit of wasted space even on a 2314 drive, on a 3330 you won't
+use but about 10 percent of the available space.
+
+The first step is to generate RJE. Have a look at my RJE generation JCL:
+
+//RJEASLE  JOB  (101),CEO,MSGLEVEL=(1,1),CLASS=A,MSGCLASS=A
+//STEP0    EXEC PGM=IEFBR14
+//DD1      DD   DSN=RJETEMP,UNIT=2314,VOL=SER=WORK03,DISP=(OLD,DELETE)
+//STEP1    EXEC PGM=IEUASM,PARM='LIST,NOLOAD,DECK,NOXREF',REGION=256K
+//SYSPRINT DD  SYSOUT=A
+//SYSLIB   DD  DSN=SYS1.MACLIB,UNIT=2314,VOL=SER=SYSRES,DISP=SHR
+//SYSUT1   DD  UNIT=SYSDA,SPACE=(CYL,(35,10)),VOL=SER=WORK01
+//SYSUT2   DD  UNIT=SYSDA,SPACE=(CYL,(35,10)),VOL=SER=WORK02
+//SYSUT3   DD  UNIT=SYSDA,SPACE=(CYL,(50,10)),VOL=SER=WORK02
+//SYSPUNCH DD  DSNAME=RJETEMP(IHKAARJE),DISP=(NEW,KEEP),
+//             SPACE=(TRK,(10,1,2)),UNIT=2314,VOL=SER=WORK03
+//SYSIN    DD  *
+LINE1   RJELINE DDLINE=LINE1,DDSYSIN=LINE1IN,LERB=(255,10,5,250)
+LINE2   RJELINE DDLINE=LINE2,DDSYSIN=LINE2IN,LERB=(255,10,5,250)
+LINE3   RJELINE DDLINE=LINE3,DDSYSIN=LINE3IN,LERB=(255,10,5,250)
+LINE4   RJELINE DDLINE=LINE4,DDSYSIN=LINE4IN,LERB=(255,10,5,250)
+TERM1   RJETERM TYPE=2780,PUNCH=YES,PRTSZ=120
+TERM2   RJETERM TYPE=2780,PUNCH=YES,PRTSZ=120
+TERM3   RJETERM TYPE=2780,PUNCH=YES,PRTSZ=120
+TERM4   RJETERM TYPE=CPU,PUNCH=YES,PRTSZ=120
+       RJEUSER 16,GST,111,CPU,222,CEO,333
+       RJETABL JOB=32,SYSPRT=A,SYSPCH=B,SYSUSER=U,SYSRJE=R,BUFNO=32
+       END
+/*
+//STEP5    EXEC PGM=LINKEDIT,PARM=(XREF,LIST,DC,NCAL,LET)
+//SYSLMOD  DD   DSN=SYS1.TELCMLIB,DISP=OLD
+/*
+//SYSLIB   DD   DSN=RJETEMP,DISP=(OLD,DELETE),UNIT=2314,VOL=SER=WORK03
+//SYSUT1   DD   SPACE=(TRK,(10,10)),UNIT=SYSDA
+//SYSPRINT DD   SYSOUT=A
+//SYSLIN   DD   *
+          INCLUDE SYSLIB(IHKAARJE)
+          NAME    IHKAARJE(R)
+/*
+//STEP6    EXEC PGM=LINKEDIT,PARM=(XREF,LIST,DC)
+//SYSLMOD  DD   DSN=SYS1.LINKLIB,DISP=OLD
+//SYSLIB   DD   DSN=SYS1.TELCMLIB,DISP=OLD
+//SYSUT1   DD   SPACE=(TRK,(40,10)),UNIT=SYSDA
+//SYSPRINT DD   SYSOUT=A
+//
+
+
+You should be able to use this pretty much unaltered except for the RJELINE,
+RJETERM, and RJEUSER macros to define the lines you want, the terminals that
+can connect to them, and the user IDs and passwords.  It's very odd that the
+user IDs and passwords are limited to 3 characters apiece, but it's true.
+
+Having generated the RJE system, the next step is to initialize the
+RJE001 disk datasets.  This is the JCL to do that:
+
+//RJEINIT JOB (101),CEO,CLASS=A,MSGCLASS=A,MSGLEVEL=(1,1)
+//STEP1   EXEC PGM=IEHPROGM
+//SYSPRINT DD  SYSOUT=A
+//DD1     DD  VOL=SER=RJE001,DISP=OLD,UNIT=SYSDA
+//SYSIN   DD  *
+SCRATCH DSNAME=SYS1.IHKFSTB,VOL=SYSDA=RJE001,PURGE
+SCRATCH DSNAME=SYS1.IHKJEDTB,VOL=SYSDA=RJE001,PURGE
+SCRATCH DSNAME=SYS1.IHKUDRTB,VOL=SYSDA=RJE001,PURGE
+SCRATCH DSNAME=SYS1.IHKTDRTB,VOL=SYSDA=RJE001,PURGE
+SCRATCH DSNAME=SYS1.IHKTXTTB,VOL=SYSDA=RJE001,PURGE
+SCRATCH DSNAME=SYS1.IHKMSGSL,VOL=SYSDA=RJE001,PURGE
+SCRATCH DSNAME=SYS1.IHKBRDSL,VOL=SYSDA=RJE001,PURGE
+/*
+//STEP2    EXEC PGM=IHKINTAB
+//SYSABEND DD SYSOUT=A
+//IHKFSTDD DD DSN=SYS1.IHKFSTB,DISP=(NEW,CATLG),SPACE=(24,(11,5)),
+//            UNIT=SYSDA,VOL=SER=RJE001,DCB=DSORG=DA
+//IHKJEDDD DD DSN=SYS1.IHKJEDTB,DISP=(NEW,CATLG),SPACE=(98,(11,5)),
+//            UNIT=SYSDA,VOL=SER=RJE001,DCB=DSORG=DA
+//IHKUDRDD DD DSN=SYS1.IHKUDRTB,DISP=(NEW,CATLG),SPACE=(18,(15,5)),
+//            UNIT=SYSDA,VOL=SER=RJE001,DCB=DSORG=DA
+//IHKTDRDD DD DSN=SYS1.IHKTDRTB,DISP=(NEW,CATLG),SPACE=(80,(15,5)),
+//            UNIT=SYSDA,VOL=SER=RJE001,DCB=DSORG=DA
+//STEP3    EXEC PGM=IHKCDBMI
+//SYSABEND DD SYSOUT=A
+//IHKTXTDD DD DSN=SYS1.IHKTXTTB,DISP=(NEW,CATLG),SPACE=(60,(161,20)),
+//            UNIT=SYSDA,VOL=SER=RJE001,DCB=DSORG=DA
+//IHKMSGDD DD DSN=SYS1.IHKMSGSL,DISP=(NEW,CATLG),SPACE=(750,(1,1)),
+//            UNIT=SYSDA,VOL=SER=RJE001
+//IHKBRDDD DD DSN=SYS1.IHKBRDSL,DISP=(NEW,CATLG),SPACE=(400,(1,1)),
+//            UNIT=SYSDA,VOL=SER=RJE001
+//
+
+
+Whew!  It's a good thing someone already did this.  It was a pain to
+figure all this out and get it working, although I copied a great deal
+of this JCL from the OS/360 RJE manual available at bitsavers.org.
+
+Now that the RJE datasets are ready, we need to load up a start procedure
+of the RJE system.  This will do it:
+
+//RJEPROC  JOB  (1),CEO,MSGLEVEL=(1,1)
+//STEP1    EXEC PGM=IEBUPDTE
+//SYSPRINT DD  SYSOUT=A
+//SYSABEND DD  SYSOUT=A
+//SYSUT1   DD  DISP=SHR,DSN=SYS1.PROCLIB,UNIT=SYSDA,VOL=SER=SYSRES
+//SYSUT2   DD  DISP=SHR,DSN=SYS1.PROCLIB,UNIT=SYSDA,VOL=SER=SYSRES
+//SYSIN    DD  DATA
+./ ADD NAME=RJE
+//RJE      EXEC PGM=IHKRJBGN,REGION=128K,
+//              PARM='000999030010249050322314    '
+//*                   APPTTTSSSQQQIIIRRRCLUUUUUUUU
+//*                   A = ACCOUNTING REQD
+//*                   PP = PRIORITY
+//*                   TTT = TIMELIMIT
+//*                   SSS = SYSOUT PRI ALLOC
+//*                   QQQ = SYSOUT SEC ALLOC
+//*                   III = INTERPRETER PRIORITY
+//*                   RRR = REGION SIZE
+//*                   C = COMMAND AUTHORITY
+//*                   L = LABEL PROCESSING
+//*                   UUUUUUUU = DEFAULT UNIT
+//IEFRDER  DD DUMMY
+//IEFDATA  DD UNIT=SYSDA,VOL=SER=RJE001,
+//            SPACE=(80,(500,500),RLSE,CONTIG),
+//            DCB=(BUFNO=2,LRECL=80,BLKSIZE=80,RECFM=F,BUFL=80)
+//IEFPDSI  DD DSN=SYS1.PROCLIB,DISP=SHR
+//IHKFSTDD DD DSN=SYS1.IHKFSTB,DISP=OLD,DCB=DSORG=DA
+//IHKJEDDD DD DSN=SYS1.IHKJEDTB,DISP=OLD,DCB=DSORG=DA
+//IHKUDRDD DD DSN=SYS1.IHKUDRTB,DISP=OLD,DCB=DSORG=DA
+//IHKTDRDD DD DSN=SYS1.IHKTDRTB,DISP=OLD,DCB=DSORG=DA
+//IHKTXTDD DD DSN=SYS1.IHKTXTTB,DISP=OLD,DCB=DSORG=DA
+//IHKMSGDD DD DSN=SYS1.IHKMSGSL,DISP=OLD
+//IHKBRDDD DD DSN=SYS1.IHKBRDSL,DISP=OLD
+//LINE1IN  DD DISP=(OLD,KEEP),VOL=SER=RJE001,SPACE=(TRK,(5,20)),
+//            UNIT=SYSDA,DCB=BLKSIZE=400
+//LINE2IN  DD DISP=(OLD,KEEP),VOL=SER=RJE001,SPACE=(TRK,(5,20)),
+//            UNIT=SYSDA,DCB=BLKSIZE=400
+//LINE3IN  DD DISP=(OLD,KEEP),VOL=SER=RJE001,SPACE=(TRK,(5,20)),
+//            UNIT=SYSDA,DCB=BLKSIZE=400
+//LINE4IN  DD DISP=(OLD,KEEP),VOL=SER=RJE001,SPACE=(TRK,(5,20)),
+//            UNIT=SYSDA,DCB=BLKSIZE=400
+//LINE1    DD UNIT=070
+//LINE2    DD UNIT=071
+//LINE3    DD UNIT=072
+//LINE4    DD UNIT=073
+./ ENDUP
+/*
+//
+
+Now, at last, we should be ready to bring up RJE and connect to it.
+
+
+3. Operating OS/360 RJE.
+
+You should IPL your OS/360 system again, and this time, re-format your
+spool space.  In other words, instead of replying U to this message:
+
+REPLY WITH SET PARAMETERS OR U
+
+like you usually do, reply Q=(,F).  You don't have to do this again, unless
+RJE goes catatonic on you, in which case, re-formatting the OS spool queues
+again may be the only way to recover.  You'll know this is the case if RJE
+gives a WRONG LENGTH RECL error on one of its files every time you try and
+start it.  Re-IPLing with Q=(,f) seems to fix this bug.  Good old OS/360,
+flaky as ever.
+
+Once the usual readers and writers are up and running, you are ready
+to start RJE.  This is the command:
+
+S RJE,,,FORM
+
+The FORM tells RJE to format its own datasets.  In contrast to the many
+other chatty IBM programs, RJE starts up silently.  If you do a D A from
+the console you should see RJE as a task among the others.
+
+You are now ready to connect RJE80 to OS/360.  The first two cards you
+should submit to it are:
+
+.. RJSTART TERM1
+.. LOGON GST,111
+
+...where TERM1 is the name of the terminal from your RJETERM macros,
+and GST,111 is a valid userid and password from the RJEUSER macros.
+OS/360 will confirm on the printer if you are successully logged on.
+You can then submit jobs and see results on the printer and punch.
+To log off, it also takes two cards:
+
+.. LOGOFF
+.. RJEND
+
+At the console, and from the reader, RJE will accept a number of useful
+commands.  Some are:
+
+SHOW USERS
+SHOW LINES
+SHOW LERB
+SHOW BRDCST
+BRDCST 00,'MESSAGE TO USERS'
+
+to stop RJE, just tell it to stop:
+
+P RJE
+
+That's the essentials of configuring and running OS/360 RJE.
+
+For more details on configuring and running OS/360 RJE, please consult the
+OS/360 RJE manual online at www.bitsavers.com.
