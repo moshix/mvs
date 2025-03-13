@@ -25,7 +25,7 @@ Here are some of the programs and tools included in this repo:
 - and tons more!
 
  Simply mount the volume on your system, add it to the VTLST00 member as private, and then extend your JES2 to use the included
- SYS2.PROCLIB on SYSCPK. This proclib has procedures for all the included compilers. The run-time libraries, like SYSC.PLILIB are of course included in the volume. There is also a version of this volume on 3350 disk image, but OS390 and up don't have support for such old disks anymore. Copying stuff over to a 3390 disk isn't trivial because of the blocking required by certain compiler libraries. In short, there is a need for this volume. 
+ SYS2.PROCLIB on SYSCPK. This proclib has procedures for all the included compilers. The run-time libraries, like SYSC.PLILIB are of course included in the volume. There is also a version of this volume on 3350 disk image, but OS390 and up don't have support for such old disks anymore.
 
 3. sort.jcl is a sort job which stresses a TK4 MVS 3.8 by creating millions of random records and then using IBM Sort to sort them. Requires TK4-
 
@@ -71,7 +71,7 @@ Here are some of the programs and tools included in this repo:
 
 26. A payroll report source code in MVT Cobol with test data and the JES2 output listing
 
-27. VM/370 editor
+27. A VM/370 editor
     
 28. The TELPAR operating system for EDA (Electronic Design Automation) and 
  ATG (Automatic Test Generation) of Stanford University
@@ -86,9 +86,9 @@ Here are some of the programs and tools included in this repo:
     
 33. A treatise on the handling of virtual storage in SVS, MFT, MVT and MVS
 
-34.  some very cool VM/370 add-ons. 
+34. some very cool VM/370 add-ons. 
 
-35.  a tape with VM/370 games. 
+35. a tape with VM/370 games. 
 
 36. Matlab for VM/CMS!!    
 
@@ -96,16 +96,18 @@ Here are some of the programs and tools included in this repo:
 
 38. A generalized IP address parser for all your NICs (important when you do IPv4 stuff with Hercules)  
 
-39.  An HP41 calculator in Fortran and REXX
+39. An HP41 calculator in Fortran and REXX
 
-40.  an IBM 1403 font
+40. an IBM 1403 font
     
 41. an assembler in bash
   
-42.  and more...much, much more  
+42. and more...much, much more  
 
-Printing on VM
-===============
+General invocations
+===================
+
+**Printing on VM**
 
 Start 00e cl a nosep, on the operator console.  
 
@@ -113,14 +115,12 @@ spool print system
 print file listing a   
 
 
-Printing on MVS without JES2 charset translation
-================================================
+**Printing on MVS without JES2 charset translation**
 
 $T PRINTER(1),TRANS=NO
 
 
-CCKD support for Hercules
-=========================
+**CCKD support for Hercules**
 
 ***@ubuntu:~$ sudo apt install zlib1g-dev
 
