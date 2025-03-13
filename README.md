@@ -5,11 +5,6 @@
 
 # MVS and VM Software
 
-
-Tapes are the standard way to exchange files, utilities and information between mainframers. Some mainframe shops are now connected thru the HNET NJE international dial-up network.  
-
-I also noticed that recently the industry is moving towards a new thing called the "World Wide Web", which is why I now make this collection of tools and utilities available on Github in this crazy new world of the Internet!
-
 This repository includes some very useful utilities for people working with MVS, z/OS, VM/SP and z/VM on real mainframes or emulated ones. Most of the topics covered by these programs are covered in my youtube mainframe channel here: https://www.youtube.com/channel/UCR1ajTWGiUtiAv8X-hpBY7w
 
 Here are some of the programs and tools included in this repo:
@@ -36,7 +31,7 @@ Here are some of the programs and tools included in this repo:
 
 4. The amazing standalone operating system for S/360 from Prof Madnick's seminal book on operating system. I also include the assembly output. 
 
-5. My .vimrc file for VIM. It color highlights correctly JCl and assembler for S/370. 
+5. My .vimrc file for VIM. It color highlights correctly JCl and assembly for S/370. 
 
 6. VM goodies
 
@@ -99,7 +94,7 @@ Here are some of the programs and tools included in this repo:
 
 37. A JCL and PLI aware small editor
 
-38. A generalized IP address parser for all your NICS (important when you do IPv4 stuff with Hercules)  
+38. A generalized IP address parser for all your NICs (important when you do IPv4 stuff with Hercules)  
 
 39.  An HP41 calculator in Fortran and REXX
 
@@ -116,7 +111,14 @@ Start 00e cl a nosep, on the operator console.
 
 spool print system  
 print file listing a   
-  
+
+
+Printing on MVS without JES2 charset translation
+================================================
+
+$T PRINTER(1),TRANS=NO
+
+
 CCKD support for Hercules
 =========================
 
@@ -128,4 +130,4 @@ CCKD support for Hercules
 
 moshix   
 <br>
-Taipeh, January 2025
+Buenos Aires, March 2025
