@@ -120,7 +120,7 @@ print file listing a
 $T PRINTER(1),TRANS=NO
 
 
-**CCKD support for Hercules**
+**CCKD support for Hercules (althought new bugs were discovered in CCKD as of 4.7)**
 
 ***@ubuntu:~$ sudo apt install zlib1g-dev
 
