@@ -122,6 +122,13 @@ $T PRINTER(1),TRANS=NO
 
 ***@ubuntu:~$ sudo apt install libbz2-dev
 
+Quick initialize a new 3390 without using MVS:
+*
+* Pack layout file for MOSHIZX volume
+*
+moshix 3390
+sysvtoc        vtoc    trk 29
+
 
 Where to go next?
 =================
