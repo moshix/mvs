@@ -1,6 +1,8 @@
 
 # MVS and VM Software
 
+For discussion on the topics covered in this repository, join the Forum3270 BBS (a BBS for 3270 terminals) at [Forum3270](https://www.moshix.tech/:3270)
+
 This repository includes some very useful utilities for people working with MVS, z/OS, VM/SP and z/VM on real mainframes or emulated ones. Most of the topics covered by these programs are covered in my youtube mainframe channel here: https://www.youtube.com/channel/UCR1ajTWGiUtiAv8X-hpBY7w
 
 Here are some of the programs and tools included in this repo:
