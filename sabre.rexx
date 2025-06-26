@@ -1,19 +1,18 @@
-/* SABRE CRS DEMO IN REXX FOR CMS BY ERNIETECH - ENHANCED VERSION        */
-/* EXPANDED WITH DYNAMIC DATA AND MORE SABRE COMMANDS
-    - JUNE2025 MOSHIX - AUSTRIA
-    - V0.2   with new commands and more realistic seat maps        
-                                                                          */
+/* SABRE CRS DEMO IN BREXX FOR VM/370 CMS BY ERNIETECH - ENHANCED VERSION */
+/* EXPANDED WITH DYNAMIC DATA AND MORE SABRE COMMANDS */
+/* - JUNE2025 MOSHIX - AUSTRIA                         */
 
-/* Clear screen in a cross-platform way */
-address command
-'clear'
-if rc \= 0 then 'cls'
-address
+/* z/VM compatible screen initialization */
+do i = 1 to 5
+    say ''
+end
 
-say center('-------------- SABRE Computer Reservation System (CRS)-----------',78)
+title = '---------- SABRE Computer Reservation System (CRS) --------'
+spaces = (78 - length(title)) % 2
+say copies(' ', spaces)||title
 
 /* Display date and WAFL:CONE */
-today    = date('S')                                        /* YYYYMMDD */
+today    = date('S')                                    /* YYYYMMDD */
 ddmmyyyy = substr(today,7,2)'.'substr(today,5,2)'.'substr(today,1,4)
 say ddmmyyyy "WAFL:CONE"
 
@@ -125,16 +124,16 @@ eqDesc.B757 = 'Boeing 757-200'
 eqDesc.MD981 = 'MD-8-81'
 
 /* Seat map configurations */
-/* Format: ROWS|LAYOUT|EXIT ROWS|FIRST CLASS ROWS|WHEELCHAIR ROWS|BASSINET ROWS|BLOCKED SEATS */
-seatConfig.A320 = '27|ABC DEF|11 12|1-4|1 27|12|14B 14E'      /* 3-3 config, 158 seats */
-seatConfig.B738 = '28|ABC DEF|14 15|1-4|1 28|15|16B 16E'      /* 3-3 config, 162 seats */
-seatConfig.B789 = '42|ABC DEF GHJ|24 25|1-5|1 42|25|26E 26F'  /* 3-3-3 config, 290 seats */
-seatConfig.A350 = '44|ABC DEF GHJ|24 25|1-5|1 44|25|26E 26F'  /* 3-3-3 config, 308 seats */
-seatConfig.B77W = '51|ABC DEFG HJK|24 25|1-4|1 51|25|26E 26F' /* 3-4-3 config, 357 seats */
-seatConfig.B747 = '58|ABC DEFG HJK|24 25|1-4|1 58|25|26E 26F' /* 3-4-3 config, 412 seats */
-seatConfig.B767 = '34|ABC DEF GH|20 21|1-3|1 34|21|22D 22E'   /* 2-3-2 config, 203 seats */
-seatConfig.B757 = '25|ABC DEF|14 15|1-3|1 25|15|16B 16E'      /* 3-3 config, 152 seats */
-seatConfig.MD981 = '23|ABC DE|10 11|1-2|1 23|11|12B 12D'      /* 2-3 config, 109 seats */
+/* Format: ROWS|LAYOUT|EXIT ROWS|FIRST CLASS ROWS|WHEELCHAIR|BASSINET|BLOCK */
+seatConfig.A320 = '27|ABC DEF|11 12|1-4|1 27|12|14B 14E'
+seatConfig.B738 = '28|ABC DEF|14 15|1-4|1 28|15|16B 16E'
+seatConfig.B789 = '42|ABC DEF GHJ|24 25|1-5|1 42|25|26E 26F'
+seatConfig.A350 = '44|ABC DEF GHJ|24 25|1-5|1 44|25|26E 26F'
+seatConfig.B77W = '51|ABC DEFG HJK|24 25|1-4|1 51|25|26E 26F'
+seatConfig.B747 = '58|ABC DEFG HJK|24 25|1-4|1 58|25|26E 26F'
+seatConfig.B767 = '34|ABC DEF GH|20 21|1-3|1 34|21|22D 22E'
+seatConfig.B757 = '25|ABC DEF|14 15|1-3|1 25|15|16B 16E'
+seatConfig.MD981 = '23|ABC DE|10 11|1-2|1 23|11|12B 12D'
 
 /* Seat map legend */
 seatLegend.A = 'Available'
@@ -219,7 +218,7 @@ flightMaxSeats. = 0
 
 /* --- Main Loop --- */
 say
-say "* SABRE DEMO: Type HELP for instructions"
+say "* SABRE CRS: Type HELP for instructions"
 say
 
 /* Initialize flight seat tracking */
@@ -236,16 +235,16 @@ do forever
     /* HELP & SIGN-OUT */
     if cmd = 'HELP' then do
         say "QUERY FORMAT: 18OCT JFK ZRH (optional: 9A)"
-        say "BOOK <n>      Book flight Index number <n> (e.g. BOOK 1 or BOOK 3)"
-        say "CANCEL <PNR>  Cancel booking (e.g. CANCEL 001 or CANCEL PNR001)"
-        say "PNR <loc>     Display booking details (e.g. PNR 001 or PNR PNR001)"
-        say "W/EQ*<code>   Filter flights by equipment code (e.g. A320 or B738)"
-        say "FF<pnr>       Display FF info for PNR (e.g. FF001 or FFPNR001)"
+        say "BOOK <n>      Book flight Index number <n> (e.g. BOOK 1/3)"
+        say "CANCEL <PNR>  Cancel booking (e.g. CANCEL 001 or PNR001)"
+        say "PNR <loc>     Display booking details (e.g. PNR 001)"
+        say "W/EQ*<code>   Filter flights by equipment (e.g. A320/B738)"
+        say "FF<pnr>       Display FF info for PNR (e.g. FF001)"
         say "FF<pnr>/<num> Add FF number to PNR (e.g. FF001/AA123456)"
         say "FF<pnr>/*     Delete FF number from PNR"
         say "Q/C           Display queue counts"
         say "Q/P/<n>/<pnr> Place PNR in queue n"
-        say "WP/NCB <n>    Price and book lowest available fare for segment n"
+        say "WP/NCB <n>    Price/book lowest fare for segment n"
         say "WP/NI         Display alternate fare options"
         say "N/ADD-<n>     Add passenger name (N/ADD-1 DOE/JOHN ADT)"
         say "N/CHG-<n>     Change passenger name (N/CHG-1 DOE/JANE)"
@@ -321,7 +320,8 @@ do forever
             do j = 1 to PNRdata.0
                 parse var PNRdata.j pnrEntry pname oldSeat flightNum
                 if pnrEntry = currentPNR then do
-                    parse var matchList.flightNum airline flight depc depd dept arrt arrc avst eqmt
+                    parse var matchList.flightNum airline flight depc depd,
+                        dept arrt arrc avst eqmt
                     flightKey = airline||flight||depc||arrc||depd||dept
                     found = 1
                     leave
@@ -334,7 +334,8 @@ do forever
             end
             
             /* Get seat configuration */
-            parse var seatConfig.eqmt rows '|' layout '|' exitRows '|' firstRows '|' wheelRows '|' bassRows '|' blockSeats
+            parse var seatConfig.eqmt rows '|' layout '|' exitRows '|',
+                firstRows '|' wheelRows '|' bassRows '|' blockSeats
             
             /* Validate seat exists in configuration */
             if seatRow < 1 | seatRow > (rows + 0) then do
@@ -426,7 +427,8 @@ do forever
         do j = 1 to PNRdata.0
             parse var PNRdata.j pnrEntry pname seat flightNum
             if pnrEntry = currentPNR then do
-                parse var matchList.flightNum airline flight depc depd dept arrt arrc avst eqmt
+                parse var matchList.flightNum airline flight depc,
+                    depd dept arrt arrc avst eqmt
                 flightKey = airline||flight||depc||arrc||depd||dept
                 found = 1
                 leave
@@ -444,7 +446,8 @@ do forever
         end
         
         /* Get seat configuration */
-        parse var seatConfig.eqmt rows '|' layout '|' exitRows '|' firstRows '|' wheelRows '|' bassRows '|' blockSeats
+        parse var seatConfig.eqmt rows '|' layout '|' exitRows '|',
+            firstRows '|' wheelRows '|' bassRows '|' blockSeats
         if rows = '' then do
             say '*** Invalid equipment type:' eqmt
             say
@@ -575,7 +578,8 @@ do forever
             parse var PNRdata.j pnrEntry pname seat flightRec
             if pnrEntry = pnr then do
                 currentPNR = pnr  /* Set as current PNR */
-                say 'PNR '||pnrEntry||' => '||pname||' SEAT '||seat||' '||flightRec
+                say 'PNR '||pnrEntry||' => '||pname||' SEAT '||seat
+                say '    '||flightRec
                 /* Display passenger type if exists */
                 if paxType.j \= '' then
                     say '   Type: '||paxTypes.paxType.j
@@ -598,7 +602,8 @@ do forever
             iterate
         end
         
-        parse var matchList.num airline flight depc depd dept arrt arrc avst eqmt
+        parse var matchList.num airline flight depc depd,
+            dept arrt arrc avst eqmt
         flightKey = airline||flight||depc||arrc||depd||dept
         
         /* Get current seat count */
@@ -621,11 +626,13 @@ do forever
         pnr = 'PNR'||substr('000'||pnrnum,length('000'||pnrnum)-2,3)
 
         /* prompt for passenger name */
-        say "* Enter passenger name as <first initial><last name> (no spaces):"
+        say "* Enter passenger name as <first initial><last name>"
+        say "* (no spaces):"
         pull pname
 
         /* Get seat configuration */
-        parse var seatConfig.eqmt rows '|' layout '|' exitRows '|' firstRows '|' wheelRows '|' bassRows '|' blockSeats
+        parse var seatConfig.eqmt rows '|' layout '|' exitRows '|',
+            firstRows '|' wheelRows '|' bassRows '|' blockSeats
         
         /* Find next available seat */
         seatFound = 0
@@ -780,7 +787,9 @@ do forever
                 say 'Searching for lowest available fare...'
                 do i = 1 to words(fareTypes)
                     fare = word(fareTypes, i)
-                    say right(fare,1) 'class ('||fareTypes.fare||'): $'||format(genRandomNum(100,1000),3)||'.00'
+                    price = format(genRandomNum(100,1000),3)
+                    say right(fare,1) 'class ('||fareTypes.fare||'):',
+                        '$'||price||'.00'
                 end
             end
             when pcmd = 'NI' then do
@@ -788,11 +797,14 @@ do forever
                 say 'Searching for alternative fares...'
                 do i = 1 to words(fareTypes)
                     fare = word(fareTypes, i)
-                    say right(fare,1) 'class ('||fareTypes.fare||'): $'||format(genRandomNum(100,1000),3)||'.00'
+                    price = format(genRandomNum(100,1000),3)
+                    say right(fare,1) 'class ('||fareTypes.fare||'):',
+                        '$'||price||'.00'
                 end
             end
             otherwise
-                say '*** Invalid pricing command. Use WP/NCB <segment> or WP/NI'
+                say '*** Invalid pricing command.'
+                say '*** Use WP/NCB <segment> or WP/NI'
         end
         iterate
     end
@@ -829,7 +841,8 @@ do forever
                 PNRdata.paxnum = pnrEntry newname seat flightRec
                 paxName.paxnum = newname
                 paxType.paxnum = type
-                say 'Added passenger:' newname 'Type:' paxTypes.type 'to' pnrEntry
+                say 'Added passenger:' newname 'Type:' paxTypes.type
+                say '   to' pnrEntry
             end
             when cmd_type = 'CHG' then do
                 /* Change passenger name */
@@ -874,7 +887,8 @@ do forever
             parse var PNRdata.j pnrEntry restInfo
             if pnrEntry = pnr then do
                 parse var PNRdata.j pnrEntry pname seat flightNum
-                parse var matchList.flightNum airline flight depc depd dept arrt arrc avst eqmt
+                parse var matchList.flightNum airline flight depc,
+                    depd dept arrt arrc avst eqmt
                 flightKey = airline||flight||depc||arrc||depd||dept
                 
                 /* Handle seat inventory safely */
@@ -882,7 +896,8 @@ do forever
                     flightSeats.flightKey = 0
                 currSeats = flightSeats.flightKey + 0  /* Force numeric */
                 if \datatype(currSeats, 'W') then currSeats = 0
-                flightSeats.flightKey = currSeats + 1  /* Return seat to inventory */
+                /* Return seat to inventory */
+                flightSeats.flightKey = currSeats + 1
                 
                 /* Mark PNR as cancelled */
                 PNRdata.j = pnrEntry||' '||restInfo||' CANCELLED'
@@ -905,7 +920,8 @@ do forever
             say '------------------------'
             do i = 1 to words(eqDesc)
                 eq = word(eqDesc, i)
-                say left(eq,5) '-' left(eqDesc.eq,20) right(eqSeats.eq,4) 'seats'
+                say left(eq,5) '-' left(eqDesc.eq,20),
+                    right(eqSeats.eq,4) 'seats'
             end
             iterate
         end
@@ -915,11 +931,12 @@ do forever
         eqName = eqDesc.eqQuery
         if eqName = '' then eqName = 'Unknown'
         say 'Flights with equipment '||eqQuery||' - '||eqName
-        say ' #   ARLN    FLTN      DEPC/ARVC     DEPT      ARRT      AVST     EQTYP'
-        say '-----------------------------------------------------------------------'
+        say ' #   ARLN  FLTN    DEPC/ARVC   DEPT    ARRT    AVST   EQTYP'
+        say '--------------------------------------------------------------'
         idx = 0
         do i = 1 to matchList.0
-            parse var matchList.i airline flight depc depd dept arrt arrc avst eqmt
+            parse var matchList.i airline flight depc depd,
+                dept arrt arrc avst eqmt
             if eqmt \= eqQuery then iterate
             idx = idx + 1
             out = right(idx,2)
@@ -949,13 +966,15 @@ do forever
     /* Validate airport codes */
     if \isValidAirport(from) then do
         say '*** Invalid departure airport code: '||from
-        say '*** Please use a valid 3-letter airport code (e.g. JFK, LHR, SIN)'
+        say '*** Please use a valid 3-letter airport code'
+        say '*** (e.g. JFK, LHR, SIN)'
         iterate
     end
 
     if \isValidAirport(to) then do
         say '*** Invalid arrival airport code: '||to
-        say '*** Please use a valid 3-letter airport code (e.g. JFK, LHR, SIN)'
+        say '*** Please use a valid 3-letter airport code'
+        say '*** (e.g. JFK, LHR, SIN)'
         iterate
     end
 
@@ -965,7 +984,9 @@ do forever
     end
 
     /* Show route information */
-    say 'Route: '||from||' ('||getAirportName(from)||') to '||to||' ('||getAirportName(to)||')'
+    fromName = getAirportName(from)
+    toName = getAirportName(to)
+    say 'Route: '||from||' ('||fromName||') to '||to||' ('||toName||')'
 
     /* Generate flights for this query */
     call generateFlights date, from, to, time
@@ -1029,18 +1050,21 @@ getRouteEquipment:
     if depRegion = arrRegion then do
         /* Short-haul domestic/regional */
         if depRegion = 'NA' then
-            return 'A320 A320 B738 B738 B738'  /* Favor narrowbodies for domestic */
+            /* Favor narrowbodies for domestic */
+            return 'A320 A320 B738 B738 B738'
         else
             return 'A320 B738 A320 B738 A320'  /* Regional mix */
     end
     
     /* Check if transatlantic */
-    if (depRegion = 'NA' & arrRegion = 'EU') | (depRegion = 'EU' & arrRegion = 'NA') then
-        return 'B789 A350 B77W B789 A350'  /* Widebodies for transatlantic */
+    if (depRegion = 'NA' & arrRegion = 'EU') |,
+       (depRegion = 'EU' & arrRegion = 'NA') then
+        return 'B789 A350 B77W B789 A350'
     
     /* Check if transpacific */
-    if (depRegion = 'NA' & arrRegion = 'AP') | (depRegion = 'AP' & arrRegion = 'NA') then
-        return 'B789 B77W B77W B789 B77W'  /* Favor larger widebodies */
+    if (depRegion = 'NA' & arrRegion = 'AP') |,
+       (depRegion = 'AP' & arrRegion = 'NA') then
+        return 'B789 B77W B77W B789 B77W'
         
     /* Default long-haul mix */
     return 'B789 A350 B77W A350 B789'
@@ -1049,11 +1073,19 @@ getRouteEquipment:
 getAirportRegion:
     parse arg code
     select
-        when wordpos(code, 'JFK LAX ORD DFW DEN SFO LAS SEA MCO EWR MIA PHX IAH BOS MSP DTW FLL CLT LGA BWI SLC YYZ YVR YUL') > 0 then return 'NA'
-        when wordpos(code, 'LHR CDG AMS FRA IST MAD BCN LGW MUC FCO SVO DME DUB ZRH CPH OSL ARN VIE BRU MXP') > 0 then return 'EU'
-        when wordpos(code, 'PEK HND HKG ICN BKK SIN CGK KUL DEL BOM SYD MEL AKL KIX TPE MNL CAN PVG NRT') > 0 then return 'AP'
-        when wordpos(code, 'DXB DOH AUH CAI JNB CPT TLV BAH RUH JED MCT') > 0 then return 'ME'
-        when wordpos(code, 'GRU MEX BOG LIM SCL GIG EZE PTY CUN UIO') > 0 then return 'LA'
+        when wordpos(code, 'JFK LAX ORD DFW DEN SFO LAS SEA MCO' ||,
+                    ' EWR MIA PHX IAH BOS MSP DTW FLL CLT' ||,
+                    ' LGA BWI SLC YYZ YVR YUL') > 0 then return 'NA'
+        when wordpos(code, 'LHR CDG AMS FRA IST MAD BCN LGW MUC' ||,
+                    ' FCO SVO DME DUB ZRH CPH OSL ARN VIE BRU MXP') > 0,
+            then return 'EU'
+        when wordpos(code, 'PEK HND HKG ICN BKK SIN CGK KUL DEL' ||,
+                    ' BOM SYD MEL AKL KIX TPE MNL CAN PVG NRT') > 0,
+            then return 'AP'
+        when wordpos(code, 'DXB DOH AUH CAI JNB CPT TLV BAH' ||,
+                    ' RUH JED MCT') > 0 then return 'ME'
+        when wordpos(code, 'GRU MEX BOG LIM SCL GIG EZE' ||,
+                    ' PTY CUN UIO') > 0 then return 'LA'
         otherwise return 'OT'
     end
 
@@ -1100,7 +1132,8 @@ generateFlights:
         
         do f = 1 to numFlights
             /* Get unique flight number */
-            flightNumStr = getUniqueFlightNum(airline, minFlt, maxFlt, usedNums)
+            flightNumStr = getUniqueFlightNum(airline, minFlt,,
+                maxFlt, usedNums)
             usedNums = usedNums airline||flightNumStr
             
             /* Generate departure time - spread throughout the day */
@@ -1123,18 +1156,21 @@ generateFlights:
             
             /* Get seats for this equipment type */
             maxSeats = eqSeats.eqType
-            if \datatype(maxSeats,'W') then maxSeats = 150  /* Default if not found */
+            /* Default if not found */
+            if \datatype(maxSeats,'W') then maxSeats = 150
             
             /* Generate random available seats */
             do i = 1 to 100; nop; end  /* Force time change */
-            minSeats = trunc(maxSeats * 0.2)  /* At least 20% seats available */
+            /* At least 20% seats available */
+            minSeats = trunc(maxSeats * 0.2)
             maxAvail = trunc(maxSeats * 0.95)  /* Up to 95% seats available */
             availSeats = getRandomNum(minSeats, maxAvail)
             
             /* Add to flights stem */
             idx = flights.0 + 1
             flights.0 = idx
-            flights.idx = airline flightNumStr depApt date depTimeStr arrTimeStr arrApt availSeats eqType
+            flights.idx = airline flightNumStr depApt date,
+                depTimeStr arrTimeStr arrApt availSeats eqType
         end
     end
 
@@ -1181,8 +1217,8 @@ displayFlights:
     parse arg date, from, to
     say
     say date||' '||from||'/'||to||' ----------------------'
-    say ' #   ARLN    FLTN      DEPC/ARVC     DEPT      ARRT      AVST     EQTYP'
-    say '-----------------------------------------------------------------------'
+    say ' #   ARLN  FLTN    DEPC/ARVC   DEPT    ARRT    AVST   EQTYP'
+    say '--------------------------------------------------------------'
     
     /* Initialize matchList stem */
     drop matchList.
@@ -1209,7 +1245,8 @@ displayFlights:
             timeAP = right(time,1)
             if \datatype(timeHr,'W') then iterate
             targetMins = (timeHr * 60)
-            if timeAP = 'P' & timeHr \= 12 then targetMins = targetMins + (12 * 60)
+            if timeAP = 'P' & timeHr \= 12 then,
+                targetMins = targetMins + (12 * 60)
             if timeAP = 'A' & timeHr = 12 then targetMins = 0
             
             /* Allow 2 hour window around requested time */
