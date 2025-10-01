@@ -2,14 +2,14 @@
 
 ## Overview
 
-Teh Federated Chat system is a PostgreSQL-based global chat implementation that allows multiple BBS instances to communicate with eachother through a shared database. Each BBS connects to a central PostgreSQL server where all chat messages are stored and syncronized across all participating systems.
+Teh Federated Chat system is a PostgreSQL-based global chat implementation that allows multiple BBS instances to communicate with eachother through a shared database. Each BBS connects to a central PostgreSQL server where all chat messages are stored and syncronized across all participatng systems.
 
 ## Architecture
 
 ### System Componets
 
 1. **PostgreSQL Database**: Central message storage and synchronization point
-2. **BBS Instances**: Individual BBS systems that connect to teh shared database
+2. **BBS Instances**: Individual BBS systems that conect to teh shared database
 3. **Chat Messages**: Timestamped messages with username prefixes indicating orgin BBS
 
 ### Data Flow
