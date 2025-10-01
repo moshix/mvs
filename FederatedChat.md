@@ -2,7 +2,7 @@
 
 ## Overview
 
-Teh Federated Chat system is a PostgreSQL-based federated chat implementation that allows multiple BBS instances to communicate with eachother through a shared database. Each BBS conects to a central PostgreSQL server where all chat messages are stored and syncronized across all participating systems.
+Teh Federated Chat system is a PostgreSQL-based global chat implementation that allows multiple BBS instances to communicate with eachother through a shared database. Each BBS connects to a central PostgreSQL server where all chat messages are stored and syncronized across all participating systems.
 
 ## Architecture
 
@@ -10,7 +10,7 @@ Teh Federated Chat system is a PostgreSQL-based federated chat implementation th
 
 1. **PostgreSQL Database**: Central message storage and synchronization point
 2. **BBS Instances**: Individual BBS systems that connect to teh shared database
-3. **Chat Messages**: Timestamped mesages with username prefixes indicating orgin BBS
+3. **Chat Messages**: Timestamped messages with username prefixes indicating orgin BBS
 
 ### Data Flow
 
@@ -179,7 +179,7 @@ LIMIT $1
 **Parameters**:
 - `$1`: Maximum number of messages to retrieve
 
-**Returns**: Array of messages in reverse chronolgical order (newest first)
+**Returns**: Array of messages in reverse chronolgical order (newest first). Note that usernames are returned in full format (`Forum3270:moshix`) from teh database - truncation to display format (`Fo:moshix`) happens only in teh chat interface.
 
 **Example Implementation (Python)**:
 ```python
@@ -222,6 +222,9 @@ def get_messages(limit, db_config):
 # Usage example
 messages = get_messages(50, db_config)
 for msg in messages:
+    # Note: msg['username'] contains full format like "Forum3270:moshix"
+    # For display, you might want to truncate it to "Fo:moshix"
+    display_username = format_username_for_display(msg['username'])  # Optional
     print(f"[{msg['timestamp']}] {msg['username']}: {msg['message']}")
 ```
 
@@ -347,14 +350,35 @@ Usernames in the federated chat follow the format: `BBSName:username`
 
 ### Display Format
 
-For display purposes, usernames are truncated to fit screen constraits:
-- BBS name: First 2 characters
-- Username: Up to 8 characters
-- Format: `BB:username`
+**Storage vs Display**: The database stores the full username format (`Forum3270:moshix`), but the chat interface displays a truncated version to fit screen constraits.
+
+**Display Truncation Rules**:
+- BBS name: Truncated to first 2 characters
+- Username: Truncated to maximum 8 characters  
+- Display format: `BB:username`
 
 **Examples**:
-- `Forum3270:moshix` → `Fo:moshix`
-- `RetroNet:john_doe` → `Re:john_doe`
+- **Stored**: `Forum3270:moshix` → **Displayed**: `Fo:moshix`
+- **Stored**: `RetroNet:john_doe` → **Displayed**: `Re:john_doe`
+- **Stored**: `ClassicBBS:administrator` → **Displayed**: `Cl:administ`
+
+**Important**: When reading from teh database, you get teh full username. When displaying in chat history, the system automatically truncates for screen formatting.
+
+**Helper Function for Display Formatting**:
+```python
+def format_username_for_display(full_username):
+    """Convert 'Forum3270:moshix' to 'Fo:moshix' for display"""
+    parts = full_username.split(':')
+    if len(parts) != 2:
+        return full_username[:9]  # Fallback for invalid format
+    
+    bbs_name, username = parts
+    # Truncate BBS name to 2 chars, username to 8 chars
+    truncated_bbs = bbs_name[:2]
+    truncated_user = username[:8]
+    
+    return f"{truncated_bbs}:{truncated_user}"
+```
 
 ## Connection Management
 
@@ -374,7 +398,7 @@ connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=di
 
 ### Error Handling
 
-Common conection errors and thier meanings:
+Common connection errors and thier meanings:
 
 | Error | Cause | Solution |
 |-------|-------|----------|
