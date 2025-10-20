@@ -124,7 +124,7 @@ $T PRINTER(1),TRANS=NO
 
 ***@ubuntu:~$ sudo apt install libbz2-dev
 
-Quick initialize a new 3390 without using MVS:
+Quick initialize a new 3390 without using MVS, with dasdload and this following config file:
 *
 * Pack layout file for MOSHIZX volume
 *
@@ -139,4 +139,4 @@ Check out my ISPF website at [www.moshix.tech](https://www.moshix.tech/) where y
 
 moshix   
 <br>
-Salzburg, June 2025
+Salzburg, October 2025
