@@ -117,6 +117,13 @@ print file listing a
 
 $T PRINTER(1),TRANS=NO
 
+**Printing a text file to PDF formatted as 1403 line printer output**
+
+See https://github.com/Pynckels/prt1403
+
+**Printing a text file to PDF formatted as 1442 punched cards**
+
+See https://github.com/Pynckels/pun1442
 
 **CCKD support for Hercules (althought new bugs were discovered in CCKD as of 4.7)**
 
