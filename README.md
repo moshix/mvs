@@ -142,8 +142,9 @@ sysvtoc        vtoc    trk 29
 Where to go next?
 =================
 
-Check out my ISPF website at [www.moshix.tech](https://www.moshix.tech/) where you find NJE resources and a whole bunch of MVS 3.8 mainframe games!
+Join us at Forum3270 [www.moshix.tech](https://www.moshix.tech:3270) where you find other like-minded people who like to talk about
+mainframes and other retro software. 
 
 moshix   
 <br>
-Rust, March 2026
+Barolo, May 2026
