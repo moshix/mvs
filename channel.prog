@@ -1,0 +1,145 @@
+            Computers in general would be pretty useless if they did
+            not have some method for interacting with the outside world.
+            The intent of this article is  to introduce the structure of
+            the IBM 370 I/O system, and I/O programming in general.
+0               IBM s/370 computers use  a powerful interrupt-driven I/O
+            system.   Doing I/O does not tie up, or INTERLOCK,  the CPU.
+            Programs can continue executing while I/O is being completed
+            on a device.  This is accomplished by CHANNELS. A channel is
+            basically  a small  computer  that  handles I/O  operations.
+            Every device attached to the CPU has an ADDRESS.  An example
+            of this address  is the line-number that is  returned from a
+            QUERY NAMES  command next to  the userid.   This  address is
+            often referred to as 'cuu' where 'c' is the channel address,
+            and 'uu'  is the unit  address.   This  means that up  to 16
+            channels (0-F)  may be attached to a 370 CPU.   Each channel
+            may  have  attached  to  it   either  256  devices,   or  16
+            subchannels with 16 devices each.
+0              Channels come  in two basic varieties,   SELECTOR,  which
+            handle high-speed I/O  devices such as tapes  or disks,  and
+            MULTIPLEXOR,   which  handle  low   speed  devices  such  as
+            terminals.  Selector channels are dedicated to one device at
+            a time.   If the tape drives are on channel 5, only one tape
+            drive at a  time is serviced.   Multiplexor  channels handle
+            several devices simultaneously, such as terminals.   This is
+            necessary  to provide  the  real-time  response needed  from
+            interactive terminals.
+0               The IBM/370 machine language actually possesses very few
+            instructions dealing  with I/O.   There are  instructions to
+            start,  test,  and halt I/O operations on a specific device,
+            but the actual operations are performed by a CHANNEL PROGRAM
+            kept  in main  storage.   A  channel program  consists of  a
+            series of 8-byte words called CHANNEL COMMANDS WORDS (CCWs),
+            which specify operations to be performed,  such as a read or
+            a write to a device, etc.  In general,  the channel commands
+            are device specific, which is to say,  a WRITE command for a
+            terminal will not usually work on a disk drive.  The channel
+            command also contains such things as  the address of data to
+            be written,  or into which data is to be read,  and how many
+            bytes are to be transferred.   There  is also a 'transfer in
+            channel' CCW (channel  command word)  which allows  loops in
+            channel  programs.   A  channel program  may be  arbitrarily
+            long, and perform many operations in a single invokation.
+
+0               To  initiate I/O  operations the  programmer must  first
+            place the  address of  his channel  program in  a predefined
+            area of storage known as the CHANNEL ADDRESS WORD (CAW). The
+            CAW  is  located at  the  fixed  storage address  x'48'  (48
+            hexadecimal).   Once the  address of the channel  program is
+            stored in  the CAW,  you initiate  the I/O operation  with a
+            Start I/O (SIO) instruction. SIO causes the channel to begin
+            executing your channel program.
+0               Now the user program may continue to execute.   However,
+            it  is generally  recommended that  the  I/O operations  are
+            allowed to  complete before  execution continues.    This is
+            accomplished by one of two ways:   a Test I/O (TIO) loop, or
+            a PROGRAM WAIT.   In this article,   we will discuss the TIO
+            loop method for determining I/O completion.
+0               Generally you set up the  TIO loop immediately after the
+            SIO instruction.   It is  simply a  TIO instruction  for the
+            specific device, followed by a series of BRANCH instructions
+            for specific  condition codes.   For  a TIO,   the following
+            condition codes are defined:
+0           CC = 0 -- channel and device available
+            CC = 1 -- channel status word stored
+            CC = 2 -- device is busy (executing channel program)
+            CC = 3 -- device is not operational
+0              If the  condition code  is 3  you should  leave the  loop
+            immediately.   In more sophisticated applications, you would
+            test the Channel Status Word stored when  you get a CC of 1,
+            but in this  example,  we will wait  for a CC of  0 and then
+            exit the loop.    The Channel Status Word is  stored after a
+            channel  interrupt,    and  contains   detailed  information
+            regarding the progress of the I/O operations.   The CSW will
+            be discussed in a later article.
+0              The   following   assembler   program   illustrates   the
+            principles discussed above.  Instructions for assembling and
+            executing it follow the program.   The program simply writes
+            a line  of text  to your terminal,   which is  (usually)  at
+            device address X'009' (that is, channel 0, device 09):
+
+0           WRITERM  CSECT
+                     STM   R14,R12,12(R13)  save registers passed by CMS
+                     LR    R12,R15          load our entrypoint into R12
+                     USING WRITERM,R12      address this program
+            *
+            * In order to store in location x'48' we must have a nucleus
+            * storage key,which we accomplish with the CMS DMSKEY macro.
+            *
+                     DMSKEY NUCLEUS       establish a  zero  storage key
+                     LA    R4,CHANPROG    get the address of our channel
+            *                             program
+                     ST    R4,X'48'       store into the CAW
+                     DMSKEY RESET         restore the last  storage  key
+            *
+            * now having stored the  ADDRESS of our channel program,  we
+            * initiate I/O on the CMS console (device x'009')
+            *
+                     SIO   X'009'        X'009'  is the  device on which
+            *                            I/O is done
+            *
+            * now do a TIO loop to make sure I/O is complete.  We simply
+            * wait for a condition code of zero,  and then drop out.
+            *
+            TESTLOOP TIO   X'009'          test device
+                     BO    OUTOFIT         BO is for CC=3,
+            *                                 device not operational
+                     BNZ   TESTLOOP        if CC Not Zero, do loop again
+            *
+            * Now we are through doing I/O, go back to CMS.
+            *
+            OUTOFIT  LM    R14,R12,12(R13)      get registers back
+                     XR    R15,R15              make a zero  return code
+                     BR    R14                  return to CMS
+            *
+            * the following area is the channel program, consisting of 1
+            * channel command word,  which writes the message  at MSG to
+            * your terminal.  The X'01' is the command code for a WRITE,
+            * X'20'   is the  CCW flag  which indicates  no more CCWs in
+            * chain. If the channel program is more than 1 CCW long, the
+            * X'20' would be changed to an X'60', in all the CCWs except
+            * the last which would be kept X'20'.
+            *
+            CHANPROG DS    0D              align on double word boundary
+                     CCW   X'01',MSG,X'20',MSGLEN
+            *
+            * The message area to be written
+            *
+            MSG      DC    C'This is a line output to the terminal.'
+            MSGLEN   EQU   *-MSG              length of message
+            *
+            * following are required macro definitions
+            *
+                     REGEQU
+                     END   WRITERM
+0                                        
+0               This program actually works!!    To assemble and execute
+            it, issue the following commands to CMS:
+0           GLOBAL MACLIB CMSLIB DMSSP
+            ASSEMBLE WRITERM
+            LOAD WRITERM
+            GENMOD
+            WRITERM
+
+
+            
