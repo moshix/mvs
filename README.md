@@ -147,4 +147,4 @@ mainframes and other retro software.
 
 moshix   
 <br>
-Barolo, May 2026
+Barolo, July 2026
